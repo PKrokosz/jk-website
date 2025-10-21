@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
 import { NativeModelShowcase } from "@/components/catalog/NativeModelShowcase";
 import { createMockProducts } from "@/lib/catalog/products";
+import { resolveApiUrl } from "@/lib/http/base-url";
 import type {
   CatalogLeather,
   CatalogProductSummary,
@@ -14,7 +15,7 @@ interface ApiResponse<T> {
 }
 
 async function fetchStyles(): Promise<CatalogStyle[]> {
-  const response = await fetch("/api/styles", {
+  const response = await fetch(resolveApiUrl("/api/styles"), {
     next: { revalidate: 3600 }
   });
 
@@ -28,7 +29,7 @@ async function fetchStyles(): Promise<CatalogStyle[]> {
 }
 
 async function fetchLeathers(): Promise<CatalogLeather[]> {
-  const response = await fetch("/api/leather", {
+  const response = await fetch(resolveApiUrl("/api/leather"), {
     next: { revalidate: 3600 }
   });
 

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
 import { catalogLeathers, catalogStyles } from "@/lib/catalog/data";
 import { getProductBySlug, listProductSlugs } from "@/lib/catalog/products";
 import type { CatalogLeather, CatalogStyle } from "@/lib/catalog/types";
@@ -91,12 +92,20 @@ export default function ProductPage({ params }: ProductPageProps) {
                 </div>
               </dl>
               <div className="product-hero__cta">
+                <OrderModalTrigger
+                  className="button button--primary order-modal__trigger"
+                  triggerLabel="Złóż zamówienie"
+                  ctaLabel="Wypełnij formularz"
+                />
                 <Link
-                  className="button button--primary"
+                  className="button button--ghost"
                   href={`/contact?product=${product.slug}`}
                   prefetch={false}
                 >
-                  Zamów teraz
+                  Skontaktuj się z nami
+                </Link>
+                <Link className="button button--primary order-modal__mobile-link" href="/order/native">
+                  Złóż zamówienie
                 </Link>
                 <p className="product-hero__price" aria-label={`Cena: ${currencyFormatter.format(product.priceGrosz / 100)}`}>
                   {currencyFormatter.format(product.priceGrosz / 100)}

@@ -6,6 +6,7 @@ import { NavLink } from "./NavLink";
 const navigationItems = [
   { href: "/", label: "Home", exact: true },
   { href: "/catalog", label: "Catalog" },
+  { href: "/order/native", label: "Order" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" }
 ];

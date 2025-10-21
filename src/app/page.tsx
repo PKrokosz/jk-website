@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
+
 import { PricingCalculator } from "./components/PricingCalculator";
 
 const galleryItems = [
@@ -34,11 +36,19 @@ export default function Home() {
               kończy się parą dopasowaną do kroku, garderoby i okazji.
             </p>
             <div className="hero__actions">
-              <a className="button button--primary" href="mailto:pracownia@jk-footwear.pl">
+              <OrderModalTrigger
+                className="button button--primary order-modal__trigger"
+                triggerLabel="Zamów buty"
+                ctaLabel="Przejdź do formularza"
+              />
+              <a className="button button--ghost" href="mailto:pracownia@jk-footwear.pl">
                 Umów konsultację
               </a>
               <Link className="button button--ghost" href="/api/pricing/quote">
                 Zobacz API wyceny
+              </Link>
+              <Link className="button button--primary order-modal__mobile-link" href="/order/native">
+                Zamów buty
               </Link>
             </div>
           </div>

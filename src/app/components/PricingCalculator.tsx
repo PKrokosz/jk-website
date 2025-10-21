@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { ORDER_ACCESSORIES } from "@/config/orderAccessories";
 import { ORDER_MODELS } from "@/config/orderModels";

@@ -29,6 +29,26 @@ const ORDER_ACCESSORY_MAP = new Map(ORDER_ACCESSORIES.map((accessory) => [access
 
 const STANDARD_SIZES = Array.from({ length: 10 }, (_, index) => 36 + index);
 
+const PRODUCT_GALLERY_IMAGES: Record<string, readonly string[]> = {
+  szpic: ["/image/models/1.jfif", "/image/models/2.jfif", "/image/models/3.jfif"],
+  klamry: ["/image/models/4.jfif", "/image/models/5.jfif", "/image/models/6.jfif"],
+  "wysokie-szpice": ["/image/models/7.jfif", "/image/models/8.jfif", "/image/models/9.jfif"],
+  tamer: ["/image/models/10.jfif", "/image/models/11.jfif", "/image/models/12.jfif"],
+  "wysokie-cholewy": ["/image/models/13.jfif", "/image/models/14.jfif", "/image/models/15.jfif"],
+  "przelotka-na-sabatony": ["/image/models/6.jfif", "/image/models/7.jfif", "/image/models/8.jfif"],
+  trzewiki: ["/image/models/2.jfif", "/image/models/3.jfif", "/image/models/4.jfif"],
+  obiezyswiat: ["/image/models/9.jfif", "/image/models/10.jfif", "/image/models/11.jfif"],
+  dragonki: ["/image/models/12.jfif", "/image/models/13.jfif", "/image/models/14.jfif"],
+  wonderer: ["/image/models/15.jfif", "/image/models/16.jfif", "/image/models/1.jfif"],
+  "dedykowany-wosk": ["/image/models/16.jfif", "/image/models/1.jfif", "/image/models/2.jfif"],
+  "impregnat-warsztatowy": ["/image/models/3.jfif", "/image/models/4.jfif", "/image/models/5.jfif"],
+  "rzemienie-do-buty": ["/image/models/5.jfif", "/image/models/6.jfif", "/image/models/7.jfif"],
+  "buklak-podrozny": ["/image/models/8.jfif", "/image/models/9.jfif", "/image/models/10.jfif"],
+  "prawidla-sosnowe": ["/image/models/11.jfif", "/image/models/12.jfif", "/image/models/13.jfif"]
+};
+
+const PRODUCT_GALLERY_FALLBACK = "/image/models/placeholder.svg";
+
 function mapOrderReference(
   type: CatalogOrderReference["type"],
   id: string,
@@ -491,11 +511,34 @@ const productTemplates: ProductTemplate[] = [
   }
 ];
 
-function createPlaceholderImage(name: string, caption: string) {
-  const alt = `Placeholder zdjęcia modelu ${name} — ${caption}`;
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400' role='img'><rect width='600' height='400' rx='24' fill='%23171829'/><text x='50%' y='45%' dominant-baseline='middle' text-anchor='middle' fill='%23f7f2e8' font-family='serif' font-size='32'>${name}</text><text x='50%' y='65%' dominant-baseline='middle' text-anchor='middle' fill='%23c9b37c' font-family='serif' font-size='20'>${caption}</text></svg>`;
+function buildProductGallery(template: ProductTemplate) {
+  const assets = PRODUCT_GALLERY_IMAGES[template.slug];
+
+  if (assets && assets.length > 0) {
+    return template.galleryCaptions.map((caption, index) => {
+      const src = assets[index] ?? assets[assets.length - 1] ?? PRODUCT_GALLERY_FALLBACK;
+      return createGalleryImage(template.name, caption, src);
+    });
+  }
+
+  return template.galleryCaptions.map((caption) => createPlaceholderImage(template.name, caption));
+}
+
+function createGalleryImage(name: string, caption: string, src: string) {
+  const normalizedCaption = caption.charAt(0).toUpperCase() + caption.slice(1);
+
   return {
-    alt,
+    alt: `Model ${name} — ${normalizedCaption}`,
+    src
+  };
+}
+
+function createPlaceholderImage(name: string, caption: string) {
+  const normalizedCaption = caption.charAt(0).toUpperCase() + caption.slice(1);
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400' role='img'><rect width='600' height='400' rx='24' fill='%23171829'/><text x='50%' y='45%' dominant-baseline='middle' text-anchor='middle' fill='%23f7f2e8' font-family='serif' font-size='32'>${name}</text><text x='50%' y='65%' dominant-baseline='middle' text-anchor='middle' fill='%23c9b37c' font-family='serif' font-size='20'>${normalizedCaption}</text></svg>`;
+
+  return {
+    alt: `Model ${name} — ${normalizedCaption} (placeholder)`,
     src: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
   };
 }
@@ -588,9 +631,7 @@ export function getProductBySlug(
   const style = styleById.get(template.styleId);
   const leather = leatherById.get(template.leatherId);
 
-  const gallery = template.galleryCaptions.map((caption) =>
-    createPlaceholderImage(template.name, caption)
-  );
+  const gallery = buildProductGallery(template);
 
   return {
     id: template.id,

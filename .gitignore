@@ -1,9 +1,12 @@
 # Node
 node_modules/
+.pnpm/
+.turbo/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-store/
+tsconfig.tsbuildinfo
 pnpm-debug.log*
 
 # Next.js

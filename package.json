@@ -9,21 +9,24 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "depcheck": "depcheck --skip-missing=true"
+    "depcheck": "depcheck --skip-missing=true --ignores=@vitest/coverage-v8,@types/pg",
+    "approve-builds": "pnpm approve-builds"
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@jk/db": "workspace:*",
     "next": "14.2.13",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "zod": "^3.25.76"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/pg": "^8.15.5",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@types/node": "20.16.5",

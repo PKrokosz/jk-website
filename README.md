@@ -38,7 +38,11 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
    ```bash
    pnpm install
    ```
-2. Utwórz plik `.env` na podstawie `.env.example` i uzupełnij wymagane wartości.
+2. Zatwierdź instalację natywnych binariów wymaganych przez pnpm 10 (patrz konfiguracja w [`.pnpm-builds.json`](./.pnpm-builds.json)):
+   ```bash
+   pnpm approve-builds
+   ```
+3. Utwórz plik `.env` na podstawie `.env.example` i uzupełnij wymagane wartości.
 
 ### Zmienne środowiskowe
 

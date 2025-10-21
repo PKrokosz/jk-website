@@ -133,6 +133,17 @@ export function CatalogExplorer({
     return sorted;
   }, [products, selectedStyleIds, selectedLeatherIds, selectedCategory, sortOrder]);
 
+  const funnelAnchors = useMemo(() => {
+    const anchors = new Map<CatalogProductSummary["funnelStage"], string>();
+    filteredProducts.forEach((product) => {
+      if (!anchors.has(product.funnelStage)) {
+        anchors.set(product.funnelStage, product.id);
+      }
+    });
+
+    return anchors;
+  }, [filteredProducts]);
+
   return (
     <div className="catalog-layout" role="region" aria-labelledby="catalog-products-heading">
       <aside
@@ -255,9 +266,13 @@ export function CatalogExplorer({
             const funnelId = `${product.id}-funnel`;
             const funnelCta = getFunnelCta(product.funnelStage);
             const orderHref = resolveOrderHref(product.orderReference);
+            const anchorId =
+              funnelAnchors.get(product.funnelStage) === product.id
+                ? `funnel-${product.funnelStage.toLowerCase()}`
+                : undefined;
 
             return (
-              <li key={product.id} className="catalog-card">
+              <li key={product.id} className="catalog-card" id={anchorId}>
                 <article
                   className="catalog-card__inner"
                   tabIndex={0}

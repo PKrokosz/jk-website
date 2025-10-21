@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import Link from "next/link";
+
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
 import { NativeModelShowcase } from "@/components/catalog/NativeModelShowcase";
 import { createMockProducts } from "@/lib/catalog/products";
@@ -70,21 +72,42 @@ export default async function CatalogPage() {
               </p>
             </div>
             <div className="catalog-funnel-legend" aria-label="Legendę lejka sprzedażowego">
-              <article className="catalog-funnel-legend__item">
+              <Link
+                href="#funnel-tofu"
+                className="catalog-funnel-legend__item"
+                aria-label="Przejdź do sekcji modeli inspiracyjnych"
+              >
                 <abbr title="Top of Funnel" className="badge badge--funnel">TOFU</abbr>
-                <h2>Top of Funnel</h2>
-                <p>Inspiracje i modele pokazowe — idealne, gdy dopiero poznajesz katalog i szukasz kierunku.</p>
-              </article>
-              <article className="catalog-funnel-legend__item">
+                <h2>Znajdź inspirację</h2>
+                <p>
+                  Modele pokazowe i lookbookowe sylwetki — szybki sposób, by złapać kierunek i zebrać
+                  pomysły na zamówienie.
+                </p>
+              </Link>
+              <Link
+                href="#funnel-mofu"
+                className="catalog-funnel-legend__item"
+                aria-label="Przejdź do sekcji konfiguracji modeli"
+              >
                 <abbr title="Middle of Funnel" className="badge badge--funnel">MOFU</abbr>
-                <h2>Middle of Funnel</h2>
-                <p>Produkty gotowe do konfiguracji: porównuj skóry, dodatki oraz przygotuj brief do formularza.</p>
-              </article>
-              <article className="catalog-funnel-legend__item">
+                <h2>Porównaj warianty</h2>
+                <p>
+                  Modele gotowe do konfiguracji — zobacz dostępne skóry i dodatki, aby przygotować
+                  brief do formularza.
+                </p>
+              </Link>
+              <Link
+                href="#funnel-bofu"
+                className="catalog-funnel-legend__item"
+                aria-label="Przejdź do sekcji dodatków kończących zamówienie"
+              >
                 <abbr title="Bottom of Funnel" className="badge badge--funnel">BOFU</abbr>
-                <h2>Bottom of Funnel</h2>
-                <p>Elementy finalizujące zamówienie — akcesoria, bukłaki i prawidła, które dodasz prosto w formularzu.</p>
-              </article>
+                <h2>Dokończ zamówienie</h2>
+                <p>
+                  Akcesoria, pielęgnacja i usługi wykończeniowe — wszystko, co dodasz na finiszu w tym
+                  samym formularzu.
+                </p>
+              </Link>
             </div>
           </div>
         </section>

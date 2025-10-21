@@ -997,3 +997,281 @@ ul {
     min-height: 75vh;
   }
 }
+
+.breadcrumbs {
+  background: #151515;
+  color: rgba(248, 245, 242, 0.72);
+  padding-block: 0.75rem;
+  border-block-end: 1px solid rgba(255, 226, 166, 0.2);
+}
+
+.breadcrumbs ol {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover,
+.breadcrumbs a:focus-visible {
+  color: rgba(255, 226, 166, 0.95);
+}
+
+.product-hero {
+  display: grid;
+  gap: 3rem;
+}
+
+.product-hero__content {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.product-hero__meta {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.product-hero__meta dt {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: rgba(17, 17, 17, 0.68);
+}
+
+.product-hero__meta dd {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+  color: #1b1b1b;
+}
+
+.product-hero__cta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.product-hero__price {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1b1b1b;
+}
+
+.product-gallery {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.product-gallery__item {
+  background: linear-gradient(160deg, #1c1b23, #322b18);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.product-gallery__item figcaption {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: rgba(248, 245, 242, 0.9);
+}
+
+.product-gallery__item img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.product-details {
+  display: grid;
+  gap: 3rem;
+}
+
+.product-process {
+  margin-top: 1.5rem;
+  padding-left: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.product-variants {
+  display: grid;
+  gap: 1.5rem;
+  background: #f2ece3;
+  padding: 1.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(198, 164, 110, 0.3);
+}
+
+.product-variants__group ul {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.product-variants__hint {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(17, 17, 17, 0.6);
+  margin-top: 0.25rem;
+}
+
+.size-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.size-list li {
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(198, 164, 110, 0.4);
+  background: rgba(255, 226, 166, 0.2);
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(198, 164, 110, 0.15);
+  color: #4a381d;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.skeleton-heading,
+.skeleton-text {
+  background: linear-gradient(90deg, #e1dbd2, #f2ece3, #e1dbd2);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  color: transparent;
+  border-radius: 8px;
+}
+
+.skeleton-heading {
+  width: min(20ch, 100%);
+  height: 2.5rem;
+}
+
+.skeleton-text {
+  width: min(40ch, 100%);
+  height: 1rem;
+  margin-top: 1rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (min-width: 768px) {
+  .product-hero {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .product-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+
+.contact-info {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top: 2rem;
+}
+
+.contact-info dt {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.6);
+}
+
+.contact-info dd {
+  margin: 0.35rem 0 0;
+  font-size: 1.1rem;
+}
+
+.contact-layout {
+  display: grid;
+  gap: 3rem;
+}
+
+.contact-sidebar {
+  background: #f2ece3;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(198, 164, 110, 0.3);
+  display: grid;
+  gap: 1rem;
+}
+
+.contact-sidebar ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.contact-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.contact-status {
+  min-height: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.contact-status--success {
+  color: #0f6b32;
+}
+
+.contact-status--error {
+  color: #8b1c1c;
+}
+
+@media (min-width: 992px) {
+  .contact-layout {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+
+
+.checkbox__content {
+  display: grid;
+  gap: 0.35rem;
+}
+

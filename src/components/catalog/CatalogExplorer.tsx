@@ -2,7 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 
-import { CatalogLeather, CatalogProduct, CatalogStyle } from "@/lib/catalog/types";
+import Link from "next/link";
+import { CatalogLeather, CatalogProductSummary, CatalogStyle } from "@/lib/catalog/types";
 
 const currencyFormatter = new Intl.NumberFormat("pl-PL", {
   style: "currency",
@@ -12,7 +13,7 @@ const currencyFormatter = new Intl.NumberFormat("pl-PL", {
 interface CatalogExplorerProps {
   styles: CatalogStyle[];
   leathers: CatalogLeather[];
-  products: CatalogProduct[];
+  products: CatalogProductSummary[];
 }
 
 type SortOrder = "name-asc" | "name-desc";
@@ -211,9 +212,14 @@ export function CatalogExplorer({
                     <p className="catalog-card__price" aria-label={`Cena: ${formatPrice(product.priceGrosz)}`}>
                       {formatPrice(product.priceGrosz)}
                     </p>
-                    <button type="button" className="catalog-card__cta">
+                    <Link
+                      className="catalog-card__cta"
+                      href={`/catalog/${product.slug}`}
+                      aria-label={`Poznaj szczegóły modelu ${product.name}`}
+                      prefetch={false}
+                    >
                       Poznaj szczegóły
-                    </button>
+                    </Link>
                   </footer>
                 </article>
               </li>

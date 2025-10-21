@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { Header } from "../components/Header";
 import "./globals.css";
 
@@ -48,8 +48,13 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className="site-body">
+        <a className="skip-link" href="#main-content">
+          Przejdź do głównej treści
+        </a>
         <Header />
-        <div className="site-content">{children}</div>
+        <div className="site-content" id="main-content">
+          {children}
+        </div>
       </body>
     </html>
   );

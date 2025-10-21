@@ -11,84 +11,86 @@
 - [8. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- MVP operuje na mockowanych danych w pamięci (bez modyfikacji schematu DB).
-- Model produktu łączy `style`, `leather`, warianty (kolor/rozmiar) i galerię placeholderów.
-- Endpointy `/api/styles` i `/api/leather` pozostają bez zmian; dodajemy `/api/products` (lista) oraz `/api/products/[slug]` (szczegóły) po stronie mocków.
-- Walidacja: Zod na warstwie API + typy TypeScript (`CatalogProductDetail`).
+- MVP operuje na mockowanych danych w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień).
+- Endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` są dostępne; lista produktów i szczegóły obsługiwane są lokalnie (`CatalogExplorer`, `getProductBySlug`).
+- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`), brak jeszcze schematów Zod – do dodania przy wprowadzaniu backendu.
 
 ## Model danych produktu
 | Pole | Typ | Opis |
 | --- | --- | --- |
-| `id` | `string` | Identyfikator produktu (np. `prod-1`). |
+| `id` | `string` | Identyfikator produktu (np. `model-szpic`). |
 | `slug` | `string` | Używany w routingu `/catalog/[slug]`. |
 | `name` | `string` | Nazwa modelu. |
 | `styleId` | `number` | Odniesienie do `CatalogStyle`. |
 | `leatherId` | `number` | Odniesienie do `CatalogLeather`. |
 | `description` | `string` | Opis główny. |
 | `highlight` | `string` | Krótki wyróżnik. |
-| `priceGrosz` | `number` | Cena brutto w groszach. |
-| `gallery` | `Array<{ src: string; alt: string }>` | Placeholder obrazów (lokalne `/public/placeholders/...`). |
-| `variants` | `{ colors: Array<{ id: string; name: string; leatherId: number }>; sizes: number[]; }` | Listy wariantów. |
-| `breadcrumbs` | `string[]` | Do generowania nawigacji (opcjonalne). |
-| `seo` | `{ title: string; description: string; keywords: string[] }` | Custom metadata per produkt. |
+| `priceGrosz` | `number` | Cena brutto w groszach (wyliczana z `style.basePriceGrosz + leather.priceModGrosz` lub `priceOverride`). |
+| `category` | `"footwear" \| "accessories" \| "hydration" \| "care"` | Segment katalogu. |
+| `categoryLabel` | `string` | Tekst badge kategorii. |
+| `funnelStage` | `"TOFU" \| "MOFU" \| "BOFU"` | Etap lejka sprzedażowego użyty na stronie produktu. |
+| `funnelLabel` | `string` | Wyjaśnienie etapu lejka. |
+| `orderReference` | `CatalogOrderReference?` | Powiązanie z modelem/akcesorium w formularzu natywnym. |
+| `gallery` | `CatalogProductImage[]` | Lista obrazów (`src`, `alt`). |
+| `variants` | `{ colors: Array<{ id: string; name: string; leatherId: number }>; sizes: number[]; }` | Warianty personalizacji. |
+| `craftProcess` | `string[]` | Kroki procesu rzemieślniczego do sekcji "Detale". |
+| `seo` | `{ title: string; description: string; keywords: string[] }` | Metadata produktu. |
 
 ## Mapowanie stylów i skór
-- Styl (`CatalogStyle`) → cechy:
-  - `name`, `era`, `basePriceGrosz`.
-  - `slug` może być użyty do generowania kategorii (np. `courtly-riding-boot`).
-- Skóra (`CatalogLeather`): `name`, `color`, `finish`, `priceModGrosz`.
-- Produkt dziedziczy część informacji:
-  - `priceGrosz = style.basePriceGrosz + leather.priceModGrosz` (już w `createMockProducts`).
-  - `variants.colors` może bazować na innych `leather` o tym samym stylu.
-- Mock: utworzyć dodatkowe pliki `src/lib/catalog/mock-products.ts` z rozszerzonym modelem (slug + galeria + warianty).
+- Styl (`CatalogStyle`) → `id`, `slug`, `name`, `era`, `description`, `basePriceGrosz`.
+- Skóra (`CatalogLeather`) → `id`, `name`, `color`, `finish`, `priceModGrosz`, `description`.
+- Produkt korzysta z map:
+  - `priceGrosz` obliczany z `basePriceGrosz + priceModGrosz` (nadpisywany `priceOverrideGrosz` jeśli podany w template).
+  - `variantLeatherIds` mapują się na `CatalogLeather` i generują badge kolorów.
+  - `orderReference` tworzony przez helper `mapOrderReference` na podstawie `ORDER_MODELS` i `ORDER_ACCESSORIES`.
 
 ## Zasilanie katalogu i produktu
 - **Katalog (`/catalog`)**
-  - Importuje `styles`, `leathers`, `products` z mocków (`data.ts`, `products.ts` rozszerzony o slug/galerię).
-  - `CatalogExplorer` otrzymuje `products` i generuje karty; CTA `Poznaj szczegóły` linkuje do `/catalog/${slug}`.
+  - Importuje `catalogStyles`, `catalogLeathers`, `createProductSummaries()` z `products.ts`.
+  - `CatalogExplorer` filtruje lokalnie (bez API) – sortowanie, filtry, aria-live.
+  - CTA kart kieruje do `/catalog/[slug]`.
 - **Produkt (`/catalog/[slug]`)**
-  - Server Component pobiera dane z `getProductBySlug(slug)` (mock in-memory).
-  - W przypadku braku sluga rzuca `notFound()` (Next).
-  - Używa tych samych mocków `styles` i `leathers` do renderowania specyfikacji.
-- **Bez zmian schematu**
-  - Wszystkie dane trzymane w plikach TS/JSON (np. `src/lib/catalog/mock-product-details.ts`).
-  - Umożliwia budowę MVP bez Postgresa; w przyszłości wymiana na Drizzle.
+  - `getProductBySlug(slug, styles, leathers)` zwraca `CatalogProductDetail` z galerą, wariantami i CTA.
+  - `generateStaticParams` wykorzystuje `listProductSlugs()` do pre-renderu.
+  - Brak SSR fetch – dane z pliku TS.
+- **Order/Contact**
+  - `OrderModalTrigger` wykorzystuje `orderReference` do preselektowania parametrów (URL query) w `/order/native`.
+  - Formularz kontaktowy przyjmuje `product` w query (`/contact?product=slug`) – do zaimplementowania autopodpowiedzi (TODO).
 
 ## Kontrakty endpointów API
 | Endpoint | Metoda | Input | Output | Notatki |
 | --- | --- | --- | --- | --- |
-| `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Już istnieje; dodaj cache `revalidate: 3600`. |
-| `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Już istnieje. |
-| `/api/products` | GET | Query: `styleIds?`, `leatherIds?`, `sort?` | `{ data: CatalogProductSummary[] }` | Opcjonalne, może pozostać po stronie clienta; w MVP filtry lokalne. |
-| `/api/products/[slug]` | GET | Param slug | `{ data: CatalogProductDetail }` | Alternatywa: generować SSG na podstawie mocków (bez fetchu). |
-| `/api/pricing/quote` | POST | `PricingRequest` (z `options`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Istniejący endpoint; ewentualnie walidacja wejścia. |
-
-`CatalogProductSummary` = subset (`id`, `slug`, `name`, `priceGrosz`, `styleId`, `leatherId`, `highlight`).
-`CatalogProductDetail` = summary + `description`, `gallery`, `variants`, `seo`.
+| `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Cache domyślny (ISR) – do rozważenia `revalidate`. |
+| `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Mockowe dane z `data.ts`. |
+| `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; brak walidacji Zod. |
+| `/api/products` | — | brak | — | Brak endpointu – filtracja po stronie klienta (zostawione do czasu integracji z DB). |
+| `/api/products/[slug]` | — | brak | — | Niezaimplementowane – strona produktu korzysta z funkcji bibliotecznych. |
 
 ## Walidacja i obsługa błędów
-- Walidacja requestów (MVP):
-  - Użyć Zod do definicji schematów: `PricingRequestSchema`, `ProductFiltersSchema`.
-  - W przypadku błędu zwrócić `400` z `{ error: "Invalid payload" }`.
-- Obsługa błędów fetch w komponentach:
-  - `CatalogPage` powinien mieć try/catch i fallback (np. `redirect('/contact?issue=data')` lub UI „Brak danych”).
-  - `ProductPage` – `notFound()` dla braku sluga, `error.tsx` fallback dla wyjątków.
-- Logging: w MVP wystarczy `console.error` w server action (z planem przeniesienia do observability).
+- Walidacja requestów API: brak Zod – dodać `PricingRequestSchema`, `QuoteResponseSchema`.
+- Komponenty UI:
+  - `CatalogExplorer` obsługuje brak wyników tekstem.
+  - `ProductPage` wywołuje `notFound()` dla nieistniejącego sluga; brak fallbacku `error.tsx` (opcjonalny future work).
+  - `ContactForm` waliduje pola klientowo (regex email, required, consent) i ustawia `status` + komunikaty.
+- Logging: `console.error` w `ContactForm` do rozważenia przy integracji backendu.
 
 ## Checklisty kontrolne
-- [x] Zdefiniowano model danych produktu z wariantami i galerią.
-- [x] Opisano jak zasilać katalog i produkt bez zmian w DB.
-- [x] Spisano kontrakty endpointów oraz typy odpowiedzi.
-- [ ] Dodano schematy Zod w kodzie (do implementacji).
-- [ ] Stworzono mock pliki `mock-product-details.ts`.
+- [x] Zdefiniowano model danych produktu z kategoriami i wariantami.
+- [x] Opisano, jak zasilać katalog i produkt bez back-endu.
+- [x] Spisano aktualne endpointy i ich status.
+- [ ] Dodano schematy Zod dla `PricingRequest` i potencjalnych API produktów.
+- [ ] Utworzono backend dla formularza kontaktowego / autopodpowiedź `product`.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Mocki mogą rozjechać się z przyszłą bazą (konieczne mapowanie danych przy migracji).
-  - Brak walidacji może doprowadzić do nieprzewidzianych błędów w API.
+  - Mocki mogą rozjechać się z przyszłym schematem DB – konieczne mapowanie podczas migracji.
+  - Brak walidacji w API (`/api/pricing/quote`) może dopuścić niepoprawne payloady.
+  - Brak endpointu `/api/products` ogranicza re-use danych w przyszłych integracjach (np. SSR/CSR fetch).
 - **Decyzje do podjęcia**
-  - Czy tworzymy endpoint `/api/products` w MVP, czy filtrujemy po stronie klienta z mocków?
-  - Jakie zdjęcia/grafiki wykorzystujemy w galerii (placeholder vs real assets)?
+  - Czy potrzebujemy `/api/products` przed integracją z Drizzle?
+  - Jak mapować `orderReference` przy przejściu na realne dane (np. ID z bazy)?
+  - Czy `ContactForm` powinien wypełniać pole produktu na podstawie query paramu automatycznie?
 - **Następne kroki**
-  - Zaimplementować helpery `getProductBySlug` i `listProducts` w `src/lib/catalog`.
-  - Dodać walidację Zod i fallback UI w komponentach stron.
+  - Dodać walidację Zod i testy dla `calculateQuote` + endpointu.
+  - Przygotować konwersję mocków do seeda Drizzle (JSON/SQL).
+  - Zaplanować API `/api/products` oparte na Drizzle lub co najmniej `GET /api/products/[slug]` z mocków.

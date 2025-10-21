@@ -10,23 +10,29 @@
 - [7. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- Routing App Routera pokrywa podstawowe sekcje (Home, Catalog, About, Contact) oraz endpointy API i `healthz`.
-- Globalny layout (`src/app/layout.tsx`) dostarcza spójną metadata SEO (OpenGraph, Twitter) i sticky header.
-- Drizzle ORM jest przygotowane w pakiecie `@jk/db`, lecz brak integracji z frontem (mockowane dane w `src/lib/catalog`).
-- Krytyczne luki: brak szczegółów modelu produktu/wariantów, brak migracji (`drizzle-kit`), nieustalona strategia źródła danych dla katalogu/produktów.
+- Routing App Routera obejmuje Home, Catalog (statyczny), Product (dynamiczny slug), Order (iframe + natywny landing), Contact (formularz) i About.
+- Globalny layout (`src/app/layout.tsx`) dostarcza metadata SEO, skip link, sticky header oraz wrapper `main-content` dla dostępności.
+- Mocki katalogowe (`src/lib/catalog`) generują produkty z kategoriami, funnel stage, wariantami oraz referencjami do formularza zamówień; integracja z Drizzle pozostaje do wykonania.
+- Krytyczne luki: brak migracji `drizzle-kit`, niespójny `DATABASE_URL`, brak konfiguracji design tokens w CSS (obecne wartości hard-coded) i brak backendu dla formularza kontaktowego.
 
 ## Routing App Routera
 ```
 src/app
-├── layout.tsx (RootLayout + metadata, lang="pl")
+├── layout.tsx (RootLayout + metadata, skip link, header)
 ├── globals.css
 ├── page.tsx (Home)
 ├── about/
 │   └── page.tsx
+├── catalog/
+│   ├── page.tsx
+│   └── [slug]/
+│       └── page.tsx (dynamic product detail + metadata)
 ├── contact/
 │   └── page.tsx
-├── catalog/
-│   └── page.tsx
+├── order/
+│   ├── page.tsx (iframe embed)
+│   └── native/
+│       └── page.tsx (lista modeli + CTA)
 ├── components/
 │   └── PricingCalculator.tsx
 ├── healthz/
@@ -40,50 +46,57 @@ src/app
         └── quote/
             └── route.ts (POST)
 ```
-- Brak jeszcze ścieżek `catalog/[slug]` (produkt) oraz dodatkowych layoutów per-sekcja.
-- Brak dedykowanego layoutu dla katalogu (wykorzystywana struktura globalna).
+- Dynamiczna strona produktu korzysta z `generateStaticParams` i `generateMetadata` opartych na mockach.
+- Order posiada dwa warianty: `/order` (iframe) oraz `/order/native` (fallback + CTA), co wymaga spójnych linków w CTA i modalu.
 
 ## Layouty i metadata
-- `RootLayout` ustawia `metadataBase`, `title` z template, opisy, słowa kluczowe, OpenGraph, Twitter Card i favicon.
-- `lang="pl"`, body `site-body` z globalną klasą; header wstawiany globalnie (sticky, w `Header`).
-- Strony `about` i `contact` definiują własne `metadata.title`; `catalog` posiada `Metadata` z tytułem `"Catalog"` (do lokalizacji/SEO).
-- Brak dynamicznych `generateMetadata` dla przyszłych produktów (`/catalog/[slug]`).
+- `RootLayout` ustawia `metadataBase`, `title` z template, OpenGraph, Twitter Card, `lang="pl"` i `body.site-body`.
+- Skip link prowadzi do `#main-content`, wrapper `div` w `layout.tsx` ma `id="main-content"` (testowane w `layout.test.tsx`).
+- Strony deklarują własne metadata:
+  - `catalog/page.tsx` – `title`, `description`, `alternates`.
+  - `catalog/[slug]/page.tsx` – `generateMetadata` z fallbackiem na "Model niedostępny".
+  - `order/page.tsx` – `alternates.canonical` i `openGraph`.
+  - `contact/page.tsx` – `title`, `description` dopasowane do formularza.
+- Brak dynamicznego `robots.txt` / `sitemap.ts` – do rozważenia przy wdrożeniu SEO.
 
 ## Warstwa danych i Drizzle ORM
 - Pakiet `@jk/db`:
   - `src/lib/db.ts` – inicjalizacja `drizzle(pool)` na podstawie `DATABASE_URL` (wymagana zmienna środowiskowa).
-  - `src/schema.ts` – definicje tabel: `style`, `leather`, `sole`, `option`, `customer`, `measurements`, `order`.
-  - Brak folderu `migrations/` i narzędzia `drizzle-kit` do generowania migracji.
-  - Własny `docker-compose.yml` (Postgres 16, user `devuser`, pass `devpass`, db `jkdb`).
-- Frontend (Next.js) korzysta z mocków:
-  - `src/lib/catalog/data.ts` – tablice `catalogStyles`, `catalogLeathers`.
-  - `src/lib/catalog/products.ts` – generator `createMockProducts` tworzący listę produktów na podstawie stylów i skór.
-  - `src/lib/pricing/calc.ts` – logika kalkulatora (NIE korzysta z DB).
-- Brak powiązania z Drizzle w route'ach API – aktualnie zwracają statyczne dane z `lib/catalog`.
+  - `src/schema.ts` – definicje tabel: `style`, `leather`, `sole`, `option`, `customer`, `measurements`, `order` (brak migracji).
+  - Brak konfiguracji `drizzle.config.ts` i CLI migracji.
+- Frontend (Next.js) korzysta z mocków w `src/lib/catalog`:
+  - `data.ts` – `catalogStyles`, `catalogLeathers` (rozszerzone o `slug`, `description`, `priceModGrosz`).
+  - `products.ts` – `listProductSlugs`, `getProductBySlug`, generacja `CatalogProductSummary`/`Detail` z kategoriami, funnel stage, orderReference.
+  - `types.ts` – definicje `CatalogProductDetail` (gallery, craftProcess, variants, `orderReference`).
+- Formularz kontaktowy działa client-side (`ContactForm`), brak backendu – na MVP symuluje wysyłkę `setTimeout`.
+- Kalkulator wycen (`src/lib/pricing`) operuje na mockowanych cennikach (`ORDER_MODELS`, `ORDER_ACCESSORIES`).
 
 ## Black-boxy i warianty rozwiązania
 | Luka / pytanie | Opis | Wariant A | Plusy | Minusy | Wariant B | Plusy | Minusy |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Źródło danych katalogu | Czy katalog/produkt w MVP ma korzystać z DB, czy mocków? | Mock w pliku (status quo) | Szybka implementacja, brak zależności od DB | Brak skalowania, konieczny refactor później | Połączenie z Drizzle (`style`, `leather`, `order`) | Realne dane, test migracji | Wymaga migracji, czasu na seed, Docker |
-| Produkt `/catalog/[slug]` | Brak strony produktu i danych szczegółowych | Generacja z mocków + dynamic routes (file-based) | Brak zależności od backendu, szybki MVP | Mocki muszą obejmować galerię/variants | API server component korzystający z Drizzle | Realne dane, przygotowuje pod MTO | Wymaga wprowadzenia Drizzle do runtime (server actions) |
-| Zamówienia / formularz | Brak decyzji co do procesu | Prosty formularz kontaktowy (mailto + stub) | Minimalny nakład, zgodny z wymaganiami MVP | Brak automatyzacji, manual handling | Integracja z DB (`order` table) | Przygotowuje do automatyzacji, strumień danych | Wysoki koszt implementacji, walidacje |
-| Migracje Drizzle | Brak `drizzle-kit` i migracji | Dodanie `drizzle-kit` + pliku `drizzle.config.ts` | Standaryzowane migracje, CI-friendly | Wymaga czasu na konfigurację i pipeline | Pozostanie przy mockach, migracje po MVP | Szybsze MVP | Ryzyko długu technicznego i niespójności |
-| Dane o wariantach | Model nie opisuje wariantów (rozmiar, kolor) | Hardkodowane warianty per produkt (mock) | Szybkie do wdrożenia, spełnia wymagania display | Brak skalowalności | Wydzielenie tabel (product_variant) w DB | Elastyczne, gotowe na MTO | Wymaga zmian schematu i migracji |
+| Migracje Drizzle | Brak `drizzle-kit` i migracji | Dodać `drizzle-kit`, `drizzle.config.ts`, workflow seeda | Standaryzowane migracje, gotowość pod prod | Wymaga czasu na konfigurację, pipeline Docker | Pozostać na mockach do czasu integracji | Zero kosztu teraz | Dług techniczny, brak pewności danych |
+| Konfiguracja DB | `.env.example` ≠ `docker-compose.yml` | Ujednolicić do `devuser/devpass@jkdb` + dokumentacja | Koniec niespójności, łatwiejszy onboarding | Wymaga zmian w dotychczasowych envach | Pozostawić jak jest + komentarz | Brak zmian | Ryzyko błędów przy startach |
+| Formularz kontaktowy | Brak backendu / wysyłki maili | Integracja z API (server action, n8n) | Realna obsługa leadów, brak manuali | Potrzebna infrastruktura i bezpieczeństwo | Pozostawić mock i CTA mailto | Zero kosztu teraz | Brak automatyzacji, UX ograniczony |
+| UI tokens vs. CSS | Globals mają hard-coded wartości | Dodać design tokens do CSS custom properties / Tailwind | Spójność, łatwiejsze zmiany | Refactor styli globalnych | Pozostawić obecny styl | Szybkie MVP | Ryzyko rozjazdów kolorów i kontrastu |
+| Modale zamówień | `OrderModalTrigger` otwiera modal w Home/Product | Zastąpić modala dedykowaną stroną `/order/native` | Mniej kodu klientowego, prostsze testy | Potencjalnie gorsza konwersja | Utrzymać modal + Ulepszyć A11y | Większa kontrola flow | Więcej pracy przy testach |
 
 ## Checklisty kontrolne
 - [x] Zmapowano istniejące route'y App Routera.
 - [x] Zidentyfikowano obecne metadane i layout.
-- [x] Opisano aktualne wykorzystanie Drizzle ORM i mocków.
-- [ ] Wybrano docelowy wariant dla źródła danych katalogu.
+- [x] Opisano aktualne wykorzystanie mocków katalogu i CTA zamówień.
 - [ ] Dodano proces migracji (`drizzle-kit`).
+- [ ] Zrefaktoryzowano style globalne na bazie tokens.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak migracji może utrudnić wdrożenie kolejnych funkcji (np. zamówień).
-  - Mockowane dane mogą rozjechać się z docelowym schematem DB → refactor przy integracji.
+  - Brak migracji utrudni integrację zamówień i przyszłe endpointy.
+  - Hard-coded kolory w `globals.css` mogą rozjechać się z design tokens (kontrast, brand).
+  - Formularz kontaktowy bez backendu = ryzyko utraty leadów.
 - **Decyzje do podjęcia**
-  - Który wariant z tabeli black-boxów wybieramy dla MVP (mock vs DB)?
-  - Czy implementujemy `drizzle-kit` już teraz czy odkładamy do momentu integracji backendu?
+  - Priorytet dla migracji Drizzle vs. dalsze rozszerzenia katalogu.
+  - Czy zachowujemy modal zamówienia, czy promujemy `/order/native` jako główne CTA.
+  - Kiedy przenieść styling na system tokens (Tailwind/shadcn).
 - **Następne kroki**
-  - Zaprojektować wymagania MVP (patrz `WYMAGANIA_MVP.md`).
-  - Zdefiniować modele danych i kontrakty API (patrz `DANE_I_API_MVP.md`).
+  - Przygotować `drizzle.config.ts` i pierwszą migrację inicjalną.
+  - Wprowadzić zmienne CSS odpowiadające tokens z `docs/UI_TOKENS.md`.
+  - Zaprojektować integrację formularza kontaktowego (n8n / email service).

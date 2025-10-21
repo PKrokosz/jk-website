@@ -15,104 +15,112 @@
 
 ## Podsumowanie
 - Sekwencja zadań prowadzi od stabilizacji środowiska, przez UI foundation, dane mock, strony katalogu/produktów, po kontakt i CI.
+- Status (2024-xx-xx): T2–T5 zakończone, T6 częściowo wdrożone (workflow CI, testy podstawowe), T0/T1 wymagają dopięcia (`DATABASE_URL`, design tokens w CSS).
 - Każde zadanie ma dedykowany branch `codex/<kontekst>` i Definition of Done.
-- W planie uwzględniono ryzyka, rollback oraz estymaty w skali S/M/L.
 
 ## Zadania T0–T6
 ### T0 — Stabilizacja środowiska
 - **Branch**: `codex/env-hardening`
+- **Status**: 🔄 w toku (czeka na ujednolicenie `DATABASE_URL` + dokumentacji Postgresa).
 - **Zakres**: Ujednolicenie `DATABASE_URL` z `docker-compose.yml`, dodanie instrukcji `.env`, opcjonalnie `drizzle.config.ts` (bez migracji).
 - **DoD**:
-  - [ ] Aktualizacja dokumentacji `.env`.
-  - [ ] Dodane testy smoke `pnpm lint`, `pnpm test`.
-  - [ ] Potwierdzony start `pnpm dev`.
+  - [ ] Aktualizacja dokumentacji `.env` (README z nowym źródłem prawdy) – częściowo wykonane, wymaga finalizacji danych logowania.
+  - [x] Dodane testy smoke `pnpm lint`, `pnpm test` (w CI).
+  - [x] Potwierdzony start `pnpm dev`.
 - **Ryzyka**: rozbieżne dane dostępowe w środowiskach; brak Dockera w CI.
 - **Rollback**: przywrócenie poprzedniego `.env.example` i compose.
 - **Estymata**: S.
 
 ### T1 — Design tokens i prymitywy UI
 - **Branch**: `codex/ui-tokens`
+- **Status**: 🔄 częściowo (klasy w `globals.css` istnieją, tokens nieprzeniesione do CSS variables).
 - **Zakres**: Implementacja tokens w Tailwind/CSS, stworzenie komponentów `Button`, `Card`, `Badge`, `Input`, `Checkbox`.
 - **DoD**:
-  - [ ] Tokens z `UI_TOKENS.md` odzwierciedlone w kodzie.
-  - [ ] Storybook lub Vitest snapshoty (opcjonalnie) dla prymitywów.
-  - [ ] `pnpm lint`, `pnpm test`.
+  - [ ] Tokens z `UI_TOKENS.md` odzwierciedlone w kodzie (custom properties / Tailwind) – do zrobienia.
+  - [ ] Storybook lub testy wizualne – brak.
+  - [x] `pnpm lint`, `pnpm test`.
 - **Ryzyka**: brak zatwierdzonych fontów, konieczność fallbacku.
 - **Rollback**: wycofanie zmian w Tailwind i komponentach.
 - **Estymata**: M.
 
 ### T2 — Mocki katalogu i helpery danych
 - **Branch**: `codex/catalog-mocks`
+- **Status**: ✅ zakończone (mocki z slug, wariantami, order reference, helpery `listProductSlugs`/`getProductBySlug`).
 - **Zakres**: Rozszerzenie `src/lib/catalog` o slug, galerię, warianty; helpery `listProducts`, `getProductBySlug`.
 - **DoD**:
-  - [ ] Nowe mock pliki `mock-product-details.ts` lub aktualizacja istniejących.
-  - [ ] Testy jednostkowe helperów (zwrot danych, obsługa braku sluga).
-  - [ ] Zaktualizowane API `/api/products?` (jeśli wymagane) lub notatka dlaczego nie.
-  - [ ] `pnpm lint`, `pnpm test`.
+  - [x] Nowe mock pliki/dane (`products.ts`, `types.ts`).
+  - [x] Testy jednostkowe helperów (`src/lib/catalog/__tests__`).
+  - [x] Decyzja dot. `/api/products` (pozostaje client-side filtering).
+  - [x] `pnpm lint`, `pnpm test`.
 - **Ryzyka**: niespójność z przyszłym schematem DB.
 - **Rollback**: przywrócenie poprzednich mocków.
 - **Estymata**: M.
 
 ### T3 — Strona katalogu z nawigacją do produktów
 - **Branch**: `codex/catalog-page`
+- **Status**: ✅ zakończone.
 - **Zakres**: Aktualizacja `/catalog` by korzystała z helperów, linki do `/catalog/[slug]`, UX (loading/empty states, skip link).
 - **DoD**:
-  - [ ] `CatalogExplorer` z linkami i poprawionym CTA.
-  - [ ] Dodane testy komponentu (filtry + link slug).
-  - [ ] SEO metadata (`title`, `description`).
-  - [ ] `pnpm lint`, `pnpm test`.
+  - [x] `CatalogExplorer` z linkami i poprawionym CTA.
+  - [x] Testy komponentu (filtry + link slug).
+  - [x] SEO metadata (`title`, `description`).
+  - [x] `pnpm lint`, `pnpm test`.
 - **Ryzyka**: regresje w filtrach po zmianie danych.
 - **Rollback**: revert do poprzedniego `CatalogExplorer`.
 - **Estymata**: M.
 
 ### T4 — Strona produktu `/catalog/[slug]`
 - **Branch**: `codex/product-page`
-- **Zakres**: Nowy routing dynamiczny, UI sekcji (galeria, detale, warianty), breadcrumbs, CTA do kontaktu.
+- **Status**: ✅ zakończone.
+- **Zakres**: Nowy routing dynamiczny, UI sekcji (galeria, detale, warianty), breadcrumbs, CTA do kontaktu/order.
 - **DoD**:
-  - [ ] `app/catalog/[slug]/page.tsx` + `generateStaticParams` (jeśli SSG) + `not-found.tsx`.
-  - [ ] Testy (render, 404, metadata).
-  - [ ] Placeholder gallery assets w `public/`.
-  - [ ] `pnpm lint`, `pnpm test`.
+  - [x] `app/catalog/[slug]/page.tsx` + `generateStaticParams` + `not-found` fallback.
+  - [x] Testy (render, metadata) – [uwaga] brak dedykowanych testów komponentu, do rozważenia.
+  - [x] Placeholder gallery assets w `public/`.
+  - [x] `pnpm lint`, `pnpm test`.
 - **Ryzyka**: brak realnych zdjęć, potrzeba placeholderów.
 - **Rollback**: usunięcie nowego route'u.
 - **Estymata**: L.
 
 ### T5 — Strona kontaktu i formularz
 - **Branch**: `codex/contact-form`
-- **Zakres**: Formularz z walidacją client-side (Zod/React Hook Form?), CTA `mailto`, potwierdzenie wysyłki.
+- **Status**: ✅ zakończone (formularz client-side, hero, social links).
+- **Zakres**: Formularz z walidacją client-side, CTA `mailto`, potwierdzenie wysyłki.
 - **DoD**:
-  - [ ] Formularz z polami wymaganymi i walidacją.
-  - [ ] Testy komponentu (required, success state).
-  - [ ] Aktualizacja metadata + copy.
-  - [ ] `pnpm lint`, `pnpm test`.
-- **Ryzyka**: brak zgody na przechowywanie danych → placeholder RODO.
+  - [x] Formularz z polami wymaganymi i walidacją.
+  - [ ] Testy komponentu (do dopisania – brak coverage dla `ContactForm`).
+  - [x] Aktualizacja metadata + copy.
+  - [x] `pnpm lint`, `pnpm test`.
+- **Ryzyka**: brak backendu do obsługi leadów.
 - **Rollback**: powrót do wersji z prostym tekstem + `mailto`.
 - **Estymata**: M.
 
 ### T6 — Jakość, testy i CI
 - **Branch**: `codex/ci-hardening`
+- **Status**: 🔄 częściowo (workflow CI działa, coverage + depcheck w pipeline; brak template PR i dodatkowych testów komponentów).
 - **Zakres**: Dodanie workflow GitHub Actions, testów brakujących, template PR, coverage badge (opcjonalnie).
 - **DoD**:
-  - [ ] `.github/workflows/ci.yml` jak w `JAKOSC_TESTY_CI.md`.
-  - [ ] Zaktualizowany `README.md` z instrukcjami lint/test.
-  - [ ] Minimum testów uzupełnionych (product page, prymitywy).
-  - [ ] `pnpm lint`, `pnpm test`.
-- **Ryzyka**: dłuższy pipeline, konieczność dopracowania caching.
+  - [x] `.github/workflows/ci.yml` zgodny z `JAKOSC_TESTY_CI.md` (lint, typecheck, test, coverage, depcheck).
+  - [x] Zaktualizowany `README.md` z instrukcjami lint/test.
+  - [ ] Minimum testów uzupełnionych (product page, contact form) – TODO.
+  - [ ] Template PR (niezaimplementowany).
+  - [x] `pnpm lint`, `pnpm test`.
+- **Ryzyka**: dłuższy pipeline; potrzeba utrzymania logów coverage.
 - **Rollback**: wyłączenie workflow, revert commitów.
 - **Estymata**: M.
 
 ## Checklisty kontrolne
-- [x] Zdefiniowano zadania T0–T6 z branchami.
+- [x] Zdefiniowano zadania T0–T6 z branchami i statusem.
 - [x] Ujęto DoD, ryzyka, rollback, estymaty.
-- [ ] Zatwierdzono plan przez właściciela produktu.
+- [ ] Zatwierdzono plan przez właściciela produktu (w toku).
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak zasobów (grafiki, copy) może opóźnić T4/T5.
-  - Niewdrożona CI opóźni feedback – T6 powinno nastąpić przed rozszerzonym developmentem.
+  - Brak zasobów (grafiki, copy) może opóźnić T4/T5 – częściowo zaadresowane placeholderami.
+  - Niewdrożone migracje/PR template mogą utrudnić skalowanie zespołu.
 - **Decyzje do podjęcia**
-  - Kolejność T5 vs. T6 (czy zapewnić formularz zanim włączymy CI?).
-  - Czy T0 ma obejmować `drizzle-kit`, czy zostawiamy na później.
+  - Priorytet: dokończyć T0/T1/T6 czy rozszerzać katalog? (wymaga akceptacji właściciela).
+  - Czy T5 wymaga integracji z backendem przed startem kampanii marketingowej?
 - **Następne kroki**
-  - Uzyskać akceptację planu od właściciela.
-  - Rozpisać szczegółowe podzadania (np. dla T4: galeria, breadcrumbs, metadata).
+  - Przygotować zadania follow-up dla: `drizzle-kit`, CSS tokens, testy `ContactForm`/`ProductPage`, template PR.
+  - Uzyskać akceptację planu od właściciela i zaktualizować timeline.

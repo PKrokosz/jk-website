@@ -5,6 +5,7 @@ import { ORDER_MODELS } from "@/config/orderModels";
 import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
 
 import { PricingCalculator } from "./components/PricingCalculator";
+import { HeroShowcaseFrame } from "./components/HeroShowcaseFrame";
 
 const heroShowcase = [
   {
@@ -117,23 +118,10 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="hero__visual" aria-hidden="true">
+          <div className="hero__visual">
             <div className="hero__glow" />
             <div className="hero__showcase">
-              {heroShowcase.map((item, index) => (
-                <figure key={item.src} className={`hero-card hero-card--${item.accent}`}>
-                  <Image
-                    src={item.src}
-                    alt={item.alt}
-                    width={420}
-                    height={520}
-                    className="hero-card__image"
-                    sizes="(min-width: 1024px) 320px, 45vw"
-                    priority={index === 0}
-                  />
-                  <figcaption>{item.label}</figcaption>
-                </figure>
-              ))}
+              <HeroShowcaseFrame items={heroShowcase} />
             </div>
           </div>
         </div>

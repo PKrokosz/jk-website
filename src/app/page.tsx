@@ -1,34 +1,64 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
 
 import { PricingCalculator } from "./components/PricingCalculator";
 
+const heroShowcase = [
+  {
+    src: "/image/models/10.jfif",
+    alt: "Ciemnobrązowy model obuwia o wydłużonej cholewce",
+    label: "Obieżyświat",
+    accent: "amber"
+  },
+  {
+    src: "/image/models/6.jfif",
+    alt: "Granatowe buty bespoke na drewnianym kopycie",
+    label: "Tamer",
+    accent: "copper"
+  },
+  {
+    src: "/image/models/15.jfif",
+    alt: "Czarne trzewiki z kontrastowym sznurowaniem",
+    label: "Wysokie Krowie Pyski",
+    accent: "gold"
+  }
+];
+
 const galleryItems = [
   {
     title: "Oxford nocna skóra",
-    description: "Lakierowana czerń z ręcznym polerem."
+    description: "Lakierowana czerń z ręcznym polerem.",
+    image: "/image/models/1.jfif",
+    alt: "Lakierowane oksfordy na tle warsztatu"
   },
   {
     title: "Derby kasztan",
-    description: "Przeznaczone do codziennej pracy w biurze."
+    description: "Przeznaczone do codziennej pracy w biurze.",
+    image: "/image/models/4.jfif",
+    alt: "Kasztanowe derby z ręcznym wykończeniem"
   },
   {
     title: "Monk zamszowy",
-    description: "Podwójna klamra w kolorze espresso."
+    description: "Podwójna klamra w kolorze espresso.",
+    image: "/image/models/7.jfif",
+    alt: "Zamszowe monki z metalową klamrą"
   },
   {
     title: "Trzewik bespoke",
-    description: "Skórzana podszewka i kontrastowe sznurowanie."
+    description: "Skórzana podszewka i kontrastowe sznurowanie.",
+    image: "/image/models/12.jfif",
+    alt: "Trzewiki bespoke w trakcie polerowania"
   }
 ];
 
 export default function Home() {
   return (
-    <main className="page">
-      <section className="section hero" aria-labelledby="hero-heading">
-        <div className="container hero__content">
-          <div>
+    <main className="page home-page">
+      <section className="section hero hero--immersive" aria-labelledby="hero-heading">
+        <div className="container hero__layout">
+          <div className="hero__intro">
             <p className="eyebrow">JK Handmade Footwear</p>
             <h1 id="hero-heading">Buty miarowe szyte w Warszawie pod Twój rytm dnia</h1>
             <p className="lead">
@@ -52,9 +82,24 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="hero__badge" aria-hidden="true">
-            <span>Made-to-order</span>
-            <span>Warszawa</span>
+          <div className="hero__visual" aria-hidden="true">
+            <div className="hero__glow" />
+            <div className="hero__showcase">
+              {heroShowcase.map((item, index) => (
+                <figure key={item.src} className={`hero-card hero-card--${item.accent}`}>
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    width={420}
+                    height={520}
+                    className="hero-card__image"
+                    sizes="(min-width: 1024px) 320px, 45vw"
+                    priority={index === 0}
+                  />
+                  <figcaption>{item.label}</figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -98,7 +143,16 @@ export default function Home() {
           <div className="gallery-grid" role="list">
             {galleryItems.map((item) => (
               <article key={item.title} role="listitem" className="gallery-card">
-                <div className="gallery-card__media" aria-hidden="true" />
+                <div className="gallery-card__media" aria-hidden="true">
+                  <Image
+                    src={item.image}
+                    alt={item.alt}
+                    width={480}
+                    height={320}
+                    className="gallery-card__image"
+                    sizes="(min-width: 1024px) 260px, 80vw"
+                  />
+                </div>
                 <div className="gallery-card__body">
                   <h3>{item.title}</h3>
                   <p>{item.description}</p>

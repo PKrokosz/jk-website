@@ -4,14 +4,32 @@ import React, { useMemo, type ComponentPropsWithoutRef, type ReactNode } from "r
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+type LinkHref = ComponentPropsWithoutRef<typeof Link>["href"];
+
 type NavLinkProps = {
-  href: string;
+  href: LinkHref;
   children: ReactNode;
   className?: string;
   activeClassName?: string;
   inactiveClassName?: string;
   exact?: boolean;
 } & Omit<ComponentPropsWithoutRef<typeof Link>, "href">;
+
+const hrefToString = (href: LinkHref): string => {
+  if (typeof href === "string") {
+    return href;
+  }
+
+  if (href instanceof URL) {
+    return href.pathname ?? "/";
+  }
+
+  if (typeof href.pathname === "string" && href.pathname.length > 0) {
+    return href.pathname;
+  }
+
+  return "/";
+};
 
 const normalizePathname = (path: string | null) => {
   if (!path) return null;
@@ -22,18 +40,19 @@ const normalizePathname = (path: string | null) => {
   return path.replace(/\/+$/, "");
 };
 
-const resolveHrefPath = (href: string) => {
+const resolveHrefPath = (href: LinkHref) => {
+  const hrefValue = hrefToString(href);
+
   try {
-    const url = new URL(href, "http://localhost");
-    return normalizePathname(url.pathname) ?? href;
+    const url = new URL(hrefValue, "http://localhost");
+    return normalizePathname(url.pathname) ?? hrefValue;
   } catch {
-    return normalizePathname(href) ?? href;
+    return normalizePathname(hrefValue) ?? hrefValue;
   }
 };
 
-const isPathActive = (currentPath: string | null, href: string, exact: boolean) => {
+const isPathActive = (currentPath: string | null, targetPath: string, exact: boolean) => {
   const normalizedCurrent = normalizePathname(currentPath);
-  const targetPath = resolveHrefPath(href);
 
   if (!normalizedCurrent) {
     return false;
@@ -59,8 +78,12 @@ export function NavLink({
   ...rest
 }: NavLinkProps) {
   const pathname = usePathname();
+  const targetPath = useMemo(() => resolveHrefPath(href), [href]);
 
-  const isActive = useMemo(() => isPathActive(pathname, href, exact), [pathname, href, exact]);
+  const isActive = useMemo(
+    () => isPathActive(pathname, targetPath, exact),
+    [pathname, targetPath, exact]
+  );
 
   const computedClassName = [
     className,

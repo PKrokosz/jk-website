@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import type { Route } from "next";
 
 import { NavLink } from "./NavLink";
 
@@ -9,7 +10,11 @@ const navigationItems = [
   { href: "/order/native", label: "Order" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" }
-];
+] satisfies ReadonlyArray<{
+  href: Route;
+  label: string;
+  exact?: boolean;
+}>;
 
 export function Header() {
   return (

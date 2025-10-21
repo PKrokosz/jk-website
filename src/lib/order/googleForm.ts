@@ -6,7 +6,11 @@ import { ORDER_COLORS_BY_ID, ORDER_SIZES_BY_ID, OrderFormValues } from "./schema
 
 const OTHER_OPTION_VALUE = "__other_option__";
 
-const formatNumber = (value: number) => {
+const formatNumber = (value: number | undefined) => {
+  if (typeof value !== "number") {
+    return "";
+  }
+
   return Number.isFinite(value) ? value.toString().replace(".", ",") : "";
 };
 

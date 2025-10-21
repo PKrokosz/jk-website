@@ -44,6 +44,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Produkt: warianty, galeria, CTA „Zamów/Skontaktuj”, breadcrumbs.
 - Styl: "medieval artisan minimalism" – ciemne tło, złote akcenty, duże zdjęcia, spacing zgodny z tokens.
 - Kontakt: formularz z walidacją i jasnym komunikatem sukcesu/błędu.
+- Assets: folder `img/` zawiera zdjęcia produktów; traktuj nazwy plików jako źródło prawdy dla nazw modeli w mockach (`src/lib/catalog`) i komponentach UI.
+- Przy dodawaniu komponentów katalogu uwzględnij odwzorowanie każdego zdjęcia na kartę produktu oraz podpis zdjęcia zgodny z nazwą pliku (bez rozszerzenia).
 
 ## API/DB
 - Endpointy: `/api/styles`, `/api/leather`, `/api/pricing/quote` (istniejące) + planowane `/api/products` (mock).

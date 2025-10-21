@@ -1,23 +1,11 @@
 import type { Metadata } from "next";
-import type { CSSProperties } from "react";
-
-
-type SlideStyle = CSSProperties & { "--delay"?: string };
-
-type Slide = {
-  id: string;
-  kicker: string;
-  title: string;
-  description: string;
-  detail: string;
-  video: string;
-};
+import { AboutCarousel, type AboutSlide } from "./about-carousel";
 
 export const metadata: Metadata = {
   title: "O pracowni"
 };
 
-const slides: Slide[] = [
+const slides: AboutSlide[] = [
   {
     id: "origins",
     kicker: "Geneza pracowni",
@@ -86,36 +74,7 @@ export default function AboutPage() {
       <h1 id="about-heading" className="sr-only">
         O pracowni JK Handmade Footwear
       </h1>
-      <div className="about-track">
-        {slides.map((slide, index) => {
-          const style: SlideStyle = { "--delay": `${index * 0.45}s` };
-
-          return (
-            <section key={slide.id} className="about-slide" aria-labelledby={`${slide.id}-title`} style={style}>
-              <div className="about-media" aria-hidden="true">
-                <video
-                  className="about-video"
-                  src={slide.video}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                />
-                <div className="about-overlay" />
-              </div>
-              <div className="about-content">
-                <p className="about-kicker">{slide.kicker}</p>
-                <h2 id={`${slide.id}-title`} className="about-title">
-                  {slide.title}
-                </h2>
-                <p className="about-description">{slide.description}</p>
-                <p className="about-detail">{slide.detail}</p>
-              </div>
-            </section>
-          );
-        })}
-      </div>
+      <AboutCarousel slides={slides} />
     </main>
   );
 }

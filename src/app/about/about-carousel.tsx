@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type AboutSlide = {
   id: string;
@@ -19,6 +19,25 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const slideRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const target = slideRefs.current[index];
+
+      if (target) {
+        target.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+    },
+    []
+  );
+
+  const handleNext = useCallback(() => {
+    scrollToIndex((activeIndex + 1) % slides.length);
+  }, [activeIndex, scrollToIndex, slides.length]);
+
+  const handlePrev = useCallback(() => {
+    scrollToIndex((activeIndex - 1 + slides.length) % slides.length);
+  }, [activeIndex, scrollToIndex, slides.length]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -81,7 +100,6 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
                 playsInline
                 preload="metadata"
               />
-              <div className="about-overlay" />
             </div>
             <div className="about-content">
               <p className="about-kicker">{slide.kicker}</p>
@@ -94,6 +112,27 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
           </section>
         );
       })}
+      <div className="about-controls" aria-live="polite">
+        <button
+          type="button"
+          className="about-control"
+          onClick={handlePrev}
+          aria-label="Poprzedni slajd"
+        >
+          Poprzedni
+        </button>
+        <span className="about-progress" aria-hidden="true">
+          {String(activeIndex + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
+        </span>
+        <button
+          type="button"
+          className="about-control"
+          onClick={handleNext}
+          aria-label="Następny slajd"
+        >
+          Dalej
+        </button>
+      </div>
     </div>
   );
 }

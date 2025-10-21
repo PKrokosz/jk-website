@@ -6,6 +6,7 @@ import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
 
 import { PricingCalculator } from "./components/PricingCalculator";
 import { HeroShowcaseFrame } from "./components/HeroShowcaseFrame";
+import { SellingPointsCarousel } from "./components/SellingPointsCarousel";
 
 const heroShowcase = [
   {
@@ -140,17 +141,8 @@ export default function Home() {
               nim dostępne — a kalkulator wyceny poniżej pokaże orientacyjną cenę końcową.
             </p>
           </div>
-          <div className="craft-overview__features" role="region" aria-label="Najważniejsze cechy butów">
-            <div className="flying-window">
-              <ul className="selling-points selling-points--carousel" role="list">
-                {sellingPoints.map((point) => (
-                  <li key={point.title} className="selling-point" tabIndex={0}>
-                    <h3>{point.title}</h3>
-                    <p>{point.description}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="craft-overview__features">
+            <SellingPointsCarousel points={sellingPoints} />
           </div>
         </div>
       </section>

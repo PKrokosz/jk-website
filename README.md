@@ -2,6 +2,8 @@
 
 Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe oraz automatyzacjami n8n.
 
+> CI: patrz workflow [`CI`](.github/workflows/ci.yml) uruchamiany na Node.js 20 z pnpm 10.18.x dla buildów, lintów i kontroli zależności.
+
 ## Stos technologiczny
 
 - **Framework**: Next.js (App Router) + React 18
@@ -38,7 +40,11 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
    ```bash
    pnpm install
    ```
-2. Utwórz plik `.env` na podstawie `.env.example` i uzupełnij wymagane wartości.
+2. Zatwierdź instalację natywnych binariów wymaganych przez pnpm 10 (patrz konfiguracja w [`.pnpm-builds.json`](./.pnpm-builds.json)):
+   ```bash
+   pnpm approve-builds
+   ```
+3. Utwórz plik `.env` na podstawie `.env.example` i uzupełnij wymagane wartości.
 
 ### Zmienne środowiskowe
 
@@ -62,8 +68,10 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z domyśl
 | `pnpm build` | Buduje aplikację w trybie produkcyjnym. |
 | `pnpm start` | Uruchamia wcześniej zbudowaną aplikację. |
 | `pnpm lint` | Sprawdza jakość kodu przy użyciu `eslint-config-next`. |
+| `pnpm typecheck` | Weryfikuje typy TypeScript bez emitowania plików. |
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
 | `pnpm test -- --coverage` | Generuje raport pokrycia testami w formacie V8. |
+| `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 
 ## Pakiet `@jk/db`
 

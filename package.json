@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "depcheck": "depcheck --skip-missing=true"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -28,6 +30,7 @@
     "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "@vitest/coverage-v8": "2.1.1",
+    "depcheck": "^1.4.7",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.13",
     "jsdom": "^27.0.1",

@@ -62,8 +62,10 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z domyśl
 | `pnpm build` | Buduje aplikację w trybie produkcyjnym. |
 | `pnpm start` | Uruchamia wcześniej zbudowaną aplikację. |
 | `pnpm lint` | Sprawdza jakość kodu przy użyciu `eslint-config-next`. |
+| `pnpm typecheck` | Weryfikuje typy TypeScript bez emitowania plików. |
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
 | `pnpm test -- --coverage` | Generuje raport pokrycia testami w formacie V8. |
+| `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 
 ## Pakiet `@jk/db`
 

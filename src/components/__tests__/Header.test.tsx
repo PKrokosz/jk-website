@@ -14,19 +14,27 @@ vi.mock("next/link", () => ({
 }));
 
 const usePathnameMock = vi.hoisted(() => vi.fn<() => string | null>());
+const useCartMock = vi.hoisted(() => vi.fn(() => ({ items: [] })));
 
 vi.mock("next/navigation", () => ({
   __esModule: true,
   usePathname: usePathnameMock
 }));
 
+vi.mock("@/components/cart/CartProvider", () => ({
+  __esModule: true,
+  useCart: () => useCartMock()
+}));
+
 describe("Header", () => {
   beforeEach(() => {
     usePathnameMock.mockReturnValue("/");
+    useCartMock.mockReturnValue({ items: [] });
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    useCartMock.mockReset();
   });
 
   it("renders all navigation links", () => {
@@ -36,6 +44,7 @@ describe("Header", () => {
     expect(screen.getByRole("link", { name: "Catalog" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Przejdź do koszyka" })).toBeInTheDocument();
   });
 
   it("marks the matching route as active", () => {

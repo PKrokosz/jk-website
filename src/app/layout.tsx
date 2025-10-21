@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import React, { type ReactNode } from "react";
+
 import { Header } from "../components/Header";
+import { AppProviders } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -48,13 +50,15 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className="site-body">
-        <a className="skip-link" href="#main-content">
-          Przejdź do głównej treści
-        </a>
-        <Header />
-        <div className="site-content" id="main-content">
-          {children}
-        </div>
+        <AppProviders>
+          <a className="skip-link" href="#main-content">
+            Przejdź do głównej treści
+          </a>
+          <Header />
+          <div className="site-content" id="main-content">
+            {children}
+          </div>
+        </AppProviders>
       </body>
     </html>
   );

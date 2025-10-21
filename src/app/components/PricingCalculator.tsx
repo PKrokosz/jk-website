@@ -1,10 +1,17 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
+import {
+  useCart,
+  type CartItemOptionSummary
+} from "@/components/cart/CartProvider";
 import { ORDER_ACCESSORIES } from "@/config/orderAccessories";
 import { ORDER_MODELS } from "@/config/orderModels";
 import { calculateQuote } from "@/lib/pricing/calc";
+
+import { OrderDetailsModal, type OrderDetailsFormValues } from "@/components/ui/order/OrderDetailsModal";
 
 interface ModelOption {
   id: string;
@@ -26,6 +33,8 @@ const models: ModelOption[] = ORDER_MODELS.map((model) => ({
   description: model.googleValue.replace(/-\s*(\d)/, " – $1"),
   priceGrosz: Math.round(model.price * 100)
 }));
+
+const defaultModelId = models[0]?.id ?? "";
 
 const accessories: AddonOption[] = ORDER_ACCESSORIES.map((accessory) => ({
   id: accessory.id,
@@ -62,11 +71,16 @@ const currencyFormatter = new Intl.NumberFormat("pl-PL", {
 });
 
 export function PricingCalculator() {
-  const [selectedModelId, setSelectedModelId] = useState<string>(models[0]?.id ?? "");
+  const [selectedModelId, setSelectedModelId] = useState<string>(defaultModelId);
   const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [accessoriesOpen, setAccessoriesOpen] = useState(true);
   const [extrasOpen, setExtrasOpen] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+
+  const router = useRouter();
+  const { addItem } = useCart();
 
   const selectedModel = useMemo(
     () => models.find((model) => model.id === selectedModelId) ?? null,
@@ -97,6 +111,33 @@ export function PricingCalculator() {
     });
   }, [selectedAccessories, selectedExtras, selectedModel]);
 
+  useEffect(() => {
+    if (
+      selectedAccessories.length > 0 ||
+      selectedExtras.length > 0 ||
+      (defaultModelId && selectedModelId !== defaultModelId)
+    ) {
+      setHasInteracted(true);
+    }
+  }, [selectedAccessories, selectedExtras, selectedModelId]);
+
+  const selectedAccessoryItems = useMemo(
+    () => accessories.filter((accessory) => selectedAccessories.includes(accessory.id)),
+    [selectedAccessories]
+  );
+
+  const selectedExtraItems = useMemo(
+    () => serviceExtras.filter((extra) => selectedExtras.includes(extra.id)),
+    [selectedExtras]
+  );
+
+  const handleModelChange = (value: string) => {
+    setSelectedModelId(value);
+    if (value !== defaultModelId) {
+      setHasInteracted(true);
+    }
+  };
+
   const toggleAccessory = (id: string) => {
     setSelectedAccessories((prev) =>
       prev.includes(id) ? prev.filter((accessoryId) => accessoryId !== id) : [...prev, id]
@@ -126,7 +167,7 @@ export function PricingCalculator() {
               <select
                 id="model"
                 value={selectedModelId}
-                onChange={(event) => setSelectedModelId(event.target.value)}
+                onChange={(event) => handleModelChange(event.target.value)}
               >
                 {models.map((model) => (
                   <option key={model.id} value={model.id}>
@@ -262,9 +303,63 @@ export function PricingCalculator() {
                 </li>
               ))}
             </ul>
+            {selectedModel && (
+              <button
+                type="button"
+                className="order-button order-button--active"
+                onClick={() => setIsOrderModalOpen(true)}
+                disabled={!hasInteracted}
+                aria-disabled={!hasInteracted}
+              >
+                Dodaj konfigurację do koszyka
+              </button>
+            )}
           </aside>
         </div>
       </div>
+      <OrderDetailsModal
+        isOpen={isOrderModalOpen && Boolean(selectedModel)}
+        onClose={() => setIsOrderModalOpen(false)}
+        configuration={{
+          model: selectedModel,
+          accessories: selectedAccessoryItems,
+          extras: selectedExtraItems,
+          quote
+        }}
+        onSubmit={(values: OrderDetailsFormValues) => {
+          if (!selectedModel) {
+            return;
+          }
+
+          const accessoriesSummary: CartItemOptionSummary[] = selectedAccessoryItems.map((item) => ({
+            id: item.id,
+            label: item.label,
+            priceGrosz: item.priceGrosz
+          }));
+
+          const extrasSummary: CartItemOptionSummary[] = selectedExtraItems.map((item) => ({
+            id: item.id,
+            label: item.label,
+            priceGrosz: item.priceGrosz
+          }));
+
+          addItem({
+            modelId: selectedModel.id,
+            modelLabel: selectedModel.label,
+            basePriceGrosz: selectedModel.priceGrosz,
+            accessories: accessoriesSummary,
+            extras: extrasSummary,
+            totalNetGrosz: quote.totalNetGrosz,
+            totalVatGrosz: quote.totalVatGrosz,
+            totalGrossGrosz: quote.totalGrossGrosz,
+            breakdown: quote.breakdown,
+            contact: values
+          });
+
+          setIsOrderModalOpen(false);
+          router.push("/cart");
+        }}
+      />
     </section>
   );
 }

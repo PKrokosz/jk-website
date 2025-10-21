@@ -1,11 +1,26 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const addItemMock = vi.fn();
+const pushMock = vi.fn();
+
+vi.mock("@/components/cart/CartProvider", () => ({
+  __esModule: true,
+  useCart: () => ({ addItem: addItemMock })
+}));
+
+vi.mock("next/navigation", () => ({
+  __esModule: true,
+  useRouter: () => ({ push: pushMock })
+}));
 
 import { PricingCalculator } from "../PricingCalculator";
 
 describe("PricingCalculator", () => {
   it("toggles the accessories panel visibility", () => {
+    addItemMock.mockReset();
+    pushMock.mockReset();
     render(<PricingCalculator />);
 
     const trigger = screen.getByRole("button", { name: /Akcesoria/ });
@@ -28,6 +43,8 @@ describe("PricingCalculator", () => {
   });
 
   it("initially hides and toggles the extras panel", () => {
+    addItemMock.mockReset();
+    pushMock.mockReset();
     render(<PricingCalculator />);
 
     const trigger = screen.getByRole("button", { name: /Dodatkowe usługi/ });

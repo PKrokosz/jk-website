@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Route } from "next";
 
 import { NavLink } from "./NavLink";
+import { CartStatusIndicator } from "./cart/CartStatusIndicator";
 
 const navigationItems = [
   { href: "/", label: "Home", exact: true },
@@ -40,6 +41,8 @@ export function Header() {
             ))}
           </ul>
         </nav>
+
+        <CartStatusIndicator />
       </div>
     </header>
   );

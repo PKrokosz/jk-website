@@ -78,14 +78,10 @@ export default function Home() {
       <section className="section hero hero--immersive" aria-labelledby="hero-heading">
         <div className="hero__background" aria-hidden="true">
           <div className="hero__background-video">
-            <iframe
-              title="Proces tworzenia obuwia JK Handmade Footwear"
-              src="https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2FJkarelus%2Fvideos%2F1935319520426934%2F&show_text=false&width=560&t=0&mute=1"
-              loading="lazy"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
+            <video aria-hidden="true" autoPlay loop muted playsInline preload="metadata">
+              <source src="/vid/1.mp4" type="video/mp4" />
+              Twoja przeglądarka nie obsługuje elementu wideo.
+            </video>
           </div>
           <div className="hero__background-overlay" />
         </div>

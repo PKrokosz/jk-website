@@ -65,6 +65,8 @@ export function PricingCalculator() {
   const [selectedModelId, setSelectedModelId] = useState<string>(models[0]?.id ?? "");
   const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [accessoriesOpen, setAccessoriesOpen] = useState(true);
+  const [extrasOpen, setExtrasOpen] = useState(false);
 
   const selectedModel = useMemo(
     () => models.find((model) => model.id === selectedModelId) ?? null,
@@ -137,9 +139,30 @@ export function PricingCalculator() {
               </p>
             </div>
 
-            <fieldset className="field">
-              <legend>Akcesoria</legend>
-              <div className="field__group">
+            <fieldset className="field collapsible-field">
+              <legend>
+                <button
+                  type="button"
+                  className="collapsible-trigger"
+                  aria-expanded={accessoriesOpen}
+                  aria-controls="accessories-panel"
+                  onClick={() => setAccessoriesOpen((prev) => !prev)}
+                >
+                  <span className="collapsible-trigger__label">Akcesoria</span>
+                  <span className="collapsible-trigger__meta">
+                    {selectedAccessories.length > 0
+                      ? `${selectedAccessories.length} wybrane`
+                      : "Opcjonalne dodatki"}
+                  </span>
+                  <span aria-hidden className="collapsible-trigger__icon" />
+                </button>
+              </legend>
+              <div
+                className="field__group collapsible-panel"
+                id="accessories-panel"
+                hidden={!accessoriesOpen}
+                aria-hidden={!accessoriesOpen}
+              >
                 {accessories.map((accessory) => {
                   const checked = selectedAccessories.includes(accessory.id);
                   return (
@@ -163,9 +186,30 @@ export function PricingCalculator() {
               </div>
             </fieldset>
 
-            <fieldset className="field">
-              <legend>Dodatkowe usługi</legend>
-              <div className="field__group">
+            <fieldset className="field collapsible-field">
+              <legend>
+                <button
+                  type="button"
+                  className="collapsible-trigger"
+                  aria-expanded={extrasOpen}
+                  aria-controls="extras-panel"
+                  onClick={() => setExtrasOpen((prev) => !prev)}
+                >
+                  <span className="collapsible-trigger__label">Dodatkowe usługi</span>
+                  <span className="collapsible-trigger__meta">
+                    {selectedExtras.length > 0
+                      ? `${selectedExtras.length} wybrane`
+                      : "Rozszerzenia serwisowe"}
+                  </span>
+                  <span aria-hidden className="collapsible-trigger__icon" />
+                </button>
+              </legend>
+              <div
+                className="field__group collapsible-panel"
+                id="extras-panel"
+                hidden={!extrasOpen}
+                aria-hidden={!extrasOpen}
+              >
                 {serviceExtras.map((extra) => {
                   const checked = selectedExtras.includes(extra.id);
                   return (

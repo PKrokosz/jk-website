@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { ORDER_MODELS } from "@/config/orderModels";
 import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
 
 import { PricingCalculator } from "./components/PricingCalculator";
@@ -59,32 +60,15 @@ const sellingPoints = [
   }
 ];
 
-const galleryItems = [
-  {
-    title: "Oxford nocna skóra",
-    description: "Lakierowana czerń z ręcznym polerem.",
-    image: "/image/models/1.jfif",
-    alt: "Lakierowane oksfordy na tle warsztatu"
-  },
-  {
-    title: "Derby kasztan",
-    description: "Przeznaczone do codziennej pracy w biurze.",
-    image: "/image/models/4.jfif",
-    alt: "Kasztanowe derby z ręcznym wykończeniem"
-  },
-  {
-    title: "Monk zamszowy",
-    description: "Podwójna klamra w kolorze espresso.",
-    image: "/image/models/7.jfif",
-    alt: "Zamszowe monki z metalową klamrą"
-  },
-  {
-    title: "Trzewik bespoke",
-    description: "Skórzana podszewka i kontrastowe sznurowanie.",
-    image: "/image/models/12.jfif",
-    alt: "Trzewiki bespoke w trakcie polerowania"
-  }
-];
+const portfolioItems = ORDER_MODELS.filter((model) => !model.image.endsWith("placeholder.svg"))
+  .slice(0, 8)
+  .map((model) => ({
+    id: model.id,
+    title: model.name,
+    priceLabel: model.googleValue.replace(/\s*-\s*/, " – "),
+    image: model.image,
+    alt: `Model ${model.name} z katalogu JK Handmade Footwear`
+  }));
 
 export default function Home() {
   return (
@@ -168,14 +152,18 @@ export default function Home() {
               nim dostępne — a kalkulator wyceny poniżej pokaże orientacyjną cenę końcową.
             </p>
           </div>
-          <ul className="selling-points" role="list">
-            {sellingPoints.map((point) => (
-              <li key={point.title} className="selling-point">
-                <h3>{point.title}</h3>
-                <p>{point.description}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="craft-overview__features" role="region" aria-label="Najważniejsze cechy butów">
+            <div className="flying-window">
+              <ul className="selling-points selling-points--carousel" role="list">
+                {sellingPoints.map((point) => (
+                  <li key={point.title} className="selling-point" tabIndex={0}>
+                    <h3>{point.title}</h3>
+                    <p>{point.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -210,27 +198,28 @@ export default function Home() {
       </section>
 
       <section className="section section--muted" aria-labelledby="portfolio-heading">
-        <div className="container">
+        <div className="container portfolio">
           <div className="section-header">
             <h2 id="portfolio-heading">Portfolio realizacji</h2>
-            <p>Wybrane projekty, które pokazują różnorodność sylwetek i wykończeń.</p>
+            <p>Wybrane projekty prosto z katalogu natywnego — wszystkie dostępne w formularzu.</p>
           </div>
-          <div className="gallery-grid" role="list">
-            {galleryItems.map((item) => (
-              <article key={item.title} role="listitem" className="gallery-card">
-                <div className="gallery-card__media" aria-hidden="true">
+          <div className="portfolio-showcase" role="list">
+            {portfolioItems.map((item) => (
+              <article key={item.id} role="listitem" className="portfolio-card">
+                <div className="portfolio-card__media">
                   <Image
                     src={item.image}
                     alt={item.alt}
-                    width={480}
-                    height={320}
-                    className="gallery-card__image"
-                    sizes="(min-width: 1024px) 260px, 80vw"
+                    width={640}
+                    height={480}
+                    className="portfolio-card__image"
+                    sizes="(min-width: 1280px) 400px, (min-width: 768px) 45vw, 90vw"
                   />
                 </div>
-                <div className="gallery-card__body">
+                <div className="portfolio-card__body">
+                  <p className="portfolio-card__eyebrow">{item.priceLabel}</p>
                   <h3>{item.title}</h3>
-                  <p>{item.description}</p>
+                  <p>Model dostępny w formularzu natywnym — zobacz detale i dobierz dodatki.</p>
                 </div>
               </article>
             ))}

@@ -11,38 +11,43 @@
 
 ## Podsumowanie
 - Monorepo oparte o pnpm workspaces, z główną aplikacją Next.js 14 w katalogu `src/` i pakietem współdzielonym `@jk/db`.
-- Routing App Routera jest częściowo zaimplementowany (Home, Catalog, About, Contact, API `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/healthz`).
-- Mockowane dane katalogowe znajdują się w `src/lib/catalog`; integracja z Drizzle/DB nie została jeszcze podłączona do stron.
-- Konfiguracja środowiska wymaga doprecyzowania danych dostępowych do Postgresa (rozjazd między `.env.example` a `docker-compose.yml`).
+- Routing App Routera jest rozbudowany: Home, Catalog (z filtrami), Product (dynamiczne slug), About, Contact (formularz), Order (iframe + fallback) oraz API `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/healthz`.
+- Mockowane dane katalogowe (`src/lib/catalog`) rozszerzono o slug, warianty, funnel stage i referencje do formularza natywnego.
+- Konfiguracja środowiska wymaga ujednolicenia danych dostępowych do Postgresa (różnice między `.env.example` a `docker-compose.yml`) i przygotowania migracji `drizzle-kit`.
 
 ## Struktura monorepo
 - **Apps**
-  - `apps/web/` – zawiera tylko `next-env.d.ts`; bieżąca aplikacja działa z katalogu głównego `src/`.
+  - `apps/web/` – placeholder (aktualnie nieużywany, tylko `next-env.d.ts`).
 - **Packages**
   - `packages/db/` – pakiet Drizzle ORM (schemat bazy, klient PG, własny `docker-compose.yml`).
 - **Kluczowe katalogi**
-  - `src/app/` – App Router, globalne style, komponenty page-level (`about`, `catalog`, `contact`, `healthz`, `api/*`).
-  - `src/app/components/` – komponenty specyficzne dla strony (np. `PricingCalculator`).
-  - `src/components/` – komponenty współdzielone (`Header`, `NavLink`, `catalog/CatalogExplorer`).
-  - `src/lib/` – logika domenowa (`catalog`, `pricing`).
-  - `public/` – zasoby statyczne (obecnie favicon).
+  - `src/app/` – App Router, globalne style, komponenty page-level (`about`, `catalog`, `contact`, `order`, `api/*`).
+  - `src/app/catalog/[slug]/` – dynamiczna strona produktu z generowaniem metadata i breadcrumbs.
+  - `src/components/` – komponenty współdzielone (`Header`, `NavLink`, `contact/ContactForm`, `ui/order/*`).
+  - `src/lib/` – logika domenowa (`catalog`, `pricing`, konfiguracje order models/accessories).
+  - `public/` – zasoby statyczne (wideo hero, zdjęcia modeli, grafiki portfolio).
   - `vitest.setup.ts`, `vitest.config.ts` – konfiguracja testów.
 
 ## Istniejące strony, komponenty i endpointy
 - **Strony (App Router)**
-  - `/` – strona główna z sekcjami hero, proces, portfolio, kalkulator wyceny, CTA.
-  - `/catalog` – katalog z filtrami i sortowaniem (komponent `CatalogExplorer`).
-  - `/about` – placeholder sekcji „O pracowni”.
-  - `/contact` – placeholder sekcji kontaktowej.
+  - `/` – strona główna z hero video, procesem MTO, portfolio, kalkulatorem i CTA do zamówień.
+  - `/catalog` – katalog z filtrami styl/skóra, sortowaniem, stanem pustym i skeletonem.
+  - `/catalog/[slug]` – strona produktu (galeria, warianty personalizacji, CTA do modala zamówienia i linków `/order/native` `/contact`).
+  - `/order` – osadzony formularz natywny (iframe) z fallbackiem do pełnej wersji oraz metadata canonical.
+  - `/order/native` – landing z listą modeli i CTA do zewnętrznego formularza.
+  - `/contact` – rozbudowana strona kontaktowa z hero, danymi pracowni, formularzem i statusami.
+  - `/about` – sekcja o pracowni (placeholder copy do dopracowania).
   - `/healthz` – endpoint statusowy (API route `route.ts`).
 - **Endpointy API**
   - `GET /api/styles` – zwraca mockowane style (`catalogStyles`).
   - `GET /api/leather` – zwraca mockowane skóry (`catalogLeathers`).
   - `POST /api/pricing/quote` – kalkulator wyceny wykorzystujący `calculateQuote`.
 - **Komponenty kluczowe**
-  - `Header` + `NavLink` – globalna nawigacja sticky.
-  - `CatalogExplorer` – klientowy komponent katalogu z filtrami, sortowaniem i dostępnością ARIA.
-  - `PricingCalculator` – komponent kalkulatora wyceny korzystający z logiki `pricing/calc`.
+  - `Header` + `NavLink` – globalna nawigacja sticky ze skip linkiem (`layout.tsx`).
+  - `CatalogExplorer` – klientowy komponent katalogu (filtry, sortowanie, aria-live, skeletony).
+  - `ContactForm` – formularz z walidacją, stanami `idle/submitting/success/error` i linkiem mailto.
+  - `OrderModalTrigger` – przycisk otwierający modal z CTA do formularza natywnego.
+  - `PricingCalculator` – komponent kalkulatora wyceny współdzielony na stronie głównej.
 
 ## Środowisko i komendy diagnostyczne
 - **Wersje narzędzi**
@@ -68,18 +73,20 @@
   + @testing-library/react 16.3.0
   + jsdom 27.0.1
 
-  ╭ Warning ───────────────────────────────────────────────────────────────────────────────────╮
-  │                                                                                            │
-  │   Ignored build scripts: esbuild, unrs-resolver.                                           │
-  │   Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.   │
-  │                                                                                            │
-  ╰────────────────────────────────────────────────────────────────────────────────────────────╯
+  ╭ Warning ─────────────────────────────────────────────────────────────────────────╮
+  │                                                                                  │
+  │   Ignored build scripts: esbuild, unrs-resolver.                                 │
+  │   Run "pnpm approve-builds" to pick which dependencies should be allowed.       │
+  │                                                                                  │
+  ╰──────────────────────────────────────────────────────────────────────────────────╯
 
   Done in 3.2s using pnpm v10.18.3
   ```
+- **Pakiet skryptów**
+  - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:coverage`, `pnpm depcheck`, `pnpm build` – odzwierciedlają kroki pipeline.
 - **Plik `.env`**
   - Skopiowano `.env.example` → `.env.local`.
-  - Dostępna zmienna: `DATABASE_URL=postgres://postgres:postgres@localhost:5432/jk`.
+  - Dostępne zmienne: `DATABASE_URL=postgres://postgres:postgres@localhost:5432/jk`, `NEXT_PUBLIC_ORDER_FORM_URL=<embed url>`.
   - Pakiet `@jk/db` czyta `DATABASE_URL` (w `packages/db/src/lib/db.ts`).
 - **Docker Compose**
   - Uruchomienie `docker compose config` nie powiodło się (Docker nie jest dostępny w sandboxie):
@@ -87,7 +94,7 @@
     docker compose config
     bash: command not found: docker
     ```
-  - Zarówno `docker-compose.yml` w repo głównym, jak i w `packages/db` definiują usługę Postgresa nasłuchującą na `5432`, z danymi `devuser/devpass`, `jkdb`.
+  - `docker-compose.yml` w repo głównym oraz w `packages/db` definiują usługę Postgresa nasłuchującą na `5432`, z danymi `devuser/devpass`, baza `jkdb`.
 - **Start dev servera**
   ```bash
   pnpm dev
@@ -110,23 +117,26 @@
 - Node 20.19.4 ≥ minimalnego wymaganego `>=20` – OK.
 - `package.json` wymusza `pnpm@10.18.3`; lokalna wersja zgodna.
 - Next.js `14.2.13` spójny z `eslint-config-next@14.2.13`.
-- Drizzle ORM (`0.34.1`) zainstalowany tylko w pakiecie `@jk/db`; brak konfiguracji `drizzle-kit` (migracje CLI do dodania).
-- `apps/web` jest pustym szkieletem; aplikacja korzysta bezpośrednio z korzenia repo (potencjalna decyzja: czy utrzymujemy multi-app, czy upraszczamy workspace?).
-- Rozjazd konfiguracji bazy: `.env.example` zakłada `postgres/postgres@jk`, natomiast `docker-compose.yml` używa `devuser/devpass@jkdb` – wymaga ujednolicenia.
+- Drizzle ORM (`0.34.1`) w pakiecie `@jk/db`; brak migracji `drizzle-kit` i workflow inicjalizacji.
+- `apps/web` jest pustym szkieletem; aplikacja korzysta z katalogu głównego – do decyzji, czy utrzymujemy multi-app, czy porządkujemy workspace.
+- Rozjazd konfiguracji bazy: `.env.example` używa `postgres/postgres@jk`, natomiast `docker-compose.yml` `devuser/devpass@jkdb` – wymaga ujednolicenia i dokumentacji.
+- Globalny motyw wizualny wykorzystuje jasną paletę (#f8f5f2 tło), która różni się od pierwotnych założeń w discovery – UI tokens zaktualizowane w `docs/UI_TOKENS.md`.
 
 ## Checklisty kontrolne
 - [x] Zidentyfikowano wszystkie aplikacje i pakiety w workspace.
 - [x] Zweryfikowano dostępne route'y App Routera oraz endpointy API.
 - [x] Uruchomiono komendy `pnpm -v`, `node -v`, `pnpm install`, `pnpm dev`.
-- [ ] Ustalono jednolitą konfigurację połączenia z bazą danych (do decyzji).
+- [ ] Ustalono jednolitą konfigurację połączenia z bazą danych (w toku).
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Rozbieżne dane logowania do Postgresa mogą blokować uruchomienie migracji lub lokalnej instancji.
-  - Brak Docker w środowisku CI/preview wymaga alternatywnego dostarczenia danych (mocki, fallbacki).
+  - Rozbieżne dane logowania do Postgresa mogą blokować migracje i lokalne środowiska.
+  - Brak migracji Drizzle utrudni przejście z mocków na realne dane.
+  - Motyw wizualny wymaga re-użycia tokens w CSS, aby uniknąć rozjazdów.
 - **Decyzje do podjęcia**
   - Ujednolicenie `DATABASE_URL` vs. `docker-compose.yml` (które dane są źródłem prawdy?).
   - Czy utrzymujemy katalog `apps/web`, czy konsolidujemy aplikację w jednym package?
+  - Strategia migracji z mocków (`src/lib/catalog`) na Drizzle.
 - **Następne kroki**
   - Przygotować dokumentację architektury i luk → patrz `ARCHITEKTURA_I_LUKI.md`.
   - Zaplanować działania MVP oraz wymagania funkcjonalne → patrz kolejne dokumenty w `docs/`.

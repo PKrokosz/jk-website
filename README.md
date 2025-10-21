@@ -1,19 +1,19 @@
 # JK Handmade Footwear
 
-Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe oraz automatyzacjami n8n.
+Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe oraz automatyzacjami n8n. Kod aplikacji znajduje się w katalogu głównym (App Router w `src/`), a pakiet Drizzle ORM w `packages/db`.
 
-> CI: patrz workflow [`CI`](.github/workflows/ci.yml) uruchamiany na Node.js 20 z pnpm 10.18.x dla buildów, lintów i kontroli zależności.
+> CI/CD: workflow [`CI`](.github/workflows/ci.yml) uruchamiany na Node.js 20.x i 22.x z pnpm 10.18.x. Pipeline wykonuje lint, typecheck, testy jednostkowe, raport pokrycia i analizę zależności.
 
 ## Stos technologiczny
 
 - **Framework**: Next.js (App Router) + React 18
 - **Język**: TypeScript (tryb `strict`)
 - **Pakietowanie**: pnpm workspaces + `pnpm@10.18.x`
-- **Styling**: Tailwind CSS + planowana integracja z shadcn/ui
-- **Baza danych**: PostgreSQL 16 + Drizzle ORM
-- **Warstwa backendowa**: Node.js 20
-- **Testy**: Vitest (`@vitest/coverage-v8` do raportów pokrycia)
-- **Jakość kodu**: ESLint (`eslint-config-next`)
+- **Styling**: CSS Modules/SCSS-free custom styles + planowana integracja z Tailwind/shadcn/ui
+- **Baza danych**: PostgreSQL 16 + Drizzle ORM (`packages/db`)
+- **Warstwa backendowa**: API routes (Node.js 20 runtime)
+- **Testy**: Vitest + React Testing Library (`@vitest/coverage-v8` do raportów pokrycia)
+- **Jakość kodu**: ESLint (`eslint-config-next`) + `depcheck`
 
 ## Wymagania wstępne
 
@@ -25,17 +25,17 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 
 ```
 .
-├── apps/
-│   └── web/            # entrypoint Next.js (App Router)
-├── docs/               # dokumentacja discovery (strategie, roadmapy, tokeny UI)
+├── apps/                 # (placeholder) dodatkowe aplikacje workspace
+├── docs/                 # dokumentacja discovery (strategie, roadmapy, tokeny UI)
 ├── packages/
-│   └── db/             # współdzielony pakiet z klientem Drizzle ORM i schematem bazy
-├── public/             # pliki statyczne Next.js
+│   └── db/              # współdzielony pakiet z klientem Drizzle ORM i schematem bazy
+├── public/              # pliki statyczne Next.js (video, fotografie modeli)
 ├── src/
-│   ├── app/            # routing i strony (Next.js App Router)
-│   └── lib/            # logika domenowa (np. kalkulator wycen)
-├── docker-compose.yml  # lokalny Postgres 16
-└── vitest.config.ts    # konfiguracja testów jednostkowych
+│   ├── app/             # routing i strony (Home, Catalog, Product, Order, Contact...)
+│   ├── components/      # komponenty współdzielone (ContactForm, Order modal, Header)
+│   └── lib/             # logika domenowa (katalog produktów, kalkulator wycen)
+├── docker-compose.yml   # lokalny Postgres 16
+└── vitest.config.ts     # konfiguracja testów jednostkowych
 ```
 
 ## Konfiguracja środowiska
@@ -44,17 +44,18 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
    ```bash
    pnpm install
    ```
-2. Zatwierdź instalację natywnych binariów wymaganych przez pnpm 10 (patrz konfiguracja w [`.pnpm-builds.json`](./.pnpm-builds.json)):
+2. Zatwierdź instalację natywnych binariów wymaganych przez pnpm (lista w [`.pnpm-builds.json`](./.pnpm-builds.json)):
    ```bash
    pnpm approve-builds
    ```
-3. Utwórz plik `.env` na podstawie `.env.example` i uzupełnij wymagane wartości.
+3. Utwórz plik `.env.local` na podstawie `.env.example` i uzupełnij wymagane wartości.
 
 ### Zmienne środowiskowe
 
-- `DATABASE_URL` – connection string do instancji Postgresa, np. `postgres://postgres:postgres@localhost:5432/jk`.
+- `DATABASE_URL` – connection string do instancji Postgresa; w repo przykład korzysta z użytkownika `postgres`.
+- `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`).
 
-> **Tip:** Do pracy lokalnej możesz skopiować wartości z `docker-compose.yml`, aby szybko wystartować środowisko developerskie.
+> **Tip:** Lokalnie możesz użyć wartości z `docker-compose.yml` (`devuser/devpass@jkdb`). Wyrównaj dane z `DATABASE_URL`, aby uniknąć niespójności.
 
 ### Uruchomienie Postgresa lokalnie
 
@@ -64,7 +65,7 @@ Repozytorium zawiera konfigurację Docker Compose uruchamiającą Postgresa 16:
 docker compose up -d
 ```
 
-Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z domyślnym użytkownikiem i hasłem `postgres`.
+Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi `devuser/devpass` i bazą `jkdb`.
 
 ## Codzienna praca deweloperska
 
@@ -76,10 +77,10 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z domyśl
 | `pnpm lint` | Sprawdza jakość kodu przy użyciu `eslint-config-next`. |
 | `pnpm typecheck` | Weryfikuje typy TypeScript bez emitowania plików. |
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
-| `pnpm test -- --coverage` | Generuje raport pokrycia testami w formacie V8. |
+| `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 
-> Przed wysłaniem PR uruchom lokalnie `pnpm lint`, `pnpm test` oraz `pnpm build`, aby odtworzyć minimalny pipeline CI.
+> Przed wysłaniem PR uruchom lokalnie `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` i (opcjonalnie) `pnpm test:coverage`, aby odtworzyć pipeline CI.
 
 ## Pakiet `@jk/db`
 
@@ -89,49 +90,40 @@ W katalogu `packages/db` znajduje się pakiet z konfiguracją Drizzle ORM. Bibli
 - `pool` – pulę połączeń `pg` dla bardziej niskopoziomowych operacji,
 - `schema` – definicje tabel i modeli bazy (eksportowane z `src/schema.ts`).
 
-Pakiet korzysta z `dotenv`, aby wczytać zmienne środowiskowe. Brak zdefiniowanej zmiennej `DATABASE_URL` spowoduje błąd uruchomienia, dlatego upewnij się, że `.env` jest poprawnie skonfigurowany.
+Pakiet korzysta z `dotenv`, aby wczytać zmienne środowiskowe. Brak zdefiniowanej zmiennej `DATABASE_URL` spowoduje błąd uruchomienia.
+
+## Funkcjonalności aplikacji
+
+- **Strona główna (`/`)** – hero z wideo, sekcja procesu MTO, carousel selling points, portfolio modeli, kalkulator wyceny oraz CTA do formularza zamówień.
+- **Katalog (`/catalog`)** – lista produktów w oparciu o mocki (`src/lib/catalog`), filtry stylów/skór, sortowanie i stany pusty/loading.
+- **Strona produktu (`/catalog/[slug]`)** – breadcrumbs, galeria, warianty personalizacji, CTA do modala zamówienia i linków do `/order/native` oraz `/contact`.
+- **Kontakt (`/contact`)** – sekcja hero z danymi pracowni, formularz kontaktowy z walidacją oraz statusami sukces/błąd, linki do sociali.
+- **Zamówienie (`/order`, `/order/native`)** – osadzony formularz natywny (`NEXT_PUBLIC_ORDER_FORM_URL`) i fallback link do pełnej wersji.
+- **API** – mockowane endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` oraz health-check `/healthz`.
 
 ## Testy i jakość kodu
 
-- Testy jednostkowe są uruchamiane przez `pnpm test` z konfiguracją w `vitest.config.ts`.
-- Raport pokrycia można wygenerować przez `pnpm test -- --coverage`; wynik pojawi się w katalogu `coverage/`.
-- ESLint używa standardowej konfiguracji Next.js. Zalecane jest uruchamianie lintingu przed pushowaniem zmian.
+- Testy jednostkowe uruchamiane przez `pnpm test` (`vitest.config.ts`).
+- Raport pokrycia generowany przez `pnpm test:coverage` (`coverage/`).
+- ESLint i TypeScript (`pnpm lint`, `pnpm typecheck`) pilnują jakości kodu.
+- `pnpm depcheck` pomaga utrzymać porządek w zależnościach.
 
 ## Dokumentacja produktu i procesu
 
 Repozytorium zawiera katalog `docs/` z najważniejszymi artefaktami discovery. Kluczowe pliki:
 
 - [`docs/README_DOCS.md`](./docs/README_DOCS.md) – indeks dokumentacji i wskazówki dotyczące aktualizacji.
-- [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md) – plan iteracji oraz scope kolejnych sprintów.
-- [`docs/SITE_MAP.md`](./docs/SITE_MAP.md) – mapa ekranów wraz z oczekiwanymi przepływami użytkownika.
-- [`docs/UI_TOKENS.md`](./docs/UI_TOKENS.md) – design tokens i odniesienia do styli Tailwind.
+- [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md) – plan iteracji oraz status postępu.
+- [`docs/SITE_MAP.md`](./docs/SITE_MAP.md) – mapa ekranów wraz z przepływami użytkownika.
+- [`docs/UI_TOKENS.md`](./docs/UI_TOKENS.md) – aktualna paleta kolorów, typografia i komponenty UI.
 - [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md) – standardy jakości i konfiguracja CI.
 
 Aktualizuj dokumenty wraz z każdą decyzją produktową lub zmianą w implementacji, aby zespół miał jedno źródło prawdy.
 
-## Zapotrzebowanie i kierunek rozwoju
+## Kierunek rozwoju
 
-### Zapotrzebowanie produktowe
+- Wyrównanie konfiguracji bazy (`DATABASE_URL` vs `docker-compose.yml`) i dodanie migracji `drizzle-kit`.
+- Poszerzenie katalogu mocków o nowe modele oraz dynamiczne assety.
+- Integracja z Stripe/n8n po ustabilizowaniu formularzy zamówień.
+- Doprecyzowanie roadmapy testów end-to-end (Playwright).
 
-- Utrzymuj aktualny katalog zdjęć w katalogu `img/`; nazwy plików traktujemy jako kanoniczne nazwy produktów w UI.
-- Wykorzystuj zdjęcia w komponentach katalogu (`src/app/(site)/catalog`) zgodnie z opisem przepływów w [`docs/SITE_MAP.md`](./docs/SITE_MAP.md).
-- Synchronizuj atrybuty produktów z mockami w `src/lib/catalog`, aby nazewnictwo odpowiadało materiałom zdjęciowym.
-
-### Kierunek UX/UI
-
-- Kontynuuj kierunek "medieval artisan minimalism" określony w [`docs/UI_TOKENS.md`](./docs/UI_TOKENS.md) oraz priorytetach UX w [`docs/WYMAGANIA_MVP.md`](./docs/WYMAGANIA_MVP.md).
-- Zapewnij spójne nazewnictwo wariantów produktów pomiędzy komponentami UI, mockami danych i folderem `img/`.
-- Przed wdrożeniem nowych ekranów odwołuj się do mapy ekranów w [`docs/SITE_MAP.md`](./docs/SITE_MAP.md) oraz planu iteracji w [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md).
-
-### Oczekiwane narzędzia i proces
-
-- `pnpm`, `Docker Compose` oraz `drizzle-kit` do pracy lokalnej z bazą i migracjami.
-- `Vitest` (unit) i opcjonalnie Playwright do testów UI.
-- `Storybook` planowany do dokumentowania komponentów wizualnych (sprawdź backlog w [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md)).
-- Automatyzacje CI opisane w [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md); przed PR uruchamiaj `pnpm lint`, `pnpm test` i `pnpm build`.
-
-## Roadmapa / kolejne kroki
-
-- Podłączenie kalkulatora cen do rzeczywistych danych z Drizzle ORM.
-- Implementacja interfejsu formularza zamówień.
-- Integracja z Stripe i automatyzacjami n8n.

@@ -14,93 +14,97 @@
 - [11. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- MVP obejmuje ścieżkę: Home → Catalog (z filtrami) → Product → Contact/Order stub.
-- Globalna nawigacja musi być sticky, zawierać cztery główne linki i wskazywać aktywny stan.
-- Katalog działa na mockowanych danych (styles/leathers) z możliwością sortowania i wielokrotnego filtrowania.
-- Strona produktu zawiera galerię, opis, warianty oraz CTA „Zamów teraz” prowadzące do sekcji kontaktowej.
-- SEO/a11y wymagają kompletnej metadata, semantyki nagłówków, altów, focus states i breadcrumbów.
+- MVP obejmuje ścieżkę: Home → Catalog (z filtrami) → Product (dynamiczny slug) → Order (modal / `/order`) → Contact (formularz).
+- Globalna nawigacja jest sticky, posiada skip link, aktywny stan i działa na wszystkich podstronach.
+- Katalog działa na mockowanych danych (styles/leathers/products) z możliwością sortowania, filtrów i stanu pustego.
+- Strona produktu renderuje galerię, warianty, CTA do zamówień, breadcrumbs i personalizowane metadata.
+- Kontakt zawiera hero z danymi pracowni oraz formularz z walidacją i komunikatami statusu; `/order` osadza formularz natywny.
 
 ## Nawigacja globalna
-- Sticky header (top 0, backdrop blur) dostępny na każdej stronie.
-- Linki: `Home`, `Catalog`, `About`, `Contact`.
-- Aktywny stan: `aria-current="page"`, styl wizualny.
-- Responsywność: mobile-first, zwijanie listy przy małej szerokości.
-- CTA w brandzie prowadzące do `/`.
+- Sticky header (top 0, backdrop blur) dostępny na każdej stronie – ✅ zaimplementowane.
+- Linki: `Home`, `Catalog`, `About`, `Contact`, `Order` (CTA w modalu) – ✓.
+- Aktywny stan: `aria-current="page"`, wyróżnione style – ✓.
+- Responsywność: mobile-first, nav wrap – ✓, brak dedykowanego burgera (do rozważenia przy większej liczbie linków).
+- Skip link `Przejdź do głównej treści` prowadzi do `#main-content` – ✓ (testowany).
 
 ## Katalog produktów
-- Źródło danych: mock z `src/lib/catalog` (styles, leathers, product templates) – bez zależności od bazy.
-- Layout: grid kart produktu (min. 2 kolumny desktop, 1 mobile).
-- Filtry (multi-select):
-  - Styl (`styles.id`) – checkboxes.
-  - Skóra (`leathers.id`) – checkboxes.
-- Sortowanie: select `Nazwa A–Z` / `Nazwa Z–A` (domyślnie A–Z).
-- Paginacja: brak (lista maks. ~8 kart w mocku).
-- Stan pusty: informacja tekstowa przy braku wyników (już obecna w `CatalogExplorer`).
-- Każda karta zawiera: nazwę, styl, skórę, highlight, cenę, CTA „Poznaj szczegóły” (docelowo link do produktu).
+- Źródło danych: mocki w `src/lib/catalog` (styles, leathers, product templates) – ✓.
+- Layout: grid kart produktu, filtry w panelu bocznym, toolbar z wynikami – ✓.
+- Filtry (multi-select) i sortowanie – ✓.
+- Paginacja: brak (lista ok. 8 kart) – ✓.
+- Stan pusty: tekst „Brak wyników” – ✓.
+- CTA „Poznaj szczegóły” kieruje do `/catalog/[slug]` – ✓.
+- Do rozważenia: paginacja/ładowanie lazy przy większej liczbie modeli.
 
 ## Strona produktu
-- Routing: `app/catalog/[slug]/page.tsx`.
-- Treści minimalne:
-  - Breadcrumb: `Home > Catalog > {Product}`.
-  - Hero: nazwa, krótki opis, cena.
-  - Galeria: placeholdery (3–4 zdjęcia, alt-y opisowe „Placeholder zdjęcia modelu {name}”).
-  - Sekcja „Detale” (style/leather, highlight, proces).
-  - Sekcja wariantów: lista dostępnych kolorów skóry (na start z mocku) + rozmiary (np. EU 39–46) – dane statyczne.
-  - CTA „Zamów teraz” → link do `/contact` z anchor/parametrem (np. `?product=slug`).
+- Routing: `app/catalog/[slug]/page.tsx` z `generateStaticParams` – ✓.
+- Treści:
+  - Breadcrumb: `Home > Catalog > {Product}` – ✓.
+  - Hero: nazwa, opis, cena, badge funnel stage – ✓.
+  - Galeria: lista `figure` z altami i caption – ✓.
+  - Sekcja detali i procesu rzemieślniczego – ✓.
+  - Warianty: lista kolorów (leathers) i rozmiarów – ✓.
+  - CTA: modal zamówień (`OrderModalTrigger`), link do `/order/native`, link do `/contact?product=slug` – ✓.
 - Stany dodatkowe:
-  - Loading (suspense fallback, skeleton).
-  - 404 – wyświetlana gdy slug nie istnieje w mockach.
+  - `notFound()` dla braku sluga – ✓.
+  - Fallback metadata – ✓.
+  - Loading skeleton – brak (do dodania jeśli potrzeba suspense).
 
 ## Kontakt / Zamówienie
-- Strona `/contact` rozbudowana do prostego formularza (MVP):
-  - Pola: Imię, Email (required), Telefon (optional), Wiadomość (textarea), checkbox zgody RODO placeholder.
-  - CTA wysyła do `mailto:pracownia@jk-footwear.pl` (na start) lub wyświetla komunikat potwierdzenia (bez back-endu).
-  - Sekcja informacyjna: adres pracowni, godziny kontaktu (placeholder), link do social (opcjonalnie).
-- Alternatywnie: CTA „Wyślij e-mail” (jeśli formularz ma blokować MVP) – do potwierdzenia z właścicielem.
+- `/contact` posiada hero, dane kontaktowe, social, CTA, formularz (`ContactForm`) z walidacją – ✓.
+- Formularz: pola Imię, Email, Telefon, Wiadomość, zgoda RODO (tekst placeholder) – ✓.
+- Statusy: `idle`, `submitting`, `success`, `error`, fallback link mailto – ✓.
+- `/order` osadza `NEXT_PUBLIC_ORDER_FORM_URL` w iframe z `sandbox`, `referrerPolicy`, fallback linkiem – ✓.
+- `/order/native` prezentuje listę modeli i CTA do formularza – ✓.
+- Do ustalenia: backend (n8n / email) oraz treść zgody RODO (placeholder).
 
 ## SEO i dostępność
 - Metadata:
-  - Strony: `Home` (już), `Catalog`, `Product` (dynamiczne), `Contact`, `About` – w języku PL.
-  - `robots.txt`, `sitemap.xml` generowane przez App Router (Next built-in).
+  - Strony: `Home`, `Catalog`, `Product`, `Order`, `Contact`, `About` mają ustawione `title`/`description` – ✓.
+  - `generateMetadata` dla produktów w oparciu o mock SEO – ✓.
+  - Brak `robots.txt`/`sitemap.ts` – TODO przed publikacją.
 - A11y:
-  - Hierarchia nagłówków H1/H2/H3 logiczna per strona.
-  - Alt-texty w galerii (nawet jeśli placeholder – opisy kontekstowe).
-  - Focus styles zgodne z design tokens (kontrast >= 3:1).
-  - Filtry i formularze opisane etykietami, `aria-live` dla wyników katalogu (już obecne).
+  - Hierarchia nagłówków logiczna – ✓.
+  - Alt-texty w galerii i portfolio – ✓ (placeholdery opisowe).
+  - Focus styles dedykowane (`outline` + `box-shadow`) – ✓.
+  - Formularze i filtry mają label/aria-live – ✓.
+  - Modal zamówień wymaga dodatkowego przetestowania focus trap (do zaplanowania) – TODO.
 
 ## Język i treści
-- Domyślny język: polski (lang="pl" w `RootLayout`).
-- Bez i18n na MVP (brak `next-intl`).
-- Copy docelowe do potwierdzenia (sekcje About, Contact, CTA). Placeholdery w PL.
-- Stosować styl „średniowieczny minimalizm”: ton rzemieślniczy, ale zrozumiały.
+- Domyślny język: polski (`lang="pl"`) – ✓.
+- Copy: hero, proces, portfolio, kontakt w PL; About pozostaje placeholderem – TODO na akceptację.
+- Styl: "średniowieczny minimalizm" – wizualnie jasny motyw, docelowo do ujednolicenia z tokens – w toku.
+- Nazwy modeli zgodne z `ORDER_MODELS` i mockami – ✓.
 
 ## Wymogi legalne i operacyjne
-- `robots.txt` – generowany automatycznie lub plik statyczny z allow all.
-- `sitemap.xml` – generowany przez Next (`app/sitemap.ts`).
-- Link w stopce (do dodania) do polityki prywatności i regulaminu (placeholdery).
-- Informacja o prawach autorskich (footer) + ewentualny NIP/reg. firmy (do potwierdzenia).
+- `robots.txt`, `sitemap.xml` – brak implementacji (Next generatory do uruchomienia) – TODO.
+- Linki do polityki prywatności/regulaminu – brak (footer placeholder) – TODO.
+- Informacja o prawach autorskich – brak w UI (do zaprojektowania we footerze) – TODO.
 
 ## Elementy dodatkowe dla klikowalnego MVP
-- Sticky header + skip link (`Przejdź do treści`).
-- Footer z linkami: polityka, sociale, kontakt.
-- Loading states dla katalogu (skeleton), product (fallback), contact (spinner/disabled state).
-- Testowe dane (mock JSON) umożliwiające bezproblemową nawigację bez backendu.
+- Sticky header + skip link – ✓.
+- Footer – obecnie minimalny (copyright brak) – TODO.
+- Loading states: katalog ma skeleton, produkt/iframe rely on native fallback – dodać w razie potrzeby.
+- Testowe dane (mock JSON/TS) – ✓.
 
 ## Checklisty kontrolne
-- [x] Określono ścieżkę użytkownika Home → Catalog → Product → Contact.
+- [x] Określono ścieżkę użytkownika Home → Catalog → Product → Contact/Order.
 - [x] Zdefiniowano funkcjonalności katalogu (filtry, sortowanie, empty state).
-- [x] Opisano elementy strony produktu (galeria, warianty, CTA).
-- [x] Zebrano wymagania SEO/a11y.
-- [ ] Zatwierdzono treści i copy przez właściciela.
-- [ ] Potwierdzono, czy formularz kontaktowy czy mailto w MVP.
+- [x] Opisano elementy strony produktu (galeria, warianty, CTA) i wdrożono w kodzie.
+- [x] Zebrano wymagania SEO/a11y (zaktualizowane o status modalów i sitemap).
+- [ ] Zatwierdzono treści About + RODO przez właściciela.
+- [ ] Dodano legal footer + generację sitemap/robots.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak zaakceptowanych treści może opóźnić finalne copy na About/Contact.
-  - Brak formularza (tylko mailto) może obniżyć konwersję MVP.
+  - Brak zaakceptowanych treści (About, zgoda RODO) może opóźnić publikację.
+  - Brak backendu formularza = potencjalna utrata leadów.
+  - Brak `robots.txt`/`sitemap` może obniżyć SEO.
 - **Decyzje do podjęcia**
-  - Czy formularz kontaktowy ma być interaktywny (walidacja client-side) czy zastępujemy go linkiem mailto?
-  - Jakie są minimalne informacje kontaktowe (adres, NIP) wymagane prawnie?
+  - Czy formularz kontaktowy integrujemy z n8n / e-mail service w MVP?
+  - Jakie minimalne informacje prawne muszą znaleźć się w footerze na starcie?
+  - Czy modal zamówienia pozostaje w MVP, czy promujemy `/order/native` jako primary CTA?
 - **Następne kroki**
-  - Przygotować design tokens i site mapę → `UI_TOKENS.md`, `SITE_MAP.md`.
-  - Zdefiniować dane i kontrakty API → `DANE_I_API_MVP.md`.
+  - Uzgodnić copy About i tekst zgody RODO.
+  - Zaprojektować footer z linkami legal i informacją o prawach autorskich.
+  - Przygotować generację `robots.txt` i `sitemap.ts` w App Routerze.

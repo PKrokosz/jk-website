@@ -413,9 +413,11 @@ ul {
   overflow: hidden;
 }
 
-.hero__background-video iframe {
+.hero__background-video video {
   width: 100%;
   height: 100%;
+  display: block;
+  object-fit: cover;
   border: 0;
   pointer-events: none;
 }

@@ -7,8 +7,9 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 ## Stos technologiczny
 
 - **Framework**: Next.js (App Router) + React 18
-- **Język**: TypeScript
-- **Pakietowanie**: pnpm workspaces
+- **Język**: TypeScript (tryb `strict`)
+- **Pakietowanie**: pnpm workspaces + `pnpm@10.18.x`
+- **Styling**: Tailwind CSS + planowana integracja z shadcn/ui
 - **Baza danych**: PostgreSQL 16 + Drizzle ORM
 - **Warstwa backendowa**: Node.js 20
 - **Testy**: Vitest (`@vitest/coverage-v8` do raportów pokrycia)
@@ -24,6 +25,9 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 
 ```
 .
+├── apps/
+│   └── web/            # entrypoint Next.js (App Router)
+├── docs/               # dokumentacja discovery (strategie, roadmapy, tokeny UI)
 ├── packages/
 │   └── db/             # współdzielony pakiet z klientem Drizzle ORM i schematem bazy
 ├── public/             # pliki statyczne Next.js
@@ -50,6 +54,8 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 
 - `DATABASE_URL` – connection string do instancji Postgresa, np. `postgres://postgres:postgres@localhost:5432/jk`.
 
+> **Tip:** Do pracy lokalnej możesz skopiować wartości z `docker-compose.yml`, aby szybko wystartować środowisko developerskie.
+
 ### Uruchomienie Postgresa lokalnie
 
 Repozytorium zawiera konfigurację Docker Compose uruchamiającą Postgresa 16:
@@ -73,6 +79,8 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z domyśl
 | `pnpm test -- --coverage` | Generuje raport pokrycia testami w formacie V8. |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 
+> Przed wysłaniem PR uruchom lokalnie `pnpm lint`, `pnpm test` oraz `pnpm build`, aby odtworzyć minimalny pipeline CI.
+
 ## Pakiet `@jk/db`
 
 W katalogu `packages/db` znajduje się pakiet z konfiguracją Drizzle ORM. Biblioteka eksportuje:
@@ -88,6 +96,18 @@ Pakiet korzysta z `dotenv`, aby wczytać zmienne środowiskowe. Brak zdefiniowan
 - Testy jednostkowe są uruchamiane przez `pnpm test` z konfiguracją w `vitest.config.ts`.
 - Raport pokrycia można wygenerować przez `pnpm test -- --coverage`; wynik pojawi się w katalogu `coverage/`.
 - ESLint używa standardowej konfiguracji Next.js. Zalecane jest uruchamianie lintingu przed pushowaniem zmian.
+
+## Dokumentacja produktu i procesu
+
+Repozytorium zawiera katalog `docs/` z najważniejszymi artefaktami discovery. Kluczowe pliki:
+
+- [`docs/README_DOCS.md`](./docs/README_DOCS.md) – indeks dokumentacji i wskazówki dotyczące aktualizacji.
+- [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md) – plan iteracji oraz scope kolejnych sprintów.
+- [`docs/SITE_MAP.md`](./docs/SITE_MAP.md) – mapa ekranów wraz z oczekiwanymi przepływami użytkownika.
+- [`docs/UI_TOKENS.md`](./docs/UI_TOKENS.md) – design tokens i odniesienia do styli Tailwind.
+- [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md) – standardy jakości i konfiguracja CI.
+
+Aktualizuj dokumenty wraz z każdą decyzją produktową lub zmianą w implementacji, aby zespół miał jedno źródło prawdy.
 
 ## Zapotrzebowanie i kierunek rozwoju
 

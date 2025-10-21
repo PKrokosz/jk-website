@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [20.x, 22.x]
     env:
       CI: true
     steps:
@@ -25,32 +25,32 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.18.3
           run_install: false
-          cache: true
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            pnpm-workspace.yaml
 
       - name: Approve pnpm builds
         if: hashFiles('.pnpm-builds.json') != ''
-        run: pnpm approve-builds
+        run: pnpm run approve-builds
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
-        run: pnpm -r build
+      - name: Lint
+        run: pnpm lint
 
-      - name: Lint packages
-        run: pnpm -r lint
+      - name: Type check
+        run: pnpm typecheck
 
-      - name: Type check packages
-        run: pnpm -r run typecheck
+      - name: Run unit tests
+        run: pnpm test
+
+      - name: Coverage
+        run: pnpm test:coverage
 
       - name: Dependency check
-        run: pnpm -r run depcheck
+        run: pnpm depcheck

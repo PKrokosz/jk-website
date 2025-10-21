@@ -2,17 +2,17 @@ import { ORDER_ACCESSORY_MAP } from "@/config/orderAccessories";
 import { GOOGLE_FORM_CONSTANTS, ORDER_FORM_ENTRIES } from "@/config/orderFormEntries";
 import { ORDER_MODEL_MAP } from "@/config/orderModels";
 
-import { ORDER_COLORS_BY_ID, ORDER_SIZES_BY_ID, OrderFormValues } from "./schema";
+import { ORDER_COLORS_BY_ID, ORDER_SIZES_BY_ID, type OrderFormValues } from "./schema";
 
 const OTHER_OPTION_VALUE = "__other_option__";
 
-const formatNumber = (value: number | undefined) => {
-  if (typeof value !== "number") {
-    return "";
-  }
+type MeasurementValue =
+  | OrderFormValues["footLength"]
+  | OrderFormValues["instepCircumference"]
+  | OrderFormValues["calfCircumference"];
 
-  return Number.isFinite(value) ? value.toString().replace(".", ",") : "";
-};
+const formatMeasurement = (value: MeasurementValue) =>
+  typeof value === "number" && Number.isFinite(value) ? value.toString().replace(".", ",") : "";
 
 export function buildGoogleFormPayload(values: OrderFormValues) {
   const params = new URLSearchParams();
@@ -21,11 +21,17 @@ export function buildGoogleFormPayload(values: OrderFormValues) {
   params.append(ORDER_FORM_ENTRIES.phoneNumber, values.phoneNumber.trim());
   params.append(ORDER_FORM_ENTRIES.parcelLockerCode, values.parcelLockerCode.trim());
   params.append(ORDER_FORM_ENTRIES.email, values.email.trim());
-  params.append(ORDER_FORM_ENTRIES.footLength, formatNumber(values.footLength));
-  params.append(ORDER_FORM_ENTRIES.instepCircumference, formatNumber(values.instepCircumference));
+  params.append(ORDER_FORM_ENTRIES.footLength, formatMeasurement(values.footLength));
+  params.append(
+    ORDER_FORM_ENTRIES.instepCircumference,
+    formatMeasurement(values.instepCircumference)
+  );
 
   if (typeof values.calfCircumference === "number") {
-    params.append(ORDER_FORM_ENTRIES.calfCircumference, formatNumber(values.calfCircumference));
+    params.append(
+      ORDER_FORM_ENTRIES.calfCircumference,
+      formatMeasurement(values.calfCircumference)
+    );
   }
 
   const model = ORDER_MODEL_MAP[values.modelId];
@@ -44,7 +50,7 @@ export function buildGoogleFormPayload(values: OrderFormValues) {
     params.append(`${ORDER_FORM_ENTRIES.size}_label`, sizeLabel);
   }
 
-  values.accessories.forEach((accessoryId) => {
+  values.accessories.forEach((accessoryId: OrderFormValues["accessories"][number]) => {
     const accessory = ORDER_ACCESSORY_MAP[accessoryId];
     if (accessory) {
       params.append(ORDER_FORM_ENTRIES.accessories, accessory.googleValue);

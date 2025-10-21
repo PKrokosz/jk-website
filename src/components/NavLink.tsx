@@ -1,21 +1,25 @@
 "use client";
 
-import React, { useMemo, type ComponentPropsWithoutRef, type ReactNode } from "react";
-import Link from "next/link";
+import React, { useMemo, type ReactNode } from "react";
+import Link, { type LinkProps } from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
 
-type LinkHref = ComponentPropsWithoutRef<typeof Link>["href"];
+type LinkHref<RouteType extends Route = Route> = LinkProps<RouteType>["href"];
 
-type NavLinkProps = {
-  href: LinkHref;
+type BaseNavLinkProps<RouteType extends Route = Route> = {
+  href: LinkHref<RouteType>;
   children: ReactNode;
   className?: string;
   activeClassName?: string;
   inactiveClassName?: string;
   exact?: boolean;
-} & Omit<ComponentPropsWithoutRef<typeof Link>, "href">;
+};
 
-const hrefToString = (href: LinkHref): string => {
+type NavLinkProps<RouteType extends Route = Route> = BaseNavLinkProps<RouteType> &
+  Omit<LinkProps<RouteType>, "href" | "children">;
+
+const hrefToString = <RouteType extends Route>(href: LinkHref<RouteType>): string => {
   if (typeof href === "string") {
     return href;
   }
@@ -24,7 +28,7 @@ const hrefToString = (href: LinkHref): string => {
     return href.pathname ?? "/";
   }
 
-  if (typeof href.pathname === "string" && href.pathname.length > 0) {
+  if (typeof href === "object" && typeof href.pathname === "string" && href.pathname.length > 0) {
     return href.pathname;
   }
 
@@ -40,7 +44,7 @@ const normalizePathname = (path: string | null) => {
   return path.replace(/\/+$/, "");
 };
 
-const resolveHrefPath = (href: LinkHref) => {
+const resolveHrefPath = <RouteType extends Route>(href: LinkHref<RouteType>) => {
   const hrefValue = hrefToString(href);
 
   try {
@@ -68,7 +72,7 @@ const isPathActive = (currentPath: string | null, targetPath: string, exact: boo
   );
 };
 
-export function NavLink({
+export function NavLink<RouteType extends Route = Route>({
   href,
   children,
   className,
@@ -76,7 +80,7 @@ export function NavLink({
   inactiveClassName,
   exact = false,
   ...rest
-}: NavLinkProps) {
+}: NavLinkProps<RouteType>) {
   const pathname = usePathname();
   const targetPath = useMemo(() => resolveHrefPath(href), [href]);
 

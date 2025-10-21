@@ -54,8 +54,8 @@ export default async function CatalogPage() {
     const products: CatalogProductSummary[] = createMockProducts(styles, leathers);
 
     return (
-      <main className="page" aria-labelledby="catalog-heading">
-        <section className="section section--muted" aria-labelledby="catalog-heading">
+      <main className="page home-page catalog-page" aria-labelledby="catalog-heading">
+        <section className="section section--muted catalog-hero" aria-labelledby="catalog-heading">
           <div className="container">
             <div className="section-header">
               <p className="section-header__kicker">Nowa ekspozycja warsztatu</p>
@@ -105,8 +105,8 @@ export default async function CatalogPage() {
     console.error("Nie udało się pobrać danych katalogu", error);
 
     return (
-      <main className="page" aria-labelledby="catalog-heading">
-        <section className="section" aria-labelledby="catalog-heading">
+      <main className="page home-page catalog-page" aria-labelledby="catalog-heading">
+        <section className="section section--muted catalog-hero" aria-labelledby="catalog-heading">
           <div className="container">
             <h1 id="catalog-heading">Katalog</h1>
             <p>

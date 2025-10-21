@@ -14,11 +14,11 @@ describe("CatalogExplorer", () => {
       <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
     );
 
-    expect(screen.getAllByRole("listitem")).toHaveLength(8);
-    expect(screen.getByRole("heading", { name: "Regal Huntsman Boots" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Poznaj szczegóły modelu Regal Huntsman Boots" })).toHaveAttribute(
+    expect(screen.getAllByRole("listitem")).toHaveLength(15);
+    expect(screen.getByRole("heading", { name: "Szpic" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Poznaj szczegóły modelu Szpic" })).toHaveAttribute(
       "href",
-      "/catalog/regal-huntsman-boots"
+      "/catalog/szpic"
     );
   });
 
@@ -27,12 +27,12 @@ describe("CatalogExplorer", () => {
       <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
     );
 
-    fireEvent.click(screen.getByLabelText("Artisan Oxford"));
+    fireEvent.click(screen.getByLabelText("Guild Monk Shoe"));
     fireEvent.click(screen.getByLabelText(/Amber Pull-Up/));
 
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(1);
-    expect(screen.getByRole("heading", { level: 3, name: "Amber Guild Oxfords" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 3, name: "Klamry" })).toBeVisible();
   });
 
   it("sorts products by name in descending order", () => {
@@ -48,6 +48,18 @@ describe("CatalogExplorer", () => {
       .getAllByRole("heading", { level: 3 })
       .map((heading) => heading.textContent ?? "");
 
-    expect(headings[0]).toBe("Regal Huntsman Boots");
+    expect(headings[0]).toBe("Wysokie Szpice");
+  });
+
+  it("filters products by category", () => {
+    render(
+      <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Akcesoria" }));
+
+    const items = screen.getAllByRole("listitem");
+    expect(items).toHaveLength(3);
+    expect(screen.getByRole("heading", { name: "Dedykowany wosk pielęgnacyjny" })).toBeInTheDocument();
   });
 });

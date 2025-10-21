@@ -7,25 +7,28 @@ describe("catalog products helpers", () => {
   it("creates product summaries with slugs", () => {
     const products = createMockProducts(catalogStyles, catalogLeathers);
 
-    expect(products).toHaveLength(8);
+    expect(products).toHaveLength(15);
     expect(products[0]).toMatchObject({
-      slug: expect.stringContaining("regal-huntsman"),
-      priceGrosz: expect.any(Number)
+      slug: "szpic",
+      priceGrosz: expect.any(Number),
+      category: "footwear",
+      funnelStage: expect.stringMatching(/TOFU|MOFU|BOFU/)
     });
   });
 
   it("returns detailed product data by slug", () => {
-    const detail = getProductBySlug("amber-guild-oxfords", catalogStyles, catalogLeathers);
+    const detail = getProductBySlug("buklak-podrozny", catalogStyles, catalogLeathers);
 
     expect(detail?.gallery).toHaveLength(3);
-    expect(detail?.variants.colors.length).toBeGreaterThan(0);
-    expect(detail?.seo.title).toContain("Amber Guild Oxfords");
+    expect(detail?.variants.colors.length).toBe(0);
+    expect(detail?.category).toBe("hydration");
+    expect(detail?.orderReference?.id).toBe("waterskin");
   });
 
   it("lists all product slugs", () => {
     const slugs = listProductSlugs();
 
-    expect(slugs).toContain("midnight-guild-monks");
+    expect(slugs).toContain("prawidla-sosnowe");
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 });

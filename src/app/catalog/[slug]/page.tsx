@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
 import { catalogLeathers, catalogStyles } from "@/lib/catalog/data";
 import { getProductBySlug, listProductSlugs } from "@/lib/catalog/products";
-import type { CatalogLeather, CatalogStyle } from "@/lib/catalog/types";
+import type { CatalogLeather, CatalogProductDetail, CatalogStyle } from "@/lib/catalog/types";
 
 interface ProductPageProps {
   params: { slug: string };
@@ -47,6 +47,36 @@ function resolveLeather(leatherId: number): CatalogLeather | undefined {
   return catalogLeathers.find((leather) => leather.id === leatherId);
 }
 
+function resolveOrderHref(orderReference?: CatalogProductDetail["orderReference"]) {
+  if (!orderReference) {
+    return "/order/native";
+  }
+
+  const params = new URLSearchParams();
+
+  if (orderReference.type === "model") {
+    params.set("model", orderReference.id);
+  } else if (orderReference.type === "accessory") {
+    params.set("accessory", orderReference.id);
+  } else if (orderReference.type === "service") {
+    params.set("service", orderReference.id);
+  }
+
+  const query = params.toString();
+  return query ? `/order/native?${query}` : "/order/native";
+}
+
+function getFunnelCta(stage: CatalogProductDetail["funnelStage"]) {
+  switch (stage) {
+    case "BOFU":
+      return "Dodaj w zamówieniu";
+    case "MOFU":
+      return "Skonfiguruj w formularzu";
+    default:
+      return "Zobacz w formularzu";
+  }
+}
+
 export default function ProductPage({ params }: ProductPageProps) {
   const { slug } = params;
   const product = getProductBySlug(slug, catalogStyles, catalogLeathers);
@@ -57,6 +87,8 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const style = resolveStyle(product.styleId);
   const leather = resolveLeather(product.leatherId);
+  const orderHref = resolveOrderHref(product.orderReference);
+  const funnelCta = getFunnelCta(product.funnelStage);
 
   return (
     <main className="page" aria-labelledby="product-heading">
@@ -78,10 +110,20 @@ export default function ProductPage({ params }: ProductPageProps) {
         <header className="section section--muted">
           <div className="container product-hero">
             <div className="product-hero__content">
+              <div className="product-hero__tags">
+                <span className="badge badge--category">{product.categoryLabel}</span>
+                <abbr className="badge badge--funnel" title={product.funnelLabel}>
+                  {product.funnelStage}
+                </abbr>
+              </div>
               <p className="section-header__kicker">Kolekcja {style?.era ?? "Rzemieślnicza"}</p>
               <h1 id="product-heading">{product.name}</h1>
               <p className="lead">{product.description}</p>
               <dl className="product-hero__meta">
+                <div>
+                  <dt>Kategoria</dt>
+                  <dd>{product.categoryLabel}</dd>
+                </div>
                 <div>
                   <dt>Styl</dt>
                   <dd>{style?.name ?? "Nieznany"}</dd>
@@ -90,6 +132,10 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <dt>Skóra bazowa</dt>
                   <dd>{leather?.name ?? "Nieznana"}</dd>
                 </div>
+                <div>
+                  <dt>Lejek sprzedażowy</dt>
+                  <dd>{product.funnelLabel}</dd>
+                </div>
               </dl>
               <div className="product-hero__cta">
                 <OrderModalTrigger
@@ -97,6 +143,14 @@ export default function ProductPage({ params }: ProductPageProps) {
                   triggerLabel="Złóż zamówienie"
                   ctaLabel="Wypełnij formularz"
                 />
+                <Link
+                  className="button button--ghost"
+                  href={orderHref}
+                  aria-label={`${funnelCta} dla produktu ${product.name} w formularzu zamówienia`}
+                  prefetch={false}
+                >
+                  {funnelCta}
+                </Link>
                 <Link
                   className="button button--ghost"
                   href={`/contact?product=${product.slug}`}
@@ -140,29 +194,43 @@ export default function ProductPage({ params }: ProductPageProps) {
               <h2 id="variants-heading">Warianty personalizacji</h2>
               <div className="product-variants__group">
                 <h3>Kolory skóry</h3>
-                <ul>
-                  {product.variants.colors.map((color) => {
-                    const variantLeather = resolveLeather(color.leatherId);
-                    return (
-                      <li key={color.id}>
-                        <span className="badge">{variantLeather?.name ?? color.name}</span>
-                        {variantLeather?.color ? (
-                          <span className="product-variants__hint">{variantLeather.color}</span>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
+                {product.variants.colors.length > 0 ? (
+                  <ul>
+                    {product.variants.colors.map((color) => {
+                      const variantLeather = resolveLeather(color.leatherId);
+                      return (
+                        <li key={color.id}>
+                          <span className="badge">{variantLeather?.name ?? color.name}</span>
+                          {variantLeather?.color ? (
+                            <span className="product-variants__hint">{variantLeather.color}</span>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="product-variants__empty">
+                    Kolory dobieramy podczas konsultacji i potwierdzamy w formularzu natywnym.
+                  </p>
+                )}
               </div>
 
               <div className="product-variants__group">
                 <h3>Rozmiary</h3>
-                <p>Dostępne rozmiary EU:</p>
-                <ul className="size-list" aria-label="Lista dostępnych rozmiarów">
-                  {product.variants.sizes.map((size) => (
-                    <li key={size}>{size}</li>
-                  ))}
-                </ul>
+                {product.variants.sizes.length > 0 ? (
+                  <>
+                    <p>Dostępne rozmiary EU:</p>
+                    <ul className="size-list" aria-label="Lista dostępnych rozmiarów">
+                      {product.variants.sizes.map((size) => (
+                        <li key={size}>{size}</li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <p className="product-variants__empty">
+                    Rozmiar ustalamy na podstawie pomiarów przekazanych w formularzu zamówienia.
+                  </p>
+                )}
               </div>
             </div>
           </div>

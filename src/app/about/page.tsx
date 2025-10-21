@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 
-import atelierCadence from "@/../vid/1.mp4";
-import leatherDialogue from "@/../vid/2.mp4";
-import patternStudy from "@/../vid/3.mp4";
-import stitchFocus from "@/../vid/4.mp4";
-import fittingSession from "@/../vid/6.mp4";
-import horizonPlans from "@/../vid/7.mp4";
 
 type SlideStyle = CSSProperties & { "--delay"?: string };
 
@@ -32,7 +26,7 @@ const slides: Slide[] = [
       "Zaczynaliśmy od naprawiania butów rycerskich na zamkowych dziedzińcach. Dziś projektujemy całe kolekcje inspirowane średniowiecznym kunsztem.",
     detail:
       "Nasz założyciel, Jan K., przejął narzędzia po dziadku i przerobił pierwszy stół stolarski w warszawski atelier JK Handmade Footwear.",
-    video: atelierCadence
+    video: "/vid/1.mp4"
   },
   {
     id: "materials",
@@ -42,7 +36,7 @@ const slides: Slide[] = [
       "Selekcjonujemy krupony z włoskich i polskich garbarni, żeby każda para mogła przyjąć wodę, napięcia i setki kilometrów marszu.",
     detail:
       "Każdą partię testujemy na giętkość i odporność pigmentu. To dlatego nasze obuwie zachowuje kolor nawet pod sceniczne reflektory.",
-    video: leatherDialogue
+    video: "/vid/2.mp4"
   },
   {
     id: "design",
@@ -52,7 +46,7 @@ const slides: Slide[] = [
       "Zanim powstanie kopyto, rozrysowujemy historię bohatera — jego ruch, klimat świata i wymagania ekipy kostiumowej.",
     detail:
       "Od szkicu na pergaminie po cyfrowy model — w każdym etapie biorą udział projektant, rekonstruktor i rzemieślnik.",
-    video: patternStudy
+    video: "/vid/3.mp4"
   },
   {
     id: "craft",
@@ -62,7 +56,7 @@ const slides: Slide[] = [
       "Każdy szewnik prowadzi swoją parę od pierwszego cięcia po końcowe polerowanie, dlatego znamy każdą nitkę z imienia.",
     detail:
       "Ręczne przeszycia wzmocnione lnianą nicią, podpodeszwy z dębowo garbowanej skóry i woskowane krawędzie to nasz standard.",
-    video: stitchFocus
+    video: "/vid/4.mp4"
   },
   {
     id: "experience",
@@ -72,7 +66,7 @@ const slides: Slide[] = [
       "W studiu lub online prowadzimy konsultacje, nagrywamy wskazówki wideo i wysyłamy próbne cholewki, by dopracować komfort.",
     detail:
       "Na platformie zamówień śledzisz status, otrzymujesz zdjęcia z warsztatu i rekomendacje pielęgnacji dopasowane do scenariusza.",
-    video: fittingSession
+    video: "/vid/6.mp4"
   },
   {
     id: "future",
@@ -82,7 +76,7 @@ const slides: Slide[] = [
       "Rozwijamy katalog o modele dla łuczników, sokolników i ekip filmowych, zachowując miarowy charakter naszych butów.",
     detail:
       "W 2025 roku startujemy z programem renowacji MTO, aby każda para mogła wrócić na szlak z nową energią.",
-    video: horizonPlans
+    video: "/vid/7.mp4"
   }
 ];
 

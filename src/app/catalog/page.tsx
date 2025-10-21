@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
+import { NativeModelShowcase } from "@/components/catalog/NativeModelShowcase";
 import { createMockProducts } from "@/lib/catalog/products";
 import type {
   CatalogLeather,
@@ -74,6 +75,8 @@ export default async function CatalogPage() {
             <CatalogExplorer styles={styles} leathers={leathers} products={products} />
           </div>
         </section>
+
+        <NativeModelShowcase />
       </main>
     );
   } catch (error) {

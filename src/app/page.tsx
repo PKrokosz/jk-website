@@ -8,21 +8,54 @@ import { PricingCalculator } from "./components/PricingCalculator";
 const heroShowcase = [
   {
     src: "/image/models/10.jfif",
-    alt: "Ciemnobrązowy model obuwia o wydłużonej cholewce",
+    alt: "Ciemnobrązowy model Obieżyświat o wydłużonej cholewce",
     label: "Obieżyświat",
     accent: "amber"
   },
   {
     src: "/image/models/6.jfif",
-    alt: "Granatowe buty bespoke na drewnianym kopycie",
+    alt: "Granatowe buty Tamer na drewnianym kopycie",
     label: "Tamer",
     accent: "copper"
   },
   {
     src: "/image/models/15.jfif",
-    alt: "Czarne trzewiki z kontrastowym sznurowaniem",
+    alt: "Czarne trzewiki Wysokie Krowie Pyski z kontrastowym sznurowaniem",
     label: "Wysokie Krowie Pyski",
     accent: "gold"
+  }
+];
+
+const sellingPoints = [
+  {
+    title: "Podwójna licowa skóra",
+    description:
+      "Każda para powstaje z dwóch warstw najlepszej skóry, dzięki czemu buty są trwałe, a stopa oddycha nawet podczas wielogodzinnych gier."
+  },
+  {
+    title: "Wzmocnienia pod scenariusze",
+    description:
+      "Noski i pięty zabezpieczamy dodatkowym usztywnieniem, żeby wytrzymały trening walki, jazdę konną i dynamiczne rekonstrukcje."
+  },
+  {
+    title: "Stabilność i amortyzacja",
+    description:
+      "Wyważona podeszwa amortyzuje każdy krok, a konstrukcja cholewki utrzymuje pewną sylwetkę niezależnie od terenu."
+  },
+  {
+    title: "Pracownia rękodzielnicza",
+    description:
+      "Projektujemy i szyjemy w Warszawie. Jeden mistrz odpowiada za całą parę, od kopyta po polerowanie."
+  },
+  {
+    title: "Indywidualne dopasowanie",
+    description:
+      "Szyjemy w rozmiarach 36–49 i pod konkretne pomiary, dlatego możesz wybrać dowolny model z katalogu natywnego i dopasować go do swojej postaci."
+  },
+  {
+    title: "Pielęgnacja i ochrona",
+    description:
+      "Woskowana skóra chroni przed deszczem i rosą, a dodatkowe woski oraz bukłaki możesz dodać prosto z formularza."
   }
 ];
 
@@ -73,10 +106,15 @@ export default function Home() {
         <div className="container hero__layout">
           <div className="hero__intro">
             <p className="eyebrow">JK Handmade Footwear</p>
-            <h1 id="hero-heading">Buty miarowe szyte w Warszawie pod Twój rytm dnia</h1>
+            <h1 id="hero-heading">Rzemieślnicze buty LARP, które wybierzesz w naszym katalogu</h1>
             <p className="lead">
-              Od pierwszej miary po finalne polerowanie — prowadzimy Cię przez proces, który
-              kończy się parą dopasowaną do kroku, garderoby i okazji.
+              Masz problem ze znalezieniem wygodnych butów LARP o wysokim standardzie? Od 16 lat
+              projektujemy modele dla rekonstruktorów, jeźdźców i ekip filmowych — w tym Netflixa i
+              rycerzy bitwy pod Grunwaldem.
+            </p>
+            <p>
+              Nasz katalog zawiera te same warianty, które wybierzesz w formularzu zamówienia
+              natywnego. Dobierz sylwetkę, skórę i akcesoria zanim wypełnisz zamówienie.
             </p>
             <div className="hero__actions">
               <OrderModalTrigger
@@ -114,6 +152,30 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="section" aria-labelledby="craft-heading">
+        <div className="container craft-overview">
+          <div className="craft-overview__intro">
+            <h2 id="craft-heading">Co wyróżnia nasze buty</h2>
+            <p>
+              Każdy model z katalogu powstaje w warszawskiej pracowni i może zostać dostosowany do
+              Twoich wymiarów, scenariusza i preferowanych dodatków.
+            </p>
+            <p>
+              Wybierając model w formularzu natywnym, dokładnie wiesz, jakie cechy i dodatki są w
+              nim dostępne — a kalkulator wyceny poniżej pokaże orientacyjną cenę końcową.
+            </p>
+          </div>
+          <ul className="selling-points" role="list">
+            {sellingPoints.map((point) => (
+              <li key={point.title} className="selling-point">
+                <h3>{point.title}</h3>
+                <p>{point.description}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

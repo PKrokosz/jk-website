@@ -1,65 +1,57 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
+import { ORDER_ACCESSORIES } from "@/config/orderAccessories";
+import { ORDER_MODELS } from "@/config/orderModels";
 import { calculateQuote } from "@/lib/pricing/calc";
 
-interface SelectOption {
-  id: number;
+interface ModelOption {
+  id: string;
   label: string;
-  description?: string;
-  priceModGrosz?: number;
+  description: string;
+  priceGrosz: number;
 }
 
-const styles: SelectOption[] = [
-  { id: 1, label: "Oxford klasyczny", description: "Ponadczasowa sylwetka" },
-  {
-    id: 2,
-    label: "Derby bespoke",
-    description: "Więcej miejsca na podbiciu",
-    priceModGrosz: 15000
-  },
-  {
-    id: 3,
-    label: "Monk z podwójną klamrą",
-    description: "Podkreśla indywidualny charakter",
-    priceModGrosz: 22000
-  }
-];
+interface AddonOption {
+  id: string;
+  label: string;
+  description?: string;
+  priceGrosz: number;
+}
 
-const leathers: SelectOption[] = [
-  { id: 11, label: "Skóra cielęca", description: "Gładka, ręcznie polerowana" },
-  {
-    id: 12,
-    label: "Skóra zamszowa",
-    description: "Miękka faktura o głębokim kolorze",
-    priceModGrosz: 12000
-  },
-  {
-    id: 13,
-    label: "Egzotyczna (krokodyl)",
-    description: "Limitowana edycja",
-    priceModGrosz: 42000
-  }
-];
+const models: ModelOption[] = ORDER_MODELS.map((model) => ({
+  id: model.id,
+  label: model.name,
+  description: model.googleValue.replace(/-\s*(\d)/, " – $1"),
+  priceGrosz: Math.round(model.price * 100)
+}));
 
-const extras: SelectOption[] = [
+const accessories: AddonOption[] = ORDER_ACCESSORIES.map((accessory) => ({
+  id: accessory.id,
+  label: accessory.name,
+  description: accessory.description,
+  priceGrosz: Math.round(accessory.price * 100)
+}));
+
+const serviceExtras: AddonOption[] = [
   {
-    id: 101,
-    label: "Podeszwa garbowana roślinnie",
-    description: "Trwalsza i biodegradowalna",
-    priceModGrosz: 8000
+    id: "waterskin",
+    label: "Bukłak podróżny",
+    description: "Ręcznie szyty bukłak z naszej skóry — 250 zł",
+    priceGrosz: 25_000
   },
   {
-    id: 102,
-    label: "Grawer inicjałów",
-    description: "Dodatkowy detal personalizujący",
-    priceModGrosz: 4000
+    id: "bracer",
+    label: "Karwasz ochronny",
+    description: "Kompletowany z butami, wzmacniany filcem — 280 zł",
+    priceGrosz: 28_000
   },
   {
-    id: 103,
-    label: "Para drzewiaków",
-    description: "Utrzymuje kształt obuwia",
-    priceModGrosz: 9000
+    id: "shoeTrees",
+    label: "Prawidła sosnowe",
+    description: "Para drzewiaków zabezpieczająca kształt — 150 zł",
+    priceGrosz: 15_000
   }
 ];
 
@@ -70,24 +62,46 @@ const currencyFormatter = new Intl.NumberFormat("pl-PL", {
 });
 
 export function PricingCalculator() {
-  const [selectedStyle, setSelectedStyle] = useState<SelectOption>(styles[0]);
-  const [selectedLeather, setSelectedLeather] = useState<SelectOption>(leathers[0]);
-  const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
+  const [selectedModelId, setSelectedModelId] = useState<string>(models[0]?.id ?? "");
+  const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
+  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+
+  const selectedModel = useMemo(
+    () => models.find((model) => model.id === selectedModelId) ?? null,
+    [selectedModelId]
+  );
 
   const quote = useMemo(() => {
-    const options = [
-      selectedStyle,
-      selectedLeather,
-      ...extras.filter((option) => selectedExtras.includes(option.id))
-    ].map((option) => ({
-      id: option.id,
-      priceModGrosz: option.priceModGrosz ?? 0
-    }));
+    const accessoryOptions = accessories
+      .filter((accessory) => selectedAccessories.includes(accessory.id))
+      .map((accessory) => ({
+        id: accessory.id,
+        label: accessory.label,
+        priceModGrosz: accessory.priceGrosz
+      }));
 
-    return calculateQuote({ options });
-  }, [selectedExtras, selectedLeather, selectedStyle]);
+    const extraOptions = serviceExtras
+      .filter((extra) => selectedExtras.includes(extra.id))
+      .map((extra) => ({
+        id: extra.id,
+        label: extra.label,
+        priceModGrosz: extra.priceGrosz
+      }));
 
-  const toggleExtra = (id: number) => {
+    return calculateQuote({
+      basePriceGrosz: selectedModel?.priceGrosz,
+      baseLabel: selectedModel ? `Model ${selectedModel.label}` : undefined,
+      options: [...accessoryOptions, ...extraOptions]
+    });
+  }, [selectedAccessories, selectedExtras, selectedModel]);
+
+  const toggleAccessory = (id: string) => {
+    setSelectedAccessories((prev) =>
+      prev.includes(id) ? prev.filter((accessoryId) => accessoryId !== id) : [...prev, id]
+    );
+  };
+
+  const toggleExtra = (id: string) => {
     setSelectedExtras((prev) =>
       prev.includes(id) ? prev.filter((extraId) => extraId !== id) : [...prev, id]
     );
@@ -98,58 +112,61 @@ export function PricingCalculator() {
       <div className="container">
         <div className="section-header">
           <h2 id="calculator-heading">Kalkulator wyceny</h2>
-          <p>Szacunkowa wycena uwzględnia bazową parę oraz wybrane personalizacje.</p>
+          <p>
+            Sprawdź, jak zmienia się orientacyjna cena przy wyborze modeli i dodatków dostępnych w
+            formularzu zamówienia.
+          </p>
         </div>
         <div className="calculator">
           <form className="calculator__form" aria-describedby="calculator-note">
             <div className="field">
-              <label htmlFor="style">Model</label>
+              <label htmlFor="model">Model z katalogu</label>
               <select
-                id="style"
-                value={selectedStyle.id}
-                onChange={(event) =>
-                  setSelectedStyle(
-                    styles.find((style) => style.id === Number(event.target.value)) ?? styles[0]
-                  )
-                }
+                id="model"
+                value={selectedModelId}
+                onChange={(event) => setSelectedModelId(event.target.value)}
               >
-                {styles.map((style) => (
-                  <option key={style.id} value={style.id}>
-                    {style.label}
-                    {style.priceModGrosz ? " (" + currencyFormatter.format(style.priceModGrosz / 100) + ")" : ""}
+                {models.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.label} ({currencyFormatter.format(model.priceGrosz / 100)})
                   </option>
                 ))}
               </select>
-              <p className="field__hint">{selectedStyle.description}</p>
-            </div>
-
-            <div className="field">
-              <label htmlFor="leather">Skóra</label>
-              <select
-                id="leather"
-                value={selectedLeather.id}
-                onChange={(event) =>
-                  setSelectedLeather(
-                    leathers.find((item) => item.id === Number(event.target.value)) ?? leathers[0]
-                  )
-                }
-              >
-                {leathers.map((leather) => (
-                  <option key={leather.id} value={leather.id}>
-                    {leather.label}
-                    {leather.priceModGrosz
-                      ? " (" + currencyFormatter.format(leather.priceModGrosz / 100) + ")"
-                      : ""}
-                  </option>
-                ))}
-              </select>
-              <p className="field__hint">{selectedLeather.description}</p>
+              <p className="field__hint">
+                {selectedModel?.description ?? "Wybierz model, aby zobaczyć cenę bazową."}
+              </p>
             </div>
 
             <fieldset className="field">
-              <legend>Dodatki</legend>
+              <legend>Akcesoria</legend>
               <div className="field__group">
-                {extras.map((extra) => {
+                {accessories.map((accessory) => {
+                  const checked = selectedAccessories.includes(accessory.id);
+                  return (
+                    <label key={accessory.id} className="checkbox">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleAccessory(accessory.id)}
+                        aria-describedby={`accessory-${accessory.id}-hint`}
+                      />
+                      <span className="checkbox__content">
+                        <span className="checkbox__label">{accessory.label}</span>
+                        <span id={`accessory-${accessory.id}-hint`} className="field__hint">
+                          {accessory.description}
+                          {` (+${currencyFormatter.format(accessory.priceGrosz / 100)})`}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <fieldset className="field">
+              <legend>Dodatkowe usługi</legend>
+              <div className="field__group">
+                {serviceExtras.map((extra) => {
                   const checked = selectedExtras.includes(extra.id);
                   return (
                     <label key={extra.id} className="checkbox">
@@ -163,9 +180,6 @@ export function PricingCalculator() {
                         <span className="checkbox__label">{extra.label}</span>
                         <span id={`extra-${extra.id}-hint`} className="field__hint">
                           {extra.description}
-                          {extra.priceModGrosz
-                            ? ` (+${currencyFormatter.format(extra.priceModGrosz / 100)})`
-                            : ""}
                         </span>
                       </span>
                     </label>
@@ -173,6 +187,7 @@ export function PricingCalculator() {
                 })}
               </div>
             </fieldset>
+
             <p id="calculator-note" className="field__hint">
               Ceny mają charakter orientacyjny. Finalna wycena powstaje po konsultacji z mistrzem
               szewskim.

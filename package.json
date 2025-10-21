@@ -21,12 +21,15 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "20.16.5",
     "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "@vitest/coverage-v8": "2.1.1",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.13",
+    "jsdom": "^27.0.1",
     "typescript": "5.5.4",
     "vitest": "2.1.1"
   },

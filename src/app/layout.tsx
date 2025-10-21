@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Header } from "../components/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -46,7 +47,10 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="pl">
-      <body>{children}</body>
+      <body className="site-body">
+        <Header />
+        <div className="site-content">{children}</div>
+      </body>
     </html>
   );
 }

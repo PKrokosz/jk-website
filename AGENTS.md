@@ -9,6 +9,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `docker compose up -d`             # Postgres 16 (serwis: jkdb)
 - `pnpm dev`                         # dev server
 - `pnpm lint && pnpm test`           # jako smoke test
+- `pnpm lint --fix`                  # auto-fix formatowanie lintem
+- `pnpm test -- --watch`             # tryb obserwacji dla testów komponentów
 
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.

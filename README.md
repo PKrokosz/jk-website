@@ -81,6 +81,27 @@ Pakiet korzysta z `dotenv`, aby wczytać zmienne środowiskowe. Brak zdefiniowan
 - Raport pokrycia można wygenerować przez `pnpm test -- --coverage`; wynik pojawi się w katalogu `coverage/`.
 - ESLint używa standardowej konfiguracji Next.js. Zalecane jest uruchamianie lintingu przed pushowaniem zmian.
 
+## Zapotrzebowanie i kierunek rozwoju
+
+### Zapotrzebowanie produktowe
+
+- Utrzymuj aktualny katalog zdjęć w katalogu `img/`; nazwy plików traktujemy jako kanoniczne nazwy produktów w UI.
+- Wykorzystuj zdjęcia w komponentach katalogu (`src/app/(site)/catalog`) zgodnie z opisem przepływów w [`docs/SITE_MAP.md`](./docs/SITE_MAP.md).
+- Synchronizuj atrybuty produktów z mockami w `src/lib/catalog`, aby nazewnictwo odpowiadało materiałom zdjęciowym.
+
+### Kierunek UX/UI
+
+- Kontynuuj kierunek "medieval artisan minimalism" określony w [`docs/UI_TOKENS.md`](./docs/UI_TOKENS.md) oraz priorytetach UX w [`docs/WYMAGANIA_MVP.md`](./docs/WYMAGANIA_MVP.md).
+- Zapewnij spójne nazewnictwo wariantów produktów pomiędzy komponentami UI, mockami danych i folderem `img/`.
+- Przed wdrożeniem nowych ekranów odwołuj się do mapy ekranów w [`docs/SITE_MAP.md`](./docs/SITE_MAP.md) oraz planu iteracji w [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md).
+
+### Oczekiwane narzędzia i proces
+
+- `pnpm`, `Docker Compose` oraz `drizzle-kit` do pracy lokalnej z bazą i migracjami.
+- `Vitest` (unit) i opcjonalnie Playwright do testów UI.
+- `Storybook` planowany do dokumentowania komponentów wizualnych (sprawdź backlog w [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md)).
+- Automatyzacje CI opisane w [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md); przed PR uruchamiaj `pnpm lint`, `pnpm test` i `pnpm build`.
+
 ## Roadmapa / kolejne kroki
 
 - Podłączenie kalkulatora cen do rzeczywistych danych z Drizzle ORM.

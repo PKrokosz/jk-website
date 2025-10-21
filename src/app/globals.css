@@ -1010,6 +1010,11 @@ ul {
   margin-top: 0.5rem;
 }
 
+.collapsible-panel[hidden],
+.collapsible-panel[aria-hidden="true"] {
+  display: none;
+}
+
 .field label,
 .field legend {
   font-weight: 600;

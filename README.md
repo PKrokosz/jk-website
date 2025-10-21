@@ -2,6 +2,8 @@
 
 Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe oraz automatyzacjami n8n.
 
+> CI: patrz workflow [`CI`](.github/workflows/ci.yml) uruchamiany na Node.js 20 z pnpm 10.18.x dla buildów, lintów i kontroli zależności.
+
 ## Stos technologiczny
 
 - **Framework**: Next.js (App Router) + React 18

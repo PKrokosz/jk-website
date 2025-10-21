@@ -16,12 +16,38 @@ export interface CatalogLeather {
   description: string;
 }
 
-export interface CatalogProduct {
+export interface CatalogProductSummary {
   id: string;
+  slug: string;
   name: string;
   styleId: number;
   leatherId: number;
   description: string;
   highlight: string;
   priceGrosz: number;
+}
+
+export interface CatalogProductImage {
+  src: string;
+  alt: string;
+}
+
+export interface CatalogProductVariants {
+  colors: Array<{
+    id: string;
+    name: string;
+    leatherId: number;
+  }>;
+  sizes: number[];
+}
+
+export interface CatalogProductDetail extends CatalogProductSummary {
+  gallery: CatalogProductImage[];
+  variants: CatalogProductVariants;
+  craftProcess: string[];
+  seo: {
+    title: string;
+    description: string;
+    keywords: string[];
+  };
 }

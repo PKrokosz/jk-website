@@ -16,6 +16,10 @@ describe("CatalogExplorer", () => {
 
     expect(screen.getAllByRole("listitem")).toHaveLength(8);
     expect(screen.getByRole("heading", { name: "Regal Huntsman Boots" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Poznaj szczegóły modelu Regal Huntsman Boots" })).toHaveAttribute(
+      "href",
+      "/catalog/regal-huntsman-boots"
+    );
   });
 
   it("filters products by selected style and leather", () => {

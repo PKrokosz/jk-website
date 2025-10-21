@@ -34,7 +34,6 @@ describe("Header", () => {
 
     expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Catalog" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Order" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
   });
@@ -52,14 +51,14 @@ describe("Header", () => {
     expect(homeLink).not.toHaveAttribute("aria-current");
   });
 
-  it("highlights the order route when active", () => {
-    usePathnameMock.mockReturnValue("/order");
+  it("highlights the contact route when active", () => {
+    usePathnameMock.mockReturnValue("/contact");
 
     render(<Header />);
 
-    const orderLink = screen.getByRole("link", { name: "Order" });
+    const contactLink = screen.getByRole("link", { name: "Contact" });
 
-    expect(orderLink).toHaveAttribute("aria-current", "page");
-    expect(orderLink).toHaveClass("site-header__link--active");
+    expect(contactLink).toHaveAttribute("aria-current", "page");
+    expect(contactLink).toHaveClass("site-header__link--active");
   });
 });

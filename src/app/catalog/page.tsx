@@ -1,14 +1,70 @@
-export const metadata = {
+import type { Metadata } from "next";
+
+import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
+import { createMockProducts } from "@/lib/catalog/products";
+import type { CatalogLeather, CatalogProduct, CatalogStyle } from "@/lib/catalog/types";
+
+interface ApiResponse<T> {
+  data: T;
+}
+
+async function fetchStyles(): Promise<CatalogStyle[]> {
+  const response = await fetch("/api/styles", {
+    next: { revalidate: 3600 }
+  });
+
+  if (!response.ok) {
+    throw new Error("Nie udało się pobrać listy stylów");
+  }
+
+  const { data } = (await response.json()) as ApiResponse<CatalogStyle[]>;
+
+  return data;
+}
+
+async function fetchLeathers(): Promise<CatalogLeather[]> {
+  const response = await fetch("/api/leather", {
+    next: { revalidate: 3600 }
+  });
+
+  if (!response.ok) {
+    throw new Error("Nie udało się pobrać listy skór");
+  }
+
+  const { data } = (await response.json()) as ApiResponse<CatalogLeather[]>;
+
+  return data;
+}
+
+export const metadata: Metadata = {
   title: "Catalog"
 };
 
-export default function CatalogPage() {
+export default async function CatalogPage() {
+  const [styles, leathers] = await Promise.all([fetchStyles(), fetchLeathers()]);
+  const products: CatalogProduct[] = createMockProducts(styles, leathers);
+
   return (
     <main className="page" aria-labelledby="catalog-heading">
-      <section className="section" role="presentation">
+      <section className="section section--muted" aria-labelledby="catalog-heading">
         <div className="container">
-          <h1 id="catalog-heading">Catalog</h1>
-          <p>Przegląd kolekcji i przykładowych realizacji w przygotowaniu.</p>
+          <div className="section-header">
+            <p className="section-header__kicker">Nowa ekspozycja warsztatu</p>
+            <h1 id="catalog-heading">Katalog</h1>
+            <p>
+              Zanurz się w kolekcji projektów łączących rzemieślniczą precyzję z estetyką średniowiecznego minimalizmu.
+              Wybierz interesujący Cię styl lub rodzaj skóry, aby zawęzić wyniki.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" aria-labelledby="catalog-products-heading">
+        <div className="container">
+          <h2 id="catalog-products-heading" className="visually-hidden">
+            Dostępne modele
+          </h2>
+          <CatalogExplorer styles={styles} leathers={leathers} products={products} />
         </div>
       </section>
     </main>

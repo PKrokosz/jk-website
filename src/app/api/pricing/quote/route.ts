@@ -1,7 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { calculateQuote } from "@/lib/pricing/calc";
+import type { PricingRequest } from "@/lib/pricing/calc";
 
-export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  // TODO: tu podłączymy prawdziwy kalkulator; na razie stała kwota
-  return NextResponse.json({ price: { net: 100000, gross: 123000, currency: "PLN" }, echo: body });
+export async function POST(request: NextRequest) {
+  const payload = ((await request.json().catch(() => ({}))) ?? {}) as PricingRequest;
+  const quote = calculateQuote(payload);
+
+  return NextResponse.json({
+    ok: true,
+    requestedAt: new Date().toISOString(),
+    payload,
+    quote
+  });
 }

@@ -2,5 +2,14 @@
   "name": "@jk/db",
   "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    "./schema": "./src/schema.ts",
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "dotenv": "16.4.5",
+    "drizzle-orm": "0.34.1",
+    "pg": "8.12.0"
+  }
 }

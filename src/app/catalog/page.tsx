@@ -63,6 +63,27 @@ export default async function CatalogPage() {
                 Zanurz się w kolekcji projektów łączących rzemieślniczą precyzję z estetyką średniowiecznego minimalizmu.
                 Wybierz interesujący Cię styl lub rodzaj skóry, aby zawęzić wyniki.
               </p>
+              <p>
+                Każdy produkt ma przypisany skrót lejkowy TOFU, MOFU lub BOFU — tak jak w formularzu natywnym, dzięki czemu
+                szybko przejdziesz od inspiracji do zamówienia.
+              </p>
+            </div>
+            <div className="catalog-funnel-legend" aria-label="Legendę lejka sprzedażowego">
+              <article className="catalog-funnel-legend__item">
+                <abbr title="Top of Funnel" className="badge badge--funnel">TOFU</abbr>
+                <h2>Top of Funnel</h2>
+                <p>Inspiracje i modele pokazowe — idealne, gdy dopiero poznajesz katalog i szukasz kierunku.</p>
+              </article>
+              <article className="catalog-funnel-legend__item">
+                <abbr title="Middle of Funnel" className="badge badge--funnel">MOFU</abbr>
+                <h2>Middle of Funnel</h2>
+                <p>Produkty gotowe do konfiguracji: porównuj skóry, dodatki oraz przygotuj brief do formularza.</p>
+              </article>
+              <article className="catalog-funnel-legend__item">
+                <abbr title="Bottom of Funnel" className="badge badge--funnel">BOFU</abbr>
+                <h2>Bottom of Funnel</h2>
+                <p>Elementy finalizujące zamówienie — akcesoria, bukłaki i prawidła, które dodasz prosto w formularzu.</p>
+              </article>
             </div>
           </div>
         </section>

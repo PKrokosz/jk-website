@@ -36,6 +36,15 @@ export const catalogStyles: CatalogStyle[] = [
     description:
       "Wsuwane obuwie z pojedynczą klamrą, hołd dla wczesnych modeli butów cechowych mistrzów szewstwa.",
     basePriceGrosz: 248_000
+  },
+  {
+    id: 5,
+    slug: "workshop-essentials",
+    name: "Warsztatowe dodatki",
+    era: "Pracownia JK",
+    description:
+      "Linia akcesoriów, bukłaków i usług pielęgnacyjnych dostępnych jako uzupełnienie zamówienia natywnego.",
+    basePriceGrosz: 0
   }
 ];
 
@@ -71,5 +80,13 @@ export const catalogLeathers: CatalogLeather[] = [
     finish: "Soft-touch",
     priceModGrosz: 12_000,
     description: "Miękka skóra nubukowa o ziemistym, zielonkawym odcieniu przypominającym poranne mgły na wrzosowiskach."
+  },
+  {
+    id: 5,
+    name: "Workshop Utility Blend",
+    color: "Neutral",
+    finish: "Utility",
+    priceModGrosz: 0,
+    description: "Materiał warsztatowy stosowany w akcesoriach, bukłakach i prawidłach uzupełniających zamówienie."
   }
 ];

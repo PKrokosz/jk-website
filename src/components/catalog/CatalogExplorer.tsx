@@ -18,6 +18,8 @@ interface CatalogExplorerProps {
 
 type SortOrder = "name-asc" | "name-desc";
 
+type CategoryFilter = "all" | CatalogProductSummary["category"];
+
 type ToggleHandler = (value: number) => void;
 
 function useToggleList(initial: number[] = []): [number[], ToggleHandler] {
@@ -40,6 +42,36 @@ function formatPrice(priceGrosz: number) {
   return currencyFormatter.format(priceGrosz / 100);
 }
 
+function resolveOrderHref(orderReference?: CatalogProductSummary["orderReference"]) {
+  if (!orderReference) {
+    return "/order/native";
+  }
+
+  const params = new URLSearchParams();
+
+  if (orderReference.type === "model") {
+    params.set("model", orderReference.id);
+  } else if (orderReference.type === "accessory") {
+    params.set("accessory", orderReference.id);
+  } else if (orderReference.type === "service") {
+    params.set("service", orderReference.id);
+  }
+
+  const query = params.toString();
+  return query ? `/order/native?${query}` : "/order/native";
+}
+
+function getFunnelCta(stage: CatalogProductSummary["funnelStage"]) {
+  switch (stage) {
+    case "BOFU":
+      return "Dodaj w zamówieniu";
+    case "MOFU":
+      return "Skonfiguruj w formularzu";
+    default:
+      return "Zobacz w formularzu";
+  }
+}
+
 export function CatalogExplorer({
   styles,
   leathers,
@@ -48,6 +80,27 @@ export function CatalogExplorer({
   const [selectedStyleIds, toggleStyle] = useToggleList();
   const [selectedLeatherIds, toggleLeather] = useToggleList();
   const [sortOrder, setSortOrder] = useState<SortOrder>("name-asc");
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
+
+  const categoryOptions = useMemo(() => {
+    const entries = new Map<CatalogProductSummary["category"], string>();
+    products.forEach((product) => {
+      if (!entries.has(product.category)) {
+        entries.set(product.category, product.categoryLabel);
+      }
+    });
+
+    return Array.from(entries.entries()).map(([value, label]) => ({ value, label }));
+  }, [products]);
+
+  const activeCategoryLabel = useMemo(() => {
+    if (selectedCategory === "all") {
+      return "wszystkie kategorie";
+    }
+
+    const entry = categoryOptions.find((option) => option.value === selectedCategory);
+    return entry?.label.toLowerCase() ?? "wybrana kategoria";
+  }, [categoryOptions, selectedCategory]);
 
   const stylesById = useMemo(
     () => new Map(styles.map((style) => [style.id, style])),
@@ -65,8 +118,10 @@ export function CatalogExplorer({
         selectedStyleIds.length === 0 || selectedStyleIds.includes(product.styleId);
       const matchesLeather =
         selectedLeatherIds.length === 0 || selectedLeatherIds.includes(product.leatherId);
+      const matchesCategory =
+        selectedCategory === "all" || product.category === selectedCategory;
 
-      return matchesStyle && matchesLeather;
+      return matchesStyle && matchesLeather && matchesCategory;
     });
 
     const sorted = [...withFilters].sort((a, b) =>
@@ -76,7 +131,7 @@ export function CatalogExplorer({
     );
 
     return sorted;
-  }, [products, selectedStyleIds, selectedLeatherIds, sortOrder]);
+  }, [products, selectedStyleIds, selectedLeatherIds, selectedCategory, sortOrder]);
 
   return (
     <div className="catalog-layout" role="region" aria-labelledby="catalog-products-heading">
@@ -139,13 +194,38 @@ export function CatalogExplorer({
       </aside>
 
       <section className="catalog-results" aria-live="polite">
+        <nav className="catalog-category-nav" aria-label="Kategorie katalogu">
+          <button
+            type="button"
+            className={`catalog-category-nav__button${selectedCategory === "all" ? " catalog-category-nav__button--active" : ""}`}
+            onClick={() => setSelectedCategory("all")}
+            aria-pressed={selectedCategory === "all"}
+          >
+            Wszystkie
+          </button>
+          {categoryOptions.map((category) => {
+            const isActive = selectedCategory === category.value;
+            return (
+              <button
+                key={category.value}
+                type="button"
+                className={`catalog-category-nav__button${isActive ? " catalog-category-nav__button--active" : ""}`}
+                onClick={() => setSelectedCategory(category.value)}
+                aria-pressed={isActive}
+              >
+                {category.label}
+              </button>
+            );
+          })}
+        </nav>
         <header className="catalog-toolbar">
           <div className="catalog-toolbar__summary">
             {filteredProducts.length === 0 ? (
               <p>Brak wyników dla wybranych filtrów.</p>
             ) : (
               <p>
-                {filteredProducts.length} produkt{filteredProducts.length === 1 ? "" : "y"} w kolekcji
+                {filteredProducts.length} produkt{filteredProducts.length === 1 ? "" : "y"}
+                {selectedCategory === "all" ? " w kolekcji" : ` w kategorii ${activeCategoryLabel}`}
               </p>
             )}
           </div>
@@ -172,6 +252,9 @@ export function CatalogExplorer({
             const titleId = `${product.id}-title`;
             const descriptionId = `${product.id}-description`;
             const metaId = `${product.id}-meta`;
+            const funnelId = `${product.id}-funnel`;
+            const funnelCta = getFunnelCta(product.funnelStage);
+            const orderHref = resolveOrderHref(product.orderReference);
 
             return (
               <li key={product.id} className="catalog-card">
@@ -179,9 +262,15 @@ export function CatalogExplorer({
                   className="catalog-card__inner"
                   tabIndex={0}
                   aria-labelledby={titleId}
-                  aria-describedby={`${descriptionId} ${metaId}`}
+                  aria-describedby={`${descriptionId} ${metaId} ${funnelId}`}
                 >
                   <header className="catalog-card__header">
+                    <div className="catalog-card__tags">
+                      <span className="badge badge--category">{product.categoryLabel}</span>
+                      <abbr className="badge badge--funnel" title={product.funnelLabel}>
+                        {product.funnelStage}
+                      </abbr>
+                    </div>
                     <p className="catalog-card__eyebrow">{style?.era ?? "Kolekcja"}</p>
                     <h3 id={titleId}>{product.name}</h3>
                   </header>
@@ -191,6 +280,10 @@ export function CatalogExplorer({
                   </p>
 
                   <dl id={metaId} className="catalog-card__meta">
+                    <div>
+                      <dt>Kategoria</dt>
+                      <dd>{product.categoryLabel}</dd>
+                    </div>
                     <div>
                       <dt>Styl</dt>
                       <dd>{style?.name ?? "Nieznany"}</dd>
@@ -203,6 +296,10 @@ export function CatalogExplorer({
                       </dd>
                     </div>
                     <div>
+                      <dt>Lejek</dt>
+                      <dd id={funnelId}>{product.funnelLabel}</dd>
+                    </div>
+                    <div>
                       <dt>Detal</dt>
                       <dd>{product.highlight}</dd>
                     </div>
@@ -212,14 +309,24 @@ export function CatalogExplorer({
                     <p className="catalog-card__price" aria-label={`Cena: ${formatPrice(product.priceGrosz)}`}>
                       {formatPrice(product.priceGrosz)}
                     </p>
-                    <Link
-                      className="catalog-card__cta"
-                      href={`/catalog/${product.slug}`}
-                      aria-label={`Poznaj szczegóły modelu ${product.name}`}
-                      prefetch={false}
-                    >
-                      Poznaj szczegóły
-                    </Link>
+                    <div className="catalog-card__cta-group">
+                      <Link
+                        className="catalog-card__cta"
+                        href={`/catalog/${product.slug}`}
+                        aria-label={`Poznaj szczegóły modelu ${product.name}`}
+                        prefetch={false}
+                      >
+                        Poznaj szczegóły
+                      </Link>
+                      <Link
+                        className="catalog-card__cta catalog-card__cta--secondary"
+                        href={orderHref}
+                        aria-label={`${funnelCta} dla produktu ${product.name} w formularzu zamówienia`}
+                        prefetch={false}
+                      >
+                        {funnelCta}
+                      </Link>
+                    </div>
                   </footer>
                 </article>
               </li>

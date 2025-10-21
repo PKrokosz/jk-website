@@ -16,6 +16,20 @@ export interface CatalogLeather {
   description: string;
 }
 
+export type CatalogProductCategory =
+  | "footwear"
+  | "accessories"
+  | "hydration"
+  | "care";
+
+export type CatalogFunnelStage = "TOFU" | "MOFU" | "BOFU";
+
+export interface CatalogOrderReference {
+  type: "model" | "accessory" | "service";
+  id: string;
+  label: string;
+}
+
 export interface CatalogProductSummary {
   id: string;
   slug: string;
@@ -25,6 +39,11 @@ export interface CatalogProductSummary {
   description: string;
   highlight: string;
   priceGrosz: number;
+  category: CatalogProductCategory;
+  categoryLabel: string;
+  funnelStage: CatalogFunnelStage;
+  funnelLabel: string;
+  orderReference?: CatalogOrderReference;
 }
 
 export interface CatalogProductImage {

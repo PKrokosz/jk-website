@@ -1,10 +1,63 @@
 import {
+  CatalogFunnelStage,
   CatalogLeather,
+  CatalogOrderReference,
+  CatalogProductCategory,
   CatalogProductDetail,
   CatalogProductSummary,
   CatalogProductVariants,
   CatalogStyle
 } from "./types";
+import { ORDER_ACCESSORIES } from "@/config/orderAccessories";
+import { ORDER_MODELS } from "@/config/orderModels";
+
+const CATEGORY_LABELS: Record<CatalogProductCategory, string> = {
+  footwear: "Buty",
+  accessories: "Akcesoria",
+  hydration: "Bukłaki",
+  care: "Pielęgnacja"
+};
+
+const FUNNEL_LABELS: Record<CatalogFunnelStage, string> = {
+  TOFU: "TOFU — inspiracja i rozpoznanie potrzeb",
+  MOFU: "MOFU — konfiguracja i porównanie oferty",
+  BOFU: "BOFU — finalizacja zamówienia w warsztacie"
+};
+
+const ORDER_MODEL_MAP = new Map(ORDER_MODELS.map((model) => [model.id, model]));
+const ORDER_ACCESSORY_MAP = new Map(ORDER_ACCESSORIES.map((accessory) => [accessory.id, accessory]));
+
+const STANDARD_SIZES = Array.from({ length: 10 }, (_, index) => 36 + index);
+
+function mapOrderReference(
+  type: CatalogOrderReference["type"],
+  id: string,
+  fallback: string
+): CatalogOrderReference {
+  if (type === "model") {
+    const model = ORDER_MODEL_MAP.get(id);
+    return {
+      type,
+      id,
+      label: model ? `Model ${model.name}` : fallback
+    };
+  }
+
+  if (type === "accessory") {
+    const accessory = ORDER_ACCESSORY_MAP.get(id);
+    return {
+      type,
+      id,
+      label: accessory ? `Akcesorium ${accessory.name}` : fallback
+    };
+  }
+
+  return {
+    type,
+    id,
+    label: fallback
+  };
+}
 
 interface ProductTemplate {
   id: string;
@@ -19,200 +72,422 @@ interface ProductTemplate {
   sizes: number[];
   craftProcess: string[];
   seo: CatalogProductDetail["seo"];
+  category: CatalogProductCategory;
+  funnelStage: CatalogFunnelStage;
+  orderReference?: CatalogOrderReference;
+  priceOverrideGrosz?: number;
 }
 
 const productTemplates: ProductTemplate[] = [
   {
-    id: "prod-1",
-    slug: "regal-huntsman-boots",
-    name: "Regal Huntsman Boots",
-    styleId: 1,
+    id: "model-szpic",
+    slug: "szpic",
+    name: "Szpic",
+    styleId: 2,
     leatherId: 1,
     description:
-      "Wysoki model jeździecki z profilem dopasowanym do łydki, ręcznie barwiony i wykończony woskiem pszczelim.",
-    highlight: "Ręcznie malowane krawędzie i złocone klamry",
-    galleryCaptions: ["profil boczny", "detal klamry", "sznurowanie"],
-    variantLeatherIds: [1, 3, 4],
-    sizes: [39, 40, 41, 42, 43, 44, 45, 46],
-    craftProcess: [
-      "Formowanie cholewki z kasztanowej skóry wegetalnej",
-      "Ręczne barwienie z laserunkowym wykończeniem",
-      "Montaż obcasa z wielowarstwowej skóry bydlęcej"
-    ],
-    seo: {
-      title: "Regal Huntsman Boots — dworskie buty jeździeckie",
-      description:
-        "Ręcznie szyte buty jeździeckie Regal Huntsman łączą dworską elegancję z funkcjonalnością wypraw terenowych.",
-      keywords: ["buty jeździeckie", "miarowe", "dworskie obuwie"]
-    }
-  },
-  {
-    id: "prod-2",
-    slug: "obsidian-court-boots",
-    name: "Obsidian Court Boots",
-    styleId: 1,
-    leatherId: 3,
-    description:
-      "Elegancka sylwetka stworzona na dworskie audiencje, z podszewką z miękkiej skóry koziej.",
-    highlight: "Podwójna krawędź dekoracyjna inspirowana renesansem",
-    galleryCaptions: ["ujęcie frontalne", "detal obcasa", "profil cholewki"],
-    variantLeatherIds: [3, 1],
-    sizes: [39, 40, 41, 42, 43, 44],
-    craftProcess: [
-      "Dobór skóry cielęcej o wysokim połysku",
-      "Wykonanie dekoracyjnego przeszycia na nosku",
-      "Polerowanie i wykończenie woskiem carnauba"
-    ],
-    seo: {
-      title: "Obsidian Court Boots — dworskie botki z połyskiem",
-      description:
-        "Model Obsidian Court Boots to kwintesencja elegancji: połyskliwa skóra, miękka podszewka i renesansowe detale.",
-      keywords: ["botki dworskie", "czarne buty", "made to order"]
-    }
-  },
-  {
-    id: "prod-3",
-    slug: "amber-guild-oxfords",
-    name: "Amber Guild Oxfords",
-    styleId: 2,
-    leatherId: 2,
-    description:
-      "Klasyczne oksfordy z zamkniętą przyszwą, perforacją w kształcie rozety i zbalansowaną podeszwą.",
-    highlight: "Ręcznie nakłuwana perforacja rozety",
-    galleryCaptions: ["profil boczny", "perforacja", "podeszwa"],
-    variantLeatherIds: [2, 1, 4],
-    sizes: [38, 39, 40, 41, 42, 43, 44, 45],
-    craftProcess: [
-      "Cięcie cholewki z woskowanej skóry pull-up",
-      "Nakłuwanie rozety według wzoru cechowego",
-      "Ręczne barwienie i pastowanie na ciepło"
-    ],
-    seo: {
-      title: "Amber Guild Oxfords — oksfordy cechowe",
-      description:
-        "Amber Guild Oxfords to klasyczne oksfordy z bursztynowej skóry, idealne na codzienne uroczystości cechowe.",
-      keywords: ["oksfordy", "skóra bursztynowa", "cech szewski"]
-    }
-  },
-  {
-    id: "prod-4",
-    slug: "moorland-travel-oxfords",
-    name: "Moorland Travel Oxfords",
-    styleId: 2,
-    leatherId: 4,
-    description:
-      "Model dzienny z miękką cholewką i dodatkową amortyzacją w podeszwie na długie marsze po mieście.",
-    highlight: "Miękka wyściółka z filcu wełnianego",
-    galleryCaptions: ["widok z góry", "detal przeszyć", "podpodeszwa"],
-    variantLeatherIds: [4, 2],
-    sizes: [39, 40, 41, 42, 43, 44, 45, 46],
-    craftProcess: [
-      "Szczotkowanie nubuku dla uzyskania miękkiej faktury",
-      "Wszywanie wkładek z naturalnego filcu",
-      "Montaż elastycznej podeszwy skórzanej"
-    ],
-    seo: {
-      title: "Moorland Travel Oxfords — miejskie oksfordy",
-      description:
-        "Moorland Travel Oxfords oferują komfort długich spacerów dzięki nubukowej cholewce i filcowej wyściółce.",
-      keywords: ["oksfordy", "nubuk", "komfort"]
-    }
-  },
-  {
-    id: "prod-5",
-    slug: "pilgrim-ember-boots",
-    name: "Pilgrim Ember Boots",
-    styleId: 3,
-    leatherId: 2,
-    description:
-      "Trzewiki terenowe z szeroką cholewką, wzmacnianym noskiem i ręcznie wiązanym rzemieniem.",
-    highlight: "Wymienne pętle na rzemienie z mosiądzu",
-    galleryCaptions: ["profil terenowy", "detal noska", "wiązanie"],
-    variantLeatherIds: [2, 4, 1],
-    sizes: [40, 41, 42, 43, 44, 45, 46, 47],
-    craftProcess: [
-      "Wykuwanie okuć z mosiądzu",
-      "Podszywanie podwójnej warstwy skóry dla wzmocnienia",
-      "Impregnacja na gorąco woskiem pszczelim"
-    ],
-    seo: {
-      title: "Pilgrim Ember Boots — buty na wyprawy",
-      description:
-        "Pilgrim Ember Boots to solidne trzewiki gotowe na długie pielgrzymki i wyboiste szlaki.",
-      keywords: ["buty terenowe", "pielgrzym", "trzewiki"]
-    }
-  },
-  {
-    id: "prod-6",
-    slug: "pilgrim-moor-boots",
-    name: "Pilgrim Moor Boots",
-    styleId: 3,
-    leatherId: 4,
-    description:
-      "Miękko wyściełane buty na wyprawy, z podeszwą trzymającą się nawet wilgotnych nawierzchni.",
-    highlight: "Podwójne przeszycie i woskowana nić lniana",
-    galleryCaptions: ["ujęcie w ruchu", "detal przeszycia", "podeszwa terenowa"],
-    variantLeatherIds: [4, 2],
-    sizes: [39, 40, 41, 42, 43, 44, 45, 46],
-    craftProcess: [
-      "Szycie podwójnym ściegiem dla trwałości",
-      "Zabezpieczenie cholewki naturalnymi olejami",
-      "Formowanie podeszwy o zwiększonej przyczepności"
-    ],
-    seo: {
-      title: "Pilgrim Moor Boots — trzewiki na mokre tereny",
-      description:
-        "Pilgrim Moor Boots łączą nubukową miękkość z solidną podeszwą odporną na wilgoć.",
-      keywords: ["trzewiki", "nubuk", "wyprawy"]
-    }
-  },
-  {
-    id: "prod-7",
-    slug: "guildmaster-monks",
-    name: "Guildmaster Monks",
-    styleId: 4,
-    leatherId: 1,
-    description:
-      "Model z pojedynczą klamrą i skośnym paskiem, który idealnie dopasowuje się do podbicia.",
-    highlight: "Klamry odlewane według XIV-wiecznych wzorów",
-    galleryCaptions: ["ujęcie boczne", "detal klamry", "profil podeszwy"],
+      "Klasyczny model z ostrym noskiem, który zgrabnie wydłuża sylwetkę postaci i sprawdza się w historycznych stylizacjach dworskich.",
+    highlight: "Profilowany nosek chroniący przed zagięciami",
+    galleryCaptions: ["profil boczny", "detal noska", "podeszwa"],
     variantLeatherIds: [1, 2, 3],
-    sizes: [39, 40, 41, 42, 43, 44, 45],
+    sizes: STANDARD_SIZES,
     craftProcess: [
-      "Odlane na zamówienie klamry cechowe",
-      "Formowanie paska z pojedynczym przeszyciem",
-      "Ręczne wygładzanie krawędzi skórzanych"
+      "Modelowanie ostrych nosków według indywidualnej miary",
+      "Szycie cholewki z licowej skóry na kopycie natywnym",
+      "Ręczne pastowanie dla uzyskania satynowego połysku"
     ],
     seo: {
-      title: "Guildmaster Monks — klasyczne monki",
+      title: "Szpic — klasyczne obuwie dworskie",
       description:
-        "Guildmaster Monks to hołd dla cechowych mistrzów: pojedyncza klamra i dopracowane detale.",
-      keywords: ["monki", "klamra", "cech"]
-    }
+        "Model Szpic z katalogu JK Handmade Footwear to klasyczne obuwie dworskie z ostrym noskiem i ręcznym wykończeniem.",
+      keywords: ["szpic", "buty dworskie", "made to order"]
+    },
+    category: "footwear",
+    funnelStage: "MOFU",
+    orderReference: mapOrderReference("model", "szpic", "Model Szpic")
   },
   {
-    id: "prod-8",
-    slug: "midnight-guild-monks",
-    name: "Midnight Guild Monks",
+    id: "model-klamry",
+    slug: "klamry",
+    name: "Klamry",
     styleId: 4,
-    leatherId: 3,
+    leatherId: 2,
     description:
-      "Czarny wariant z połyskliwej skóry cielęcej, dedykowany wieczornym koncertom dworskim.",
-    highlight: "Podszycie z naturalnego jedwabiu",
-    galleryCaptions: ["widok frontalny", "detal jedwabnej podszewki", "klamra"],
-    variantLeatherIds: [3, 1],
-    sizes: [39, 40, 41, 42, 43, 44],
+      "Niskie buty z klamrami inspirowanymi XIV-wiecznymi odlewami, łatwe w zakładaniu i stabilne podczas długich wydarzeń LARP.",
+    highlight: "Klamry z warsztatowego stopu mosiądzu",
+    galleryCaptions: ["zapięcie na klamrę", "profil boczny", "podpodeszwa"],
+    variantLeatherIds: [2, 1, 4],
+    sizes: STANDARD_SIZES,
     craftProcess: [
-      "Wykrawanie cholewki z połyskliwej skóry cielęcej",
-      "Obszywanie wnętrza jedwabną podszewką",
-      "Polerowanie do lustrzanego połysku"
+      "Dobór pary klamer z kolekcji rekonstrukcyjnej",
+      "Formowanie paska zapinanego na klamrę",
+      "Montaż podeszwy z podzelowaniem na życzenie"
     ],
     seo: {
-      title: "Midnight Guild Monks — wieczorowe monki",
+      title: "Klamry — wsuwane buty z epoki",
       description:
-        "Midnight Guild Monks to eleganckie monki z jedwabną podszewką i lustrzanym połyskiem na specjalne okazje.",
-      keywords: ["monki", "wieczorowe", "czarne buty"]
-    }
+        "Model Klamry oferuje szybkie zakładanie dzięki metalowym sprzączkom oraz personalizowane wykończenie cholewki.",
+      keywords: ["klamry", "buty historyczne", "LARP"]
+    },
+    category: "footwear",
+    funnelStage: "MOFU",
+    orderReference: mapOrderReference("model", "klamry", "Model Klamry")
+  },
+  {
+    id: "model-wysokie-szpice",
+    slug: "wysokie-szpice",
+    name: "Wysokie Szpice",
+    styleId: 1,
+    leatherId: 3,
+    description:
+      "Wysoka cholewka zakończona ostrym noskiem zapewnia stabilność w siodle oraz atrakcyjny profil sylwetki w stroju dworskim.",
+    highlight: "Wydłużony nosek ze wzmocnionym rdzeniem",
+    galleryCaptions: ["pełna sylwetka", "detal noska", "wiązanie łydki"],
+    variantLeatherIds: [3, 1],
+    sizes: [...STANDARD_SIZES, 46, 47],
+    craftProcess: [
+      "Skan łydki i przygotowanie indywidualnego kopyta",
+      "Szycie wysokiej cholewki z cielęcej skóry",
+      "Wykończenie i zabezpieczenie długiego noska"
+    ],
+    seo: {
+      title: "Wysokie Szpice — buty jeździeckie",
+      description:
+        "Wysokie Szpice to rzemieślnicze buty jeździeckie z ostrym noskiem i pełną personalizacją obwodu łydki.",
+      keywords: ["wysokie szpice", "buty jeździeckie", "personalizacja"]
+    },
+    category: "footwear",
+    funnelStage: "BOFU",
+    orderReference: mapOrderReference("model", "wysokie-szpice", "Model Wysokie Szpice")
+  },
+  {
+    id: "model-tamer",
+    slug: "tamer",
+    name: "Tamer",
+    styleId: 3,
+    leatherId: 4,
+    description:
+      "Trzewik o wzmocnionej konstrukcji inspirowany pustynnymi wyprawami, ze stabilizacją kostki i miękkim wnętrzem.",
+    highlight: "Wymienne rzemienie na szybkie sznurowanie",
+    galleryCaptions: ["profil terenowy", "detal rzemieni", "pięta"],
+    variantLeatherIds: [4, 2, 1],
+    sizes: [...STANDARD_SIZES, 46],
+    craftProcess: [
+      "Cięcie nubuku o zwiększonej odporności na piasek",
+      "Wszywanie miękkiej podszewki z filcu",
+      "Impregnacja woskiem pszczelim"
+    ],
+    seo: {
+      title: "Tamer — trzewiki na wyprawy",
+      description:
+        "Model Tamer to wytrzymałe trzewiki JK Handmade Footwear przygotowane na intensywne treningi i pustynne scenariusze.",
+      keywords: ["tamer", "trzewiki", "larp"]
+    },
+    category: "footwear",
+    funnelStage: "MOFU",
+    orderReference: mapOrderReference("model", "tamer", "Model Tamer")
+  },
+  {
+    id: "model-wysokie-cholewy",
+    slug: "wysokie-cholewy",
+    name: "Wysokie Cholewy",
+    styleId: 1,
+    leatherId: 1,
+    description:
+      "Model o pełnej wysokości do kolana, projektowany dla rekonstruktorów potrzebujących wsparcia łydki podczas jazdy.",
+    highlight: "Profil łydki tworzony na podstawie pomiarów",
+    galleryCaptions: ["wysoka cholewka", "detal obszycia", "wiązanie"],
+    variantLeatherIds: [1, 3, 4],
+    sizes: [...STANDARD_SIZES, 46, 47],
+    craftProcess: [
+      "Pomiary łydki i przygotowanie szablonów",
+      "Szycie cholewki z podwójnej warstwy skóry",
+      "Montaż podeszw z dodatkowym obcasem"
+    ],
+    seo: {
+      title: "Wysokie Cholewy — wysokie buty jeździeckie",
+      description:
+        "Wysokie Cholewy z katalogu JK Handmade Footwear to ręcznie szyte buty jeździeckie dopasowane do obwodu łydki.",
+      keywords: ["wysokie cholewy", "buty jeździeckie", "na miarę"]
+    },
+    category: "footwear",
+    funnelStage: "BOFU",
+    orderReference: mapOrderReference("model", "wysokie-cholewy", "Model Wysokie Cholewy")
+  },
+  {
+    id: "model-przelotka-na-sabatony",
+    slug: "przelotka-na-sabatony",
+    name: "Przelotka na Sabatony",
+    styleId: 3,
+    leatherId: 2,
+    description:
+      "Model zaprojektowany dla rycerzy w zbroi — posiada system przelotek do montażu sabatonów i wzmocnioną podeszwę.",
+    highlight: "Zbrojne przelotki montowane ręcznie",
+    galleryCaptions: ["system przelotek", "wzmocniona pięta", "sznurowanie"],
+    variantLeatherIds: [2, 4, 1],
+    sizes: [...STANDARD_SIZES, 46],
+    craftProcess: [
+      "Zbrojenie przelotek ze stali nierdzewnej",
+      "Podszywanie dodatkowej warstwy skóry",
+      "Test dopasowania do sabatonów klienta"
+    ],
+    seo: {
+      title: "Przelotka na sabatony — model bojowy",
+      description:
+        "Buty z przelotką na sabatony zapewniają kompatybilność z elementami zbroi i stabilność podczas walki.",
+      keywords: ["sabatony", "buty do zbroi", "rekonstrukcja"]
+    },
+    category: "footwear",
+    funnelStage: "MOFU",
+    orderReference: mapOrderReference("model", "przelotka-na-sabatony", "Model Przelotka na sabatony")
+  },
+  {
+    id: "model-trzewiki",
+    slug: "trzewiki",
+    name: "Trzewiki",
+    styleId: 3,
+    leatherId: 4,
+    description:
+      "Uniwersalne trzewiki do codziennego noszenia w terenie i mieście, z amortyzacją i łatwym sznurowaniem.",
+    highlight: "Wyściółka z naturalnego filcu",
+    galleryCaptions: ["widok z góry", "detal języka", "podeszwa"],
+    variantLeatherIds: [4, 2, 1],
+    sizes: STANDARD_SIZES,
+    craftProcess: [
+      "Cięcie cholewki z nubuku o wysokiej gęstości",
+      "Szycie języka z miękką podszewką",
+      "Montaż podeszwy z amortyzacją"
+    ],
+    seo: {
+      title: "Trzewiki — uniwersalne obuwie terenowe",
+      description:
+        "Trzewiki JK Handmade Footwear to komfortowe obuwie terenowe do codziennych zadań i lekkich wypraw.",
+      keywords: ["trzewiki", "buty terenowe", "komfort"]
+    },
+    category: "footwear",
+    funnelStage: "MOFU",
+    orderReference: mapOrderReference("model", "trzewiki", "Model Trzewiki")
+  },
+  {
+    id: "model-obiezyswiat",
+    slug: "obiezyswiat",
+    name: "Obieżyświat",
+    styleId: 3,
+    leatherId: 2,
+    description:
+      "Buty podróżnika projektowane na wielodniowe marsze — posiadają elastyczną cholewkę i mocne sznurowanie.",
+    highlight: "Wymienne sznurowadła ze skóry bydlęcej",
+    galleryCaptions: ["sznurowanie", "profil terenowy", "detal pięty"],
+    variantLeatherIds: [2, 4, 1],
+    sizes: [...STANDARD_SIZES, 46],
+    craftProcess: [
+      "Dobór skóry pull-up odpornej na zarysowania",
+      "Szycie cholewki z dodatkową zakładką przeciw wilgoci",
+      "Impregnacja olejami ziołowymi"
+    ],
+    seo: {
+      title: "Obieżyświat — buty na długie wyprawy",
+      description:
+        "Model Obieżyświat powstał dla podróżników i zwiadowców, którzy potrzebują trwałych butów na długie dystanse.",
+      keywords: ["obiezyswiat", "buty podróżne", "larp"]
+    },
+    category: "footwear",
+    funnelStage: "MOFU",
+    orderReference: mapOrderReference("model", "obiezyswiat", "Model Obieżyświat")
+  },
+  {
+    id: "model-dragonki",
+    slug: "dragonki",
+    name: "Dragonki",
+    styleId: 1,
+    leatherId: 3,
+    description:
+      "Spektakularne buty o inspirowanym smokami wykroju, tworzone na potrzeby pokazów, konwentów i scen filmowych.",
+    highlight: "Dekoracyjne przeszycia przypominające łuski",
+    galleryCaptions: ["detal łusek", "profil boczny", "podeszwa scenicza"],
+    variantLeatherIds: [3, 1],
+    sizes: [...STANDARD_SIZES, 46],
+    craftProcess: [
+      "Projektowanie dekoracyjnych paneli zgodnie z koncepcją postaci",
+      "Tłoczenie wzorów łusek na mokrej skórze",
+      "Barwienie gradientowe i zabezpieczenie lakierem"
+    ],
+    seo: {
+      title: "Dragonki — sceniczne buty premium",
+      description:
+        "Dragonki to rzemieślnicze buty sceniczne z detalami przypominającymi łuski smoka, idealne na pokazy i cosplay.",
+      keywords: ["dragonki", "buty sceniczne", "cosplay"]
+    },
+    category: "footwear",
+    funnelStage: "TOFU",
+    orderReference: mapOrderReference("model", "dragonki", "Model Dragonki")
+  },
+  {
+    id: "model-wonderer",
+    slug: "wonderer",
+    name: "Wonderer",
+    styleId: 2,
+    leatherId: 1,
+    description:
+      "Eleganckie buty miejskie inspirowane wędrówkami mieszczan, z subtelną perforacją i miękkim wnętrzem.",
+    highlight: "Ręcznie frezowane perforacje",
+    galleryCaptions: ["widok z góry", "detal perforacji", "podeszwa miejska"],
+    variantLeatherIds: [1, 2, 3],
+    sizes: STANDARD_SIZES,
+    craftProcess: [
+      "Wykrawanie perforacji według wzoru rzemieślniczego",
+      "Szycie cholewki z licowej skóry",
+      "Pastowanie i polerowanie do satynowego połysku"
+    ],
+    seo: {
+      title: "Wonderer — buty miejskie",
+      description:
+        "Wonderer to elegancki model miejski JK Handmade Footwear z perforacją i personalizowanym wykończeniem.",
+      keywords: ["wonderer", "buty miejskie", "perforacja"]
+    },
+    category: "footwear",
+    funnelStage: "TOFU",
+    orderReference: mapOrderReference("model", "wonderer", "Model Wonderer")
+  },
+  {
+    id: "accessory-wax",
+    slug: "dedykowany-wosk",
+    name: "Dedykowany wosk pielęgnacyjny",
+    styleId: 5,
+    leatherId: 5,
+    description:
+      "Warsztatowy wosk na bazie naturalnych żywic, dostępny jako akcesorium w formularzu zamówienia natywnego.",
+    highlight: "Chroni skórę przed wilgocią i zabrudzeniami",
+    galleryCaptions: ["opakowanie", "aplikacja wosku", "połysk skóry"],
+    variantLeatherIds: [],
+    sizes: [],
+    craftProcess: [
+      "Dobór mieszanki wosków i olejów",
+      "Testy aplikacji na próbkach warsztatowych",
+      "Dołączenie instrukcji pielęgnacji do przesyłki"
+    ],
+    seo: {
+      title: "Dedykowany wosk do butów",
+      description:
+        "Dedykowany wosk JK Handmade Footwear podtrzymuje kondycję skóry i jest częścią pakietu pielęgnacyjnego.",
+      keywords: ["wosk do butów", "pielęgnacja", "akcesoria"]
+    },
+    category: "accessories",
+    funnelStage: "BOFU",
+    orderReference: mapOrderReference("accessory", "wax", "Wosk pielęgnacyjny"),
+    priceOverrideGrosz: 6_000
+  },
+  {
+    id: "accessory-impregnation",
+    slug: "impregnat-warsztatowy",
+    name: "Impregnat warsztatowy",
+    styleId: 5,
+    leatherId: 5,
+    description:
+      "Spray hydrofobowy zabezpieczający skórę przed wodą — rekomendowany do terenowych modeli obuwia.",
+    highlight: "Warstwa ochronna na 6 miesięcy intensywnego użycia",
+    galleryCaptions: ["aplikacja impregnatu", "detal kropli", "zestaw pielęgnacyjny"],
+    variantLeatherIds: [],
+    sizes: [],
+    craftProcess: [
+      "Dobór aktywnych składników impregnujących",
+      "Testy odporności na deszcz w warsztacie",
+      "Pakowanie z instrukcją użytkowania"
+    ],
+    seo: {
+      title: "Impregnat warsztatowy do skóry",
+      description:
+        "Impregnat warsztatowy JK Handmade Footwear zabezpiecza obuwie przed wodą i utrwala kolor skóry.",
+      keywords: ["impregnat", "akcesoria", "pielęgnacja"]
+    },
+    category: "accessories",
+    funnelStage: "BOFU",
+    orderReference: mapOrderReference("accessory", "impregnation", "Impregnat do skóry"),
+    priceOverrideGrosz: 7_500
+  },
+  {
+    id: "accessory-leather-straps",
+    slug: "rzemienie-do-buty",
+    name: "Para rzemieni skórzanych",
+    styleId: 5,
+    leatherId: 5,
+    description:
+      "Mocne rzemienie o długości 120 cm, używane jako zapasowe sznurowadła lub mocowania do akcesoriów.",
+    highlight: "Ręcznie cięte paski ze skóry bydlęcej",
+    galleryCaptions: ["rzemienie", "detal zakończeń", "wiązanie"],
+    variantLeatherIds: [],
+    sizes: [],
+    craftProcess: [
+      "Cięcie pasków na gilotynie warsztatowej",
+      "Woskowanie zakończeń dla trwałości",
+      "Kontrola jakości i kompletowanie pary"
+    ],
+    seo: {
+      title: "Rzemienie skórzane do butów",
+      description:
+        "Para rzemieni JK Handmade Footwear służy jako zapasowe sznurowadła lub mocowanie dodatkowych elementów.",
+      keywords: ["rzemienie", "akcesoria", "sznurowadła"]
+    },
+    category: "accessories",
+    funnelStage: "BOFU",
+    orderReference: mapOrderReference("accessory", "leather-straps", "Para rzemieni"),
+    priceOverrideGrosz: 4_000
+  },
+  {
+    id: "service-waterskin",
+    slug: "buklak-podrozny",
+    name: "Bukłak podróżny",
+    styleId: 5,
+    leatherId: 5,
+    description:
+      "Ręcznie szyty bukłak z tej samej skóry co obuwie — możesz dodać własny symbol lub herb w formularzu.",
+    highlight: "Wewnętrzna powłoka zabezpieczająca napoje",
+    galleryCaptions: ["bukłak w terenie", "detal tłoczenia", "system mocowania"],
+    variantLeatherIds: [],
+    sizes: [],
+    craftProcess: [
+      "Dobór skóry o odpowiedniej szczelności",
+      "Szycie bukłaka specjalnym szwem wodoodpornym",
+      "Tłoczenie symbolu lub herbu na życzenie"
+    ],
+    seo: {
+      title: "Bukłak podróżny do zestawu butów",
+      description:
+        "Bukłak podróżny JK Handmade Footwear to dodatek szyty na zamówienie z możliwością personalizacji symbolu.",
+      keywords: ["bukłak", "akcesoria", "personalizacja"]
+    },
+    category: "hydration",
+    funnelStage: "MOFU",
+    orderReference: mapOrderReference("service", "waterskin", "Bukłak podróżny"),
+    priceOverrideGrosz: 25_000
+  },
+  {
+    id: "service-shoe-trees",
+    slug: "prawidla-sosnowe",
+    name: "Prawidła sosnowe",
+    styleId: 5,
+    leatherId: 5,
+    description:
+      "Para prawideł wykonanych z drewna sosnowego, które utrzymują kształt butów i absorbują wilgoć po treningu.",
+    highlight: "Wymienne sprężyny dopasowane do rozmiaru butów",
+    galleryCaptions: ["prawidła w butach", "detal drewna", "mechanizm sprężynowy"],
+    variantLeatherIds: [],
+    sizes: [],
+    craftProcess: [
+      "Toczenie kopyt z litego drewna",
+      "Szlifowanie i olejowanie powierzchni",
+      "Montaż sprężyn dopasowanych do rozmiaru"
+    ],
+    seo: {
+      title: "Prawidła sosnowe do pielęgnacji obuwia",
+      description:
+        "Prawidła sosnowe JK Handmade Footwear utrzymują kształt butów i przedłużają ich żywotność.",
+      keywords: ["prawidła", "pielęgnacja", "akcesoria"]
+    },
+    category: "care",
+    funnelStage: "BOFU",
+    orderReference: mapOrderReference("service", "shoeTrees", "Prawidła sosnowe"),
+    priceOverrideGrosz: 15_000
   }
 ];
 
@@ -226,9 +501,14 @@ function createPlaceholderImage(name: string, caption: string) {
 }
 
 function computePrice(
+  template: ProductTemplate,
   style: CatalogStyle | undefined,
   leather: CatalogLeather | undefined
 ) {
+  if (typeof template.priceOverrideGrosz === "number") {
+    return Math.max(0, template.priceOverrideGrosz);
+  }
+
   const basePrice = style?.basePriceGrosz ?? 0;
   const leatherMod = leather?.priceModGrosz ?? 0;
   return Math.max(0, basePrice + leatherMod);
@@ -271,6 +551,9 @@ export function createMockProducts(
     const style = styleById.get(template.styleId) ?? styles[index % styles.length];
     const leather =
       leatherById.get(template.leatherId) ?? leathers[index % leathers.length];
+    const priceGrosz = computePrice(template, style, leather);
+    const categoryLabel = CATEGORY_LABELS[template.category] ?? template.category;
+    const funnelLabel = FUNNEL_LABELS[template.funnelStage] ?? template.funnelStage;
 
     return {
       id: template.id,
@@ -280,7 +563,12 @@ export function createMockProducts(
       leatherId: leather?.id ?? template.leatherId,
       description: template.description,
       highlight: template.highlight,
-      priceGrosz: computePrice(style, leather)
+      priceGrosz,
+      category: template.category,
+      categoryLabel,
+      funnelStage: template.funnelStage,
+      funnelLabel,
+      orderReference: template.orderReference
     } satisfies CatalogProductSummary;
   });
 }
@@ -312,10 +600,15 @@ export function getProductBySlug(
     leatherId: leather?.id ?? template.leatherId,
     description: template.description,
     highlight: template.highlight,
-    priceGrosz: computePrice(style, leather),
+    priceGrosz: computePrice(template, style, leather),
     gallery,
     variants: buildVariants(template, leatherById),
     craftProcess: template.craftProcess,
-    seo: template.seo
+    seo: template.seo,
+    category: template.category,
+    categoryLabel: CATEGORY_LABELS[template.category] ?? template.category,
+    funnelStage: template.funnelStage,
+    funnelLabel: FUNNEL_LABELS[template.funnelStage] ?? template.funnelStage,
+    orderReference: template.orderReference
   } satisfies CatalogProductDetail;
 }

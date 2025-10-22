@@ -225,6 +225,9 @@ const validateWeight = (node: NavigationNodeId, target: NavigationNodeId, weight
   return weight;
 };
 
+const isCommentKey = (key: string): boolean =>
+  key.startsWith("_") || key.startsWith("//") || key === "$comment" || key.startsWith("#");
+
 const parseNavigationWeights = (
   raw: unknown,
   graph: NavigationGraph,
@@ -236,6 +239,10 @@ const parseNavigationWeights = (
   const weights: NavigationWeightsConfig = {};
 
   for (const [nodeId, transitions] of Object.entries(raw)) {
+    if (isCommentKey(nodeId)) {
+      continue;
+    }
+
     assertIsNavigationNodeId(nodeId);
 
     if (transitions === null || typeof transitions !== "object" || Array.isArray(transitions)) {
@@ -246,6 +253,10 @@ const parseNavigationWeights = (
     const availableTargets = new Set(graph[nodeId].tokens.map((token) => token.target));
 
     for (const [targetId, weight] of Object.entries(transitions)) {
+      if (isCommentKey(targetId)) {
+        continue;
+      }
+
       assertIsNavigationNodeId(targetId);
 
       if (!availableTargets.has(targetId)) {

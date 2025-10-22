@@ -19,6 +19,7 @@
     "qa": "pnpm run cli -- quality",
     "qa:ci": "pnpm run cli -- quality:ci",
     "simulate:user-journeys": "tsx scripts/simulate-user-journeys.ts",
+    "simulate:navigation": "tsx scripts/simulate-navigation.ts",
     "db:generate": "drizzle-kit generate:pg",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "pnpm --filter @jk/db run seed",
@@ -50,10 +51,9 @@
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.13",
     "jsdom": "^27.0.1",
-    "tsx": "^4.16.2",
     "typescript": "5.5.4",
     "vitest": "2.1.1",
-    "tsx": "^4.7.1"
+    "tsx": "^4.16.2"
   },
   "packageManager": "pnpm@10.18.3"
 }

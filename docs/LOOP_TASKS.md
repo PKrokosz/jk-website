@@ -29,7 +29,8 @@
 - ✅ 2025-10-23 — Dodano testy prymitywów UI (`OrderButton`, `button`, `badge`) z pokryciem aria i focus state zgodnie z `docs/JAKOSC_TESTY_CI.md`.
 - ✅ 2025-10-24 — Dopisano testy API (`/api/styles`, `/api/leather`), rozszerzono scenariusze CLI i Playwright (nawigacja + API katalogu).
 - `x₂²`: Przygotować zestaw testów integracyjnych dla `/catalog/[slug]` i `/account` sprawdzających dostępność kluczowych CTA.
-- ⏭️ 2025-10-24 — Zaprojektować e2e flow zamówienia (Order modal → `/order/native`) z weryfikacją pól formularza.
+- ✅ 2025-10-24 — Zaimplementowano e2e flow zamówienia (Order modal → `/order/native`) z walidacją pól (`src/tests/e2e/order-native-flow.spec.ts`).
+- ⏭️ 2025-10-24 — Rozszerzyć e2e flow o prefill modelu z `/catalog/[slug]` i walidację pól koszyka (`/order/cart`).
 - `x₂ˣ`: Skonfigurować automatyczny raport pokrycia z wysyłką do Slacka/emailem po każdej gałęzi PR.
 
 ### Zadanie bazowe `x₃`: Urealnić obsługę leadów z formularza kontaktowego

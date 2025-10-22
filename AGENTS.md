@@ -22,6 +22,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `.env.example` zawiera komplet wymaganych przez walidator zmiennych z bezpiecznymi placeholderami (`NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, identyfikatory marketingowe). Skopiuj plik bez zmian, aby odpalić środowisko lokalne.
 - Narzędzia Drizzle automatycznie wczytają `.env.example`, gdy brakuje `.env.local`/`.env`, więc pierwszy start nie wymaga ręcznej konfiguracji zmiennych (pamiętaj jednak o nadpisaniu wartości przy realnych integracjach).
 - Nadpisuj wartości tylko, gdy integrujesz prawdziwe usługi (np. SMTP produkcyjne, realne piksle marketingowe). Dodając nowe zmienne, pamiętaj o aktualizacji `.env.example`, README i sekcji dokumentacyjnej opisującej walidację.
+- `tools/verify-drizzle-env.ts` oprócz listy brakujących zmiennych ostrzega, jeśli `DATABASE_URL` w `.env.example` nie zgadza się z `docker-compose.yml` (serwis `jkdb`). Traktuj ostrzeżenie jako obowiązkowe do naprawienia.
 
 ## Runbook (MVP workflow)
 1. Przeczytaj `docs/README_DOCS.md`, aby zrozumieć artefakty discovery.
@@ -120,7 +121,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.
 - Używaj `pnpm qa` do lokalnych kontroli jakości oraz `pnpm qa:ci` do pełnego przebiegu przed PR.
 - Flagi CLI: `--dry-run` (podgląd kroków) oraz `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`).
-- Pierwszy krok `quality`/`quality:ci` odpala `tools/verify-drizzle-env.ts`, aby upewnić się, że komplet zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) jest skonfigurowany. Skrypt wypisuje brakujące wpisy i przykładowe wartości – popraw `.env.local` zanim ruszysz dalej.
+- Pierwszy krok `quality`/`quality:ci` odpala `tools/verify-drizzle-env.ts`, aby upewnić się, że komplet zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) jest skonfigurowany. Skrypt wypisuje brakujące wpisy, przykładowe wartości i zgłasza ostrzeżenie, gdy `DATABASE_URL` odbiega od konfiguracji Dockera – popraw `.env.local` oraz `.env.example` zanim ruszysz dalej.
 - Entry point `tools/cli/index.ts` musi mieć odzwierciedlenie w testach (`tools/cli/__tests__/index.test.ts`) – w testach stubuj `process.exit` i logi (`console.log`, `console.error`), aby weryfikować komunikaty i kody wyjścia bez kończenia procesu.
 
 ## Czego NIE robić

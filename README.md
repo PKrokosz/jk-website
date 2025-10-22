@@ -66,16 +66,16 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 ### Zmienne środowiskowe
 
 - `DATABASE_URL` – connection string do instancji Postgresa; domyślna wartość w repo korzysta z `devuser/devpass@jkdb` zgodnie z Docker Compose.
-- Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który poinformuje o brakującej zmiennej `DATABASE_URL`.
+- Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który poinformuje o brakującej zmiennej `DATABASE_URL` i ostrzeże, gdy wpis z `.env.example` nie zgadza się z `docker-compose.yml` (serwis `jkdb`).
 - `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`). `.env.example` zawiera bezpieczną wersję demonstracyjną (`https://example.com/...`), którą możesz nadpisać w środowiskach staging/production.
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja serwera SMTP używanego do wysyłki wiadomości z formularza kontaktowego. Repo dostarcza lokalne placeholdery (`localhost`, `jkhandmade-dev`, `jkhandmade-dev-secret`), aby walidator przepuszczał środowisko developerskie.
 - `MAIL_FROM`, `MAIL_TO` – adres nadawcy i odbiorcy wiadomości wysyłanych przez `/api/contact/submit`.
 - `APP_BASE_URL` – adres aplikacji wykorzystywany do walidacji nagłówków `Origin`/`Referer` w API kontaktowym.
 - `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` – identyfikatory skryptów marketingowych. W `.env.example` znajdziesz placeholdery akceptowane przez walidator (np. `GTM-XXXXXXX`), które można zastąpić realnymi identyfikatorami przy wdrożeniu integracji.
 
-Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który raportuje brakujące wartości ze wszystkich powyższych kategorii i podpowiada, jak je uzupełnić.
+Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który raportuje brakujące wartości ze wszystkich powyższych kategorii, podpowiada jak je uzupełnić oraz porównuje `DATABASE_URL` z konfiguracją Dockera.
 
-> **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d jkdb` i korzystać z `devuser/devpass@jkdb`.
+> **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d jkdb` i korzystać z `devuser/devpass@jkdb`. Jeśli kiedyś pojawi się rozbieżność, `tools/verify-drizzle-env.ts` zgłosi ostrzeżenie.
 
 ### Uruchomienie Postgresa lokalnie
 
@@ -103,7 +103,7 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 | `pnpm test:integration` | Uruchamia testy Vitest korzystające z realnej bazy Drizzle (wymaga `.env.test` oraz działającego serwisu `jkdb`). |
 | `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
-| `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). |
+| `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) oraz sprawdza zgodność `DATABASE_URL` z `docker-compose.yml`. |
 | `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test). |
 | `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright i depcheck). |
 | `pnpm simulate:user-journeys` | Uruchamia symulacje ścieżek użytkowników na podstawie modułu `src/lib/navigation`. |
@@ -121,7 +121,7 @@ Repozytorium udostępnia warstwę CLI (`pnpm run cli`), która orkiestruje kroki
 - `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck; skrót `pnpm qa:ci`).
 - `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
 
-Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts` i sprawdza komplet wymaganych zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). Dzięki temu brak konfiguracji bazy lub mailingu jest raportowany zanim wystartuje lint czy testy.
+Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts`, sprawdza komplet wymaganych zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) i ostrzega o ewentualnej rozbieżności między `.env.example` a `docker-compose.yml`. Dzięki temu brak konfiguracji bazy lub mailingu jest raportowany zanim wystartuje lint czy testy.
 
 Testy CLI mockują `process.exit` i logi, dzięki czemu zachowania są weryfikowane bez kończenia procesu Node.js.
 

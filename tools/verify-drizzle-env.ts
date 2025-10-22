@@ -1,7 +1,17 @@
 #!/usr/bin/env tsx
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+
+type Logger = Pick<Console, "warn">;
+
+type ComposeDatabaseConfig = {
+  user: string;
+  password: string;
+  database: string;
+  hostPort: string;
+};
 
 export type EnvRequirement = {
   name: string;
@@ -72,6 +82,196 @@ export const collectMissingRequirements = (
 ): EnvRequirement[] =>
   requirements.filter((requirement) => isValueMissing(env[requirement.name]));
 
+const trimQuotes = (value: string): string => value.replace(/^['"](.*)['"]$/, "$1");
+
+const sanitizeValue = (value: string | undefined): string | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return trimQuotes(value.trim());
+};
+
+export const parseDockerComposeDatabaseConfig = (
+  composeContent: string
+): ComposeDatabaseConfig | null => {
+  const lines = composeContent.split(/\r?\n/);
+  let inServicesSection = false;
+  let inJkdbService = false;
+  let environmentIndent: number | null = null;
+  let portsIndent: number | null = null;
+  const environment: Record<string, string> = {};
+  let hostPort: string | null = null;
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\s+#.*$/, "");
+    if (line.trim().length === 0) {
+      continue;
+    }
+
+    if (!inServicesSection) {
+      if (/^services:\s*$/.test(line)) {
+        inServicesSection = true;
+      }
+      continue;
+    }
+
+    const serviceMatch = line.match(/^(\s*)([A-Za-z0-9_-]+):\s*$/);
+    if (serviceMatch) {
+      const indent = serviceMatch[1].length;
+      const name = serviceMatch[2];
+
+      if (indent <= 2) {
+        inJkdbService = name === "jkdb" && indent === 2;
+        environmentIndent = null;
+        portsIndent = null;
+        continue;
+      }
+    }
+
+    if (!inJkdbService) {
+      continue;
+    }
+
+    const environmentSectionMatch = line.match(/^(\s*)environment:\s*$/);
+    if (environmentSectionMatch) {
+      environmentIndent = environmentSectionMatch[1].length;
+      continue;
+    }
+
+    const portsSectionMatch = line.match(/^(\s*)ports:\s*$/);
+    if (portsSectionMatch) {
+      portsIndent = portsSectionMatch[1].length;
+      continue;
+    }
+
+    if (environmentIndent !== null) {
+      const indent = line.match(/^(\s*)/)?.[1].length ?? 0;
+      if (indent <= environmentIndent) {
+        environmentIndent = null;
+      } else {
+        const keyValueMatch = line.match(/^[\s-]*([A-Za-z0-9_]+):\s*(.+)?$/);
+        if (keyValueMatch) {
+          const key = keyValueMatch[1];
+          const rawValue = keyValueMatch[2] ?? "";
+          const value = sanitizeValue(rawValue);
+          if (value !== undefined) {
+            environment[key] = value;
+          }
+        }
+        continue;
+      }
+    }
+
+    if (portsIndent !== null) {
+      const indent = line.match(/^(\s*)/)?.[1].length ?? 0;
+      if (indent <= portsIndent) {
+        portsIndent = null;
+      } else {
+        const portMatch = line.match(/^[\s-]*"?(\d+):(\d+)"?\s*$/);
+        if (portMatch && hostPort === null) {
+          hostPort = portMatch[1];
+        }
+        continue;
+      }
+    }
+  }
+
+  const user = sanitizeValue(environment.POSTGRES_USER);
+  const password = sanitizeValue(environment.POSTGRES_PASSWORD);
+  const database = sanitizeValue(environment.POSTGRES_DB);
+  const port = sanitizeValue(hostPort ?? undefined) ?? "5432";
+
+  if (!user || !password || !database) {
+    return null;
+  }
+
+  return {
+    user,
+    password,
+    database,
+    hostPort: port
+  };
+};
+
+export const buildDatabaseUrlFromComposeConfig = (
+  config: ComposeDatabaseConfig,
+  host = "localhost"
+): string => {
+  const username = encodeURIComponent(config.user);
+  const password = encodeURIComponent(config.password);
+  const database = encodeURIComponent(config.database);
+  return `postgres://${username}:${password}@${host}:${config.hostPort}/${database}`;
+};
+
+export const extractDatabaseUrlFromEnvExample = (
+  envExampleContent: string
+): string | null => {
+  const match = envExampleContent.match(/^\s*DATABASE_URL\s*=\s*(.+)$/m);
+  return match ? match[1].trim() : null;
+};
+
+export const compareDatabaseUrlWithCompose = (
+  envExampleContent: string,
+  composeContent: string
+) => {
+  const envDatabaseUrl = extractDatabaseUrlFromEnvExample(envExampleContent);
+  const composeConfig = parseDockerComposeDatabaseConfig(composeContent);
+  const composeDatabaseUrl =
+    composeConfig !== null
+      ? buildDatabaseUrlFromComposeConfig(composeConfig)
+      : null;
+
+  if (!envDatabaseUrl || !composeDatabaseUrl) {
+    return {
+      envDatabaseUrl,
+      composeDatabaseUrl,
+      matches: null as const
+    };
+  }
+
+  return {
+    envDatabaseUrl,
+    composeDatabaseUrl,
+    matches: envDatabaseUrl === composeDatabaseUrl
+  } as const;
+};
+
+export const warnOnDatabaseUrlMismatch = (
+  envExamplePath = resolve(process.cwd(), ".env.example"),
+  composePath = resolve(process.cwd(), "docker-compose.yml"),
+  logger: Logger = console
+) => {
+  try {
+    const envExampleContent = readFileSync(envExamplePath, "utf8");
+    const composeContent = readFileSync(composePath, "utf8");
+    const comparison = compareDatabaseUrlWithCompose(envExampleContent, composeContent);
+
+    if (comparison.matches === false) {
+      logger.warn(
+        [
+          "⚠️  DATABASE_URL w .env.example różni się od konfiguracji docker-compose (serwis jkdb).",
+          `    .env.example : ${comparison.envDatabaseUrl}`,
+          `    docker-compose: ${comparison.composeDatabaseUrl}`,
+          "    Zaktualizuj plik, aby środowisko lokalne odpowiadało konfiguracji kontenera."
+        ].join("\n")
+      );
+    }
+
+    return comparison;
+  } catch (error) {
+    logger.warn(
+      "⚠️  Nie udało się porównać DATABASE_URL z docker-compose.yml. Upewnij się, że oba pliki istnieją.",
+      error
+    );
+    return {
+      envDatabaseUrl: null,
+      composeDatabaseUrl: null,
+      matches: null as const
+    };
+  }
+};
+
 export const formatRequirementMessage = (requirement: EnvRequirement): string => {
   const lines = [`- ${requirement.name}: ${requirement.description}`];
 
@@ -113,6 +313,7 @@ export const verifyEnvironment = (
 };
 
 const run = () => {
+  warnOnDatabaseUrlMismatch();
   const result = verifyEnvironment();
   if (!result.ok) {
     process.exit(1);

@@ -1,5 +1,17 @@
 # Design tokens i prymitywy UI
 
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Bazowe custom properties istnieją (`globals.css`). Tokens nie zostały jeszcze w pełni zaadoptowane w komponentach i gradientach; brak komponentu `Card`.
+- **Nowe ścieżki rozwoju**:
+  - Rozszerzyć tabelę o zmienne używane w `/group-orders`, `/cart` i legal pages (np. panel CTA, layout list sekcji).
+  - Przygotować JSON eksportowany do integracji (początek zadania `x₁ˣ` w `LOOP_TASKS.md`).
+  - Dodać checklistę kontrastu i referencję do narzędzia (np. `pnpm lint:tokens`).
+- **Rekomendacja archiwizacji**: Nie — dokument pozostaje źródłem prawdy dla stylu.
+- **Sens dokumentu**: Mapuje paletę, typografię, spacing i prymitywy UI, dzięki czemu projekt zachowuje spójność wizualną.
+- **Aktualizacje wykonane**:
+  - Dodano meta audyt i wskazówki dla nowych widoków.
+  - Zaznaczono konieczność eksportu tokens i checklisty kontrastu.
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Paleta kolorów](#paleta-kolorow)

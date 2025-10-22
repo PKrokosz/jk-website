@@ -37,6 +37,16 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Aktualizuj dokumenty, gdy zmienia się zakres funkcjonalny lub decyzje produktowe.
 - Raport z pomysłami na usprawnienia znajdziesz w `RAPORT_AGENT.md`.
 
+### Konwencja audytu dokumentów
+- Pliki `.md` w katalogu `docs/` muszą na początku zawierać sekcję `## Meta audytu <RRRR-MM-DD>` opisującą:
+  1. Status zagadnień z dokumentu (czy zostały zrealizowane, porzucone czy zastąpione).
+  2. Nowe ścieżki rozwoju (konkretne zadania do backlogu).
+  3. Rekomendację archiwizacji (tak/nie + uzasadnienie).
+  4. Sens dokumentu (po co istnieje).
+  5. Aktualizacje wykonane w bieżącej iteracji.
+- Sekcja meta powinna linkować do zaktualizowanych fragmentów dokumentu lub wskazywać na powiązane pliki.
+- Przy aktualizacji dokumentu dopisz datę audytu oraz zsynchronizuj status w `docs/README_DOCS.md`.
+
 ## Dokumentacja operacyjna `/docs`
 - Statusy dokumentacji są prowadzone w `docs/README_DOCS.md` → sekcja „Status aktualizacji dokumentów”. Zanim rozpoczniesz zadanie, sprawdź kolumnę „Kolejny krok w pętli” i po zakończeniu prac zaktualizuj wpis.
 - Pętlę backlogową prowadź w `docs/LOOP_TASKS.md`. Dla każdej obserwacji `x` twórz zadania `-x`, `1/x`, `x²`, `xˣ`. Po domknięciu pętli usuń wykonane pozycje i dopisz kolejną iterację.

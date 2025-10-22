@@ -1,5 +1,18 @@
 # Dane i API dla MVP
 
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Większość opisanych kontraktów istnieje w repo (w tym `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]`). Brakuje natomiast finalnej migracji Drizzle oraz spójnego endpointu `/api/products/[slug]`. Dokument zawiera zduplikowane akapity — usunięto je w tej iteracji.
+- **Nowe ścieżki rozwoju**:
+  - Dodać sekcję opisującą tabelę `quote_requests` oraz wymagania migracyjne (powiązać z zadaniem `x₃` w `LOOP_TASKS.md`).
+  - Zaplanować wdrożenie `/api/products/[slug]` z fallbackiem do mocków i dopisać test kontraktowy.
+  - Wprowadzić checklistę walidacji environment variables dla usług mailowych (SMTP) i zapisać ją w `JAKOSC_TESTY_CI.md`.
+- **Rekomendacja archiwizacji**: Nie — dokument jest źródłem prawdy dla modelu danych i kontraktów API.
+- **Sens dokumentu**: Definiuje schemat produktu, mapowanie stylów/skór, oraz opisuje kontrakty API wykorzystywane przez UI i testy.
+- **Aktualizacje wykonane**:
+  - Usunięto duplikaty w sekcji podsumowania i dopisano nowe endpointy (`/api/order/submit`, `/api/legal/[document]`).
+  - Wskazano brak `/api/products/[slug]` jako otwarte zadanie.
+  - Zsynchronizowano status z audytem meta (2025-10-29).
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Model danych produktu](#model-danych-produktu)
@@ -12,12 +25,10 @@
 
 ## Podsumowanie
 - Referencyjne dane katalogu (style, skóry, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`).
-- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote` są dostępne; `/api/styles`, `/api/leather` i `/api/products` korzystają z Drizzle ORM (styl/skóra) oraz templatek katalogowych.
-- Front (`/catalog`, `/catalog/[slug]`) konsumuje dane przez API Next.js, wykorzystując `fetchCatalogStyles`/`fetchCatalogLeathers` z revalidacją ISR.
-- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów i formularza kontaktowego.
-- MVP operuje na mockowanych danych w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień).
-- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote` są dostępne; `/api/products` obsługuje listę produktów i szczegóły na podstawie templatek katalogowych i danych z bazy.
-- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów i formularza kontaktowego.
+- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]` są dostępne; `/api/styles`, `/api/leather` i `/api/products` korzystają z Drizzle ORM (styl/skóra) oraz templatek katalogowych.
+- Front (`/catalog`, `/catalog/[slug]`, `/cart`, `/group-orders`) konsumuje dane przez API Next.js, wykorzystując `fetchCatalogStyles`/`fetchCatalogLeathers` z revalidacją ISR.
+- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów, formularza kontaktowego i zamówień.
+- MVP operuje na mockowanych danych w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień); migracja do Drizzle wciąż otwarta.
 
 ## Model danych produktu
 | Pole | Typ | Opis |

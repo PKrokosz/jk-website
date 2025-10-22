@@ -1,6 +1,19 @@
 # Wymagania MVP sklepu
 
-> **Status aktualizacji**: 2025-10-22 — obejmuje ścieżkę panelu klienta (`/account`) oraz wymagania pętli dokumentacyjnej.
+> **Status aktualizacji**: 2025-10-29 — poszerzono o `/group-orders`, `/cart`, strony prawne oraz aktualny stan formularzy.
+
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Większość wymagań MVP została wdrożona (w tym legal, panel klienta). Otwarte pozostają: migracja tokens, backend zamówień, sitemap/robots, ewentualne skeletony i analityka.
+- **Nowe ścieżki rozwoju**:
+  - Dodać szczegółowe wymagania dla `/group-orders` (sekcje hero, CTA, lead capture, e2e testy).
+  - Opisać wymagania `/cart` (prefill, walidacja, integracja z `/api/order/submit`).
+  - Dopisać w sekcji SEO warunki dla `robots.ts`/`sitemap.ts` oraz structured data.
+- **Rekomendacja archiwizacji**: Nie — dokument to fundament zakresu MVP.
+- **Sens dokumentu**: Definiuje ścieżki użytkownika i wymagania funkcjonalne/SEO/dostępnościowe dla całego MVP.
+- **Aktualizacje wykonane**:
+  - Uzupełniono sekcje nawigacji i dodatkowych stron o `/group-orders`, `/cart`, legal.
+  - Doprecyzowano status modalu zamówień oraz generacji SEO.
+  - Dodano meta audyt i powiązano follow-upy z backlogiem.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -25,7 +38,7 @@
 
 ## Nawigacja globalna
 - Sticky header (top 0, backdrop blur) dostępny na każdej stronie – ✅ zaimplementowane.
-- Linki: `Home`, `Catalog`, `About`, `Contact`, `Order` (CTA w modalu) – ✓.
+- Linki: `Home`, `Catalog`, `About`, `Contact`, `Order` (CTA w modalu), `Group Orders` – ✓.
 - Aktywny stan: `aria-current="page"`, wyróżnione style – ✓.
 - Responsywność: mobile-first, nav wrap – ✓, brak dedykowanego burgera (do rozważenia przy większej liczbie linków).
 - Skip link `Przejdź do głównej treści` prowadzi do `#main-content` – ✓ (testowany).
@@ -59,7 +72,14 @@
 - Statusy: `idle`, `submitting`, `success`, `error`, fallback link mailto – ✓.
 - `/order` osadza `NEXT_PUBLIC_ORDER_FORM_URL` w iframe z `sandbox`, `referrerPolicy`, fallback linkiem – ✓.
 - `/order/native` prezentuje listę modeli i CTA do formularza – ✓.
+- `/cart` prezentuje podsumowanie konfiguracji zamówienia, pozwala edytować parametry i kieruje do kontaktu – ✓ (prefill query, brak płatności online).
 - Do ustalenia: backend (n8n / email); treść zgody RODO wdrożona, czeka ewentualne potwierdzenie prawne.
+
+## Zamówienia grupowe (B2B)
+- `/group-orders` zawiera hero z CTA `mailto` i anchor do sekcji formularza – ✓.
+- Sekcja korzyści i proces 3 kroków prezentują wartość współpracy – ✓.
+- Brak dedykowanego formularza B2B – TODO (rozszerzyć `/api/order/submit` lub osobne API).
+- Do dopracowania: case studies/referencje oraz e2e test ścieżki `Home → Group Orders → Contact`.
 
 ## Panel klienta / Konto
 - `/account` jest mockową implementacją panelu klienta z czterema sekcjami: onboarding (hero), rejestracja, logowanie, historia zamówień, newsletter – ✓.
@@ -73,7 +93,7 @@
 - Metadata:
   - Strony: `Home`, `Catalog`, `Product`, `Order`, `Contact`, `About` mają ustawione `title`/`description` – ✓.
   - `generateMetadata` dla produktów w oparciu o mock SEO – ✓.
-  - Brak `robots.txt`/`sitemap.ts` – TODO przed publikacją.
+  - `robots.ts` i `sitemap.ts` istnieją – do rozszerzenia o `/cart`, strony prawne i B2B przed publikacją.
 - A11y:
   - Hierarchia nagłówków logiczna – ✓.
   - Alt-texty w galerii i portfolio – ✓ (opisowe, zgodne z brand voice).
@@ -88,7 +108,7 @@
 - Nazwy modeli zgodne z `ORDER_MODELS` i mockami – ✓.
 
 ## Wymogi legalne i operacyjne
-- `robots.txt`, `sitemap.xml` – brak implementacji (Next generatory do uruchomienia) – TODO.
+- `robots.txt`, `sitemap.ts` – wdrożone, wymagają weryfikacji zakresu tras (dodać `/cart`, strony prawne, B2B). – w toku.
 - Linki do polityki prywatności/regulaminu – dodane we footerze i prowadzą do stron informacyjnych – ✓.
 - Informacja o prawach autorskich – wdrożona we footerze – ✓.
 

@@ -1,8 +1,21 @@
 # Pętla zadań transformacyjnych
 
-> Ostatnia aktualizacja: 2025-10-22
+> Ostatnia aktualizacja: 2025-10-29
 >
 > Celem dokumentu jest pilnowanie cyklicznych zadań wynikających z obserwacji `x` oraz ich transformacji (`-x`, `1/x`, `x²`, `xˣ`). Po domknięciu pętli usuń zrealizowane wpisy i dopisz nową iterację.
+
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Iteracja 2025-10-22 została częściowo domknięta (`1/x₁`, `1/x₂`). Pozostałe transformacje wymagają kontynuacji i rozszerzenia o nowe obszary (`/group-orders`, `/cart`, SEO). Dokument nadal odzwierciedla backlog, ale potrzebuje nowej iteracji.
+- **Nowe ścieżki rozwoju**:
+  - Dodać zadanie bazowe `x₇`: utrzymanie sitemap/robots i structured data (powiązanie z `SEO_CHECKLIST.md`).
+  - Rozszerzyć `x₄` o konkretne działania dla `prefers-reduced-motion` oraz wizualnych testów UI.
+  - Zaplanować `x₈`: automatyczny audyt statusów dokumentów (porównanie meta vs. tabela w `README_DOCS.md`).
+- **Rekomendacja archiwizacji**: Nie — dokument jest aktywnym backlogiem pętli transformacyjnej.
+- **Sens dokumentu**: Zapewnia mechanizm ciągłego doskonalenia (transformacje `x`) i łączy obserwacje z planem pracy.
+- **Aktualizacje wykonane**:
+  - Uaktualniono datę iteracji i dodano meta audyt.
+  - Zaznaczono konieczność nowych zadań (`x₇`, `x₈`).
+  - Naprawiono zduplikowaną sekcję `x₅` (katalog fallback → `x₆`).
 
 ## Jak korzystać z pętli
 1. Zidentyfikuj obserwację lub potrzebę (`x`).
@@ -50,10 +63,23 @@
 - `1/x₅`: Zaprojektować komponenty `Button` i `Badge` eksportowane z `src/components/ui/primitives` wraz z mapowaniem wariantów na tokens.
 - `x₅²`: Zintegrować nowe komponenty w kluczowych widokach (`Home`, `Catalog`, `Order`) i zapewnić storybook/preview.
 - `x₅ˣ`: Dodać generator dokumentacji komponentów (MDX) synchronizowany z design tokens.
-### Zadanie bazowe `x₅`: Uspójnić fallback katalogu z docelową bazą danych
-- `-x₅`: Monitorować logi ostrzeżeń o fallbacku i dodać alert w telemetrii, aby łatwiej wykrywać brak połączenia z DB.
-- `1/x₅`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB.
-- `x₅²`: Zaimplementować cache warstwy katalogu (ISR + lokalny cache) i zsynchronizować go z Drizzle.
-- `x₅ˣ`: Dostarczyć healthcheck katalogu publikujący metryki (dostępność DB, czasy odpowiedzi, liczba fallbacków) do panelu obserwowalności.
+
+### Zadanie bazowe `x₆`: Uspójnić fallback katalogu z docelową bazą danych
+- `-x₆`: Monitorować logi ostrzeżeń o fallbacku i dodać alert w telemetrii, aby łatwiej wykrywać brak połączenia z DB.
+- `1/x₆`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB.
+- `x₆²`: Zaimplementować cache warstwy katalogu (ISR + lokalny cache) i zsynchronizować go z Drizzle.
+- `x₆ˣ`: Dostarczyć healthcheck katalogu publikujący metryki (dostępność DB, czasy odpowiedzi, liczba fallbacków) do panelu obserwowalności.
+
+### Zadanie bazowe `x₇`: Utrzymać SEO artefakty i structured data
+- `-x₇`: Dodać brakujące ścieżki (`/cart`, strony prawne, B2B) do `sitemap.ts` i `robots.ts`.
+- `1/x₇`: Przygotować snippet `JSON-LD` dla strony głównej i produktu oraz opisać go w `SEO_CHECKLIST.md`.
+- `x₇²`: Wprowadzić test automatyczny (np. `pnpm test:seo`) weryfikujący obecność structured data i meta tagów.
+- `x₇ˣ`: Zautomatyzować audyt Lighthouse (CI) i publikować raporty do Slacka/README.
+
+### Zadanie bazowe `x₈`: Automatyzować audyt dokumentacji discovery
+- `-x₈`: Stworzyć skrypt porównujący daty/ statusy w sekcjach meta dokumentów z tabelą `docs/README_DOCS.md` i raportujący rozbieżności.
+- `1/x₈`: Dodać checklistę manualną do PR (potwierdzenie aktualizacji statusów po zmianie dokumentacji).
+- `x₈²`: Włączyć skrypt do `pnpm qa` jako krok ostrzegający o niespójnościach.
+- `x₈ˣ`: Generować raport `docs/AUDYT_REPO2.md` automatycznie na podstawie metadanych i commitów.
 
 > Po zrealizowaniu dowolnego zadania z listy pamiętaj o aktualizacji dokumentów źródłowych (`UI_TOKENS.md`, `JAKOSC_TESTY_CI.md`, `DANE_I_API_MVP.md`) oraz sekcji statusów w `docs/README_DOCS.md`.

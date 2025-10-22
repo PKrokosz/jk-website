@@ -1,5 +1,17 @@
 # Jakość, testy i CI/CD
 
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Workflow CI działa i pokrywa wszystkie opisane kroki (`pnpm qa`, `pnpm qa:ci`). Pozostają otwarte działania opcjonalne (`pnpm test:e2e` dla kolejnych flow, monitorowanie coverage threshold). DoD wymaga konsekwentnego odhaczania pól.
+- **Nowe ścieżki rozwoju**:
+  - Ustalić minimalny próg coverage i opisać go w dokumencie (np. 85% pokrycia statements) oraz dodać w pipeline.
+  - Automatyzować weryfikację checklisty PR (np. skrypt CLI, który sprawdza wypełnienie sekcji w szablonie PR).
+  - Dopisać do `docs/LOOP_TASKS.md` zadanie na cykliczne przeglądy Playwright (utrzymanie scenariuszy w zgodzie z UI).
+- **Rekomendacja archiwizacji**: Nie — dokument jest aktywnie używany jako DoD i referencja dla CI.
+- **Sens dokumentu**: Określa Definition of Done, plan testów, konfigurację CI i konwencje pracy. Zapewnia, że każda zmiana przechodzi spójny zestaw kontroli jakości.
+- **Aktualizacje wykonane**:
+  - Dodano sekcję meta audytu i wskazano konieczność decyzji o progu coverage.
+  - Zsynchronizowano status dokumentu z audytem (2025-10-29).
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Definition of Done](#definition-of-done)

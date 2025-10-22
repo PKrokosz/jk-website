@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import {
@@ -25,8 +25,15 @@ function createSearchParams(query: string): ReadonlyURLSearchParams {
 }
 
 describe("ContactForm product prefill", () => {
+  let currentSearchParams: ReadonlyURLSearchParams;
+
+  const setSearchParams = (query: string) => {
+    currentSearchParams = createSearchParams(query);
+    mockedUseSearchParams.mockImplementation(() => currentSearchParams);
+  };
+
   beforeEach(() => {
-    mockedUseSearchParams.mockReturnValue(createSearchParams(""));
+    setSearchParams("");
   });
 
   afterEach(() => {
@@ -34,9 +41,7 @@ describe("ContactForm product prefill", () => {
   });
 
   it("prefills the product field when query param is provided", () => {
-    mockedUseSearchParams.mockReturnValue(
-      createSearchParams("product=Oxford%20No.8")
-    );
+    setSearchParams("product=Oxford%20No.8");
 
     render(<ContactForm />);
 
@@ -46,7 +51,7 @@ describe("ContactForm product prefill", () => {
   });
 
   it("renders an empty product field when query param is missing", () => {
-    mockedUseSearchParams.mockReturnValue(createSearchParams(""));
+    setSearchParams("");
 
     render(<ContactForm />);
 
@@ -56,9 +61,7 @@ describe("ContactForm product prefill", () => {
   });
 
   it("allows overriding the prefilled product value", () => {
-    mockedUseSearchParams.mockReturnValue(
-      createSearchParams("product=Oxford%20No.8")
-    );
+    setSearchParams("product=Oxford%20No.8");
 
     render(<ContactForm />);
 
@@ -67,6 +70,44 @@ describe("ContactForm product prefill", () => {
     ) as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: "Custom projekt" } });
+
+    expect(input).toHaveValue("Custom projekt");
+  });
+
+  it("clears the product field when the query param is removed", () => {
+    setSearchParams("product=Oxford%20No.8");
+
+    const { rerender } = render(<ContactForm />);
+
+    const input = screen.getByLabelText(
+      /Model lub referencja \(opcjonalnie\)/i
+    ) as HTMLInputElement;
+
+    expect(input).toHaveValue("Oxford No.8");
+
+    act(() => {
+      setSearchParams("");
+      rerender(<ContactForm />);
+    });
+
+    expect(input).toHaveValue("");
+  });
+
+  it("keeps the user-entered value when the query param is removed", () => {
+    setSearchParams("product=Oxford%20No.8");
+
+    const { rerender } = render(<ContactForm />);
+
+    const input = screen.getByLabelText(
+      /Model lub referencja \(opcjonalnie\)/i
+    ) as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: "Custom projekt" } });
+
+    act(() => {
+      setSearchParams("");
+      rerender(<ContactForm />);
+    });
 
     expect(input).toHaveValue("Custom projekt");
   });

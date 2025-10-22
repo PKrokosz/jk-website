@@ -1,6 +1,13 @@
 "use client";
 
-import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { useSearchParams } from "next/navigation";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
@@ -44,6 +51,9 @@ export function ContactForm() {
     [searchParams]
   );
 
+  const lastPrefilledProductRef = useRef<string | null>(
+    queryProduct || null
+  );
   const [data, setData] = useState<ContactFormData>(() => ({
     ...initialData,
     product: queryProduct
@@ -52,19 +62,41 @@ export function ContactForm() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!queryProduct) {
-      return;
-    }
-
     setData((current) => {
-      if (current.product.trim().length > 0) {
-        return current;
+      const lastPrefilledProduct = lastPrefilledProductRef.current;
+
+      if (queryProduct) {
+        if (queryProduct === lastPrefilledProduct) {
+          return current;
+        }
+
+        lastPrefilledProductRef.current = queryProduct;
+
+        if (
+          current.product.trim().length > 0 &&
+          current.product !== lastPrefilledProduct
+        ) {
+          return current;
+        }
+
+        return {
+          ...current,
+          product: queryProduct
+        };
       }
 
-      return {
-        ...current,
-        product: queryProduct
-      };
+      if (lastPrefilledProduct && current.product === lastPrefilledProduct) {
+        lastPrefilledProductRef.current = null;
+
+        return {
+          ...current,
+          product: ""
+        };
+      }
+
+      lastPrefilledProductRef.current = null;
+
+      return current;
     });
   }, [queryProduct]);
 
@@ -142,6 +174,7 @@ export function ContactForm() {
 
       if (response.ok) {
         setStatus("success");
+        lastPrefilledProductRef.current = queryProduct || null;
         setData({
           ...initialData,
           product: queryProduct

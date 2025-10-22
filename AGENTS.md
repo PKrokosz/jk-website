@@ -58,6 +58,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
+- Testy repozytorium katalogu mockujące `@jk/db` muszą przed każdym scenariuszem wywołać `__catalogRepositoryInternals.resetDbModuleCache()` (lub `vi.resetModules()`), aby korzystać z świeżego mocka modułu.
 - W testach modułu pricing korzystaj z helpera `createMockPricingDatabase` (`src/lib/pricing/__tests__/mock-db.ts`),
   aby odtworzyć metody Drizzle (`select`, `insert`, `values`) i móc destrukturyzować mocki.
 - Utrzymuj próg pokrycia 85% (Statements/Lines). `pnpm test:ci` uruchamia Vitest z reporterem `dot` i zakończy się błędem przy spadku poniżej limitu.

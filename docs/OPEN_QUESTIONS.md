@@ -28,7 +28,7 @@
 | 2 | Czy dostępne są logotypy, zdjęcia warsztatu, grafiki brandowe? W jakim formacie? | ⏳ | Aktualnie wykorzystujemy zdjęcia modeli z katalogu + wideo w hero. Potrzebne materiały finalne. |
 | 3 | Czy preferowane fonty (np. EB Garamond) są zatwierdzone/licencjonowane? | ⏳ | W projekcie działa fallback `Inter`; brak decyzji dot. serif. |
 | 4 | Jakie kanały social (Instagram, Facebook, LinkedIn) mają być linkowane w stopce? | ✅ | Kontakt posiada linki do Instagram + Facebook (placeholders). Potwierdzić czy dodać inne kanały. |
-| 5 | Czy istnieje polityka prywatności/regulamin do podlinkowania (nawet w formie placeholdera PDF)? | ✅ | Pełna polityka prywatności wdrożona na `/privacy-policy`; regulamin nadal w przygotowaniu. |
+| 5 | Czy istnieje polityka prywatności/regulamin do podlinkowania (nawet w formie placeholdera PDF)? | ✅ | Pełna polityka prywatności wdrożona na `/privacy-policy`; finalny regulamin dostępny na `/terms`. |
 
 ## Pytania techniczne i operacyjne
 | # | Pytanie | Status | Notatka |

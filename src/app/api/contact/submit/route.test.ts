@@ -45,14 +45,17 @@ function makeRequest(body: unknown, options?: { origin?: string; ip?: string }) 
 describe("POST /api/contact/submit", () => {
   beforeEach(() => {
     process.env.APP_BASE_URL = "https://jkhandmade.pl";
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "587";
-    process.env.SMTP_USER = "user";
-    process.env.SMTP_PASS = "pass";
+    process.env.SMTP_HOST = "localhost";
+    process.env.SMTP_PORT = "1025";
+    process.env.SMTP_USER = "jkhandmade-dev";
+    process.env.SMTP_PASS = "jkhandmade-dev-secret";
     process.env.MAIL_FROM = "JK Handmade Footwear <jkhandmade@example.com>";
     process.env.MAIL_TO = "kontakt@jkhandmade.pl";
     nodemailerMock.sendMail.mockResolvedValue({});
   });
+
+  // Walidator środowiska dopuszcza powyższe placeholdery (`localhost`, `jkhandmade-dev`),
+  // dzięki czemu scenariusze lokalne przechodzą bez dodatkowej konfiguracji.
 
   afterEach(() => {
     vi.clearAllMocks();

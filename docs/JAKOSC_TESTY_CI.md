@@ -24,6 +24,7 @@ Checklist dla każdego PR:
 - [ ] `pnpm test:coverage` – wymagane dla zmian w logice domenowej/komponentach (raport w `coverage/`).
 - [x] `pnpm build` – uruchamiane przy zmianach w konfiguracji/routingu.
 - [ ] `pnpm depcheck` – min. raz na sprint (monitoring zależności).
+- [ ] `pnpm db:seed` – opcjonalnie przed testami, aby odświeżyć referencyjne dane w lokalnej bazie (CI korzysta z tej samej komendy).
 - [x] Zaktualizowana dokumentacja (jeśli zmiana dotyczy feature'a).
 - [x] Screen/gif dla zmian UI (desktop + mobile, jeśli istotne).
 
@@ -105,6 +106,7 @@ jobs:
 ```
 - `pnpm build` odpalany jest na Node 20.x jako głównym środowisku referencyjnym.
 - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
+- Seedy katalogu uruchamiane są skryptem `pnpm db:seed` (wykorzystuje pakiet `@jk/db`); CI może go wywołać w jobie przygotowującym bazę.
 
 ## Konwencje commitów i PR
 - Commity: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:`).

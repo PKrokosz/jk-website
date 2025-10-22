@@ -82,6 +82,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "price_mod_grosz": {
           "name": "price_mod_grosz",
           "type": "integer",

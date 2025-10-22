@@ -19,6 +19,7 @@ export const leather = pgTable("leather", {
   name: text("name").notNull(),              // np. Veg-tan, Pull-up
   color: text("color").notNull(),            // np. Brown
   finish: text("finish"),                    // np. Matte, Waxed
+  description: text("description"),
   priceModGrosz: integer("price_mod_grosz").default(0),
   active: boolean("active").default(true)
 });

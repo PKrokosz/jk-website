@@ -77,6 +77,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `/api/pricing/quote` korzysta z `pricingQuoteRequestSchema`/`pricingQuoteResponseSchema` (`src/lib/pricing/schemas.ts`) – przy zmianach aktualizuj testy kontraktowe w `src/app/api/pricing/quote/route.test.ts`.
 - Logi `/api/pricing/quote` są zapisywane w tabeli `quote_requests` (Drizzle); korzystaj z repozytorium `src/lib/pricing/quote-requests-repository.ts`, aby łatwo mockować zapisy w testach.
 - Handlery API korzystające z bazy sprawdzają `process.env.DATABASE_URL` w runtime i inicjalizują klienta DB dopiero wewnątrz funkcji `GET`/`POST` (bez top-level side-effectów); w razie braku konfiguracji zwracaj `HTTP 500` z komunikatem dla klienta.
+- Korzystaj z helpera `@/lib/db/next-client` (`getNextDbClient`) do współdzielenia połączenia w środowisku Next.js – moduł sam weryfikuje `DATABASE_URL`, cache'uje klienta i wystawia `resetNextDbClient` na potrzeby testów.
+- Migruj pozostałe handlery DB (`/api/products`, `/api/styles`, `/api/leather`) na helper podczas kolejnych zadań, aby spójnie zarządzać połączeniami.
 - Testy kontraktowe API opieraj o schematy z `src/lib/catalog/schemas.ts`, mockuj moduł `@/lib/catalog/repository`, aby nie łączyć się z bazą.
 - Mocki (`src/lib/catalog`) z rozszerzonym modelem (slug, warianty, order reference) do czasu podłączenia Drizzle.
 - Repozytorium katalogu ma fallback do danych referencyjnych (`src/lib/catalog/data.ts`) w razie braku połączenia z bazą — nie usuwaj testów `repository.fallback.test.ts` i unikaj top-level importów `@jk/db` w modułach produkcyjnych.

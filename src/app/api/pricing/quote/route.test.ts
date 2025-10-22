@@ -22,6 +22,9 @@ vi.mock("@/lib/pricing/quote-requests-repository", () => ({
   insertQuoteRequestLog: vi.fn().mockResolvedValue(undefined)
 }));
 
+const dbClientHelper = await import("@/lib/db/next-client");
+const { resetNextDbClient } = dbClientHelper;
+
 const dbModule = await import("@jk/db");
 const mockedCreateDbClient = vi.mocked(dbModule.createDbClient);
 
@@ -51,6 +54,7 @@ function makeRequest(body: unknown, headers: Record<string, string> = {}) {
 
 describe("POST /api/pricing/quote", () => {
   beforeEach(() => {
+    resetNextDbClient();
     mockedCreateDbClient.mockClear();
     mockedCreateDbClient.mockReturnValue({
       db: {} as import("@jk/db").Database,
@@ -161,6 +165,7 @@ describe("POST /api/pricing/quote", () => {
 });
 
 afterAll(() => {
+  resetNextDbClient();
   process.env.DATABASE_URL = ORIGINAL_DATABASE_URL;
   consoleErrorSpy.mockRestore();
 });

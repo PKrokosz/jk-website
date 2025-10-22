@@ -6,7 +6,8 @@ import {
   insertQuoteRequestLog
 } from "@/lib/pricing/quote-requests-repository";
 import { pricingQuoteRequestSchema, pricingQuoteResponseSchema } from "@/lib/pricing/schemas";
-import { createDbClient, type Database, type DbClient } from "@jk/db";
+import { DatabaseConfigurationError, getNextDbClient } from "@/lib/db/next-client";
+import type { Database } from "@jk/db";
 
 const RATE_LIMIT_MAX_REQUESTS = 10;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 godzina
@@ -14,16 +15,6 @@ const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 godzina
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
-
-let cachedDbClient: DbClient | null = null;
-
-function getDatabase(connectionString: string): Database {
-  if (!cachedDbClient) {
-    cachedDbClient = createDbClient(connectionString);
-  }
-
-  return cachedDbClient.db;
-}
 
 function getClientIp(request: NextRequest): string {
   if (request.ip) {
@@ -57,24 +48,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const databaseUrl = process.env.DATABASE_URL;
-
-  if (!databaseUrl) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "Database connection is not configured. Please try again later."
-      },
-      { status: 500 }
-    );
-  }
-
   let database: Database;
 
   try {
-    database = getDatabase(databaseUrl);
+    database = getNextDbClient().db;
   } catch (error) {
     console.error("Failed to initialize database client", error);
+
+    if (error instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Database connection is not configured. Please try again later."
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {

@@ -4499,6 +4499,14 @@ ul {
   align-items: center;
 }
 
+.legal-page__actions {
+  margin-top: var(--space-24, 1.5rem);
+}
+
+.legal-page__actions .button {
+  width: fit-content;
+}
+
 .order-history {
   margin-top: 2rem;
 }

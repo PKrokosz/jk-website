@@ -18,6 +18,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: "./vitest.setup.ts",
+    exclude: ["node_modules/**", "src/tests/e2e/**"],
     coverage: {
       reporter: ["text", "lcov"],
       provider: "v8"

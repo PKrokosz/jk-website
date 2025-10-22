@@ -15,6 +15,13 @@
       "when": 1761101778000,
       "tag": "0001_add_leather_description",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761105400000,
+      "tag": "0002_add_quote_requests",
+      "breakpoints": false
     }
   ]
 }

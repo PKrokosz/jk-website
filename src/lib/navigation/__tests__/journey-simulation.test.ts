@@ -1,3 +1,5 @@
+import { resolve as resolvePath } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -97,6 +99,23 @@ describe("navigation weight configuration", () => {
     expect(homeToken?.weight).toBe(5);
   });
 
+  it("ignores comment keys in JSON configuration", () => {
+    const env = {
+      NAVIGATION_WEIGHTS_JSON: JSON.stringify({
+        _comment: "source -> target -> weight",
+        home: {
+          _comment: "home transitions",
+          contact: 4,
+        },
+      }),
+    } satisfies NodeJS.ProcessEnv;
+
+    const graph = buildNavigationGraph({ env });
+    const contactToken = graph.home.tokens.find((token) => token.target === "contact");
+
+    expect(contactToken?.weight).toBe(4);
+  });
+
   it("throws when the JSON configuration is invalid", () => {
     const env = {
       NAVIGATION_WEIGHTS_JSON: "{not-valid",
@@ -133,6 +152,27 @@ describe("navigation weight configuration", () => {
     expect(() => buildNavigationGraph({ env })).toThrowError(
       /does not have a transition/,
     );
+  });
+
+  it("loads overrides from JSON file referenced by NAVIGATION_WEIGHTS_PATH", () => {
+    const configPath = resolvePath(
+      process.cwd(),
+      "config/navigation-weights.example.json",
+    );
+
+    const env = {
+      NAVIGATION_WEIGHTS_PATH: configPath,
+    } satisfies NodeJS.ProcessEnv;
+
+    const graph = buildNavigationGraph({ env });
+
+    const catalogToken = graph.home.tokens.find((token) => token.target === "catalog");
+    const contactToken = graph.home.tokens.find((token) => token.target === "contact");
+    const groupOrdersToken = graph.catalog.tokens.find((token) => token.target === "groupOrders");
+
+    expect(catalogToken?.weight).toBe(6);
+    expect(contactToken?.weight).toBe(3);
+    expect(groupOrdersToken?.weight).toBe(4);
   });
 });
 

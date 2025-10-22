@@ -1,0 +1,17 @@
+{
+  "_comment": "Format: source node id -> target node id -> numeric weight (positive number).",
+  "home": {
+    "_comment": "Transitions leaving the home page.",
+    "catalog": 6,
+    "contact": 3
+  },
+  "catalog": {
+    "_comment": "Example boost of return traffic to home and discovery of group offers.",
+    "home": 2,
+    "groupOrders": 4
+  },
+  "product": {
+    "_comment": "Stronger pull toward native order checkout.",
+    "orderNative": 5
+  }
+}

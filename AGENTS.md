@@ -29,6 +29,12 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Aktualizuj dokumenty, gdy zmienia się zakres funkcjonalny lub decyzje produktowe.
 - Raport z pomysłami na usprawnienia znajdziesz w `RAPORT_AGENT.md`.
 
+## Dokumentacja operacyjna `/docs`
+- Statusy dokumentacji są prowadzone w `docs/README_DOCS.md` → sekcja „Status aktualizacji dokumentów”. Zanim rozpoczniesz zadanie, sprawdź kolumnę „Kolejny krok w pętli” i po zakończeniu prac zaktualizuj wpis.
+- Pętlę backlogową prowadź w `docs/LOOP_TASKS.md`. Dla każdej obserwacji `x` twórz zadania `-x`, `1/x`, `x²`, `xˣ`. Po domknięciu pętli usuń wykonane pozycje i dopisz kolejną iterację.
+- Upewnij się, że zmiany w kodzie mają odzwierciedlenie w dedykowanych dokumentach tematycznych (`UI_TOKENS.md`, `JAKOSC_TESTY_CI.md`, `DANE_I_API_MVP.md`, `SEO_CHECKLIST.md`).
+- Kończąc zadanie, dopisz follow-up w `docs/LOOP_TASKS.md` oraz uzupełnij checklisty w dokumentach, których dotyczyła praca.
+
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.

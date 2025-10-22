@@ -1,5 +1,7 @@
 # Wymagania MVP sklepu
 
+> **Status aktualizacji**: 2025-10-22 — obejmuje ścieżkę panelu klienta (`/account`) oraz wymagania pętli dokumentacyjnej.
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Nawigacja globalna](#nawigacja-globalna)
@@ -14,11 +16,12 @@
 - [11. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- MVP obejmuje ścieżkę: Home → Catalog (z filtrami) → Product (dynamiczny slug) → Order (modal / `/order`) → Contact (formularz).
+- MVP obejmuje ścieżkę: Home → Catalog (z filtrami) → Product (dynamiczny slug) → Order (modal / `/order`) → Contact (formularz) → Account (mock panel klienta z onboardingiem).
 - Globalna nawigacja jest sticky, posiada skip link, aktywny stan i działa na wszystkich podstronach.
 - Katalog działa na mockowanych danych (styles/leathers/products) z możliwością sortowania, filtrów i stanu pustego.
 - Strona produktu renderuje galerię, warianty, CTA do zamówień, breadcrumbs i personalizowane metadata.
 - Kontakt zawiera hero z danymi pracowni oraz formularz z walidacją i komunikatami statusu; `/order` osadza formularz natywny.
+- Panel klienta `/account` pozwala rejestrować konto, logować się, przeglądać mockowaną historię zamówień i zapisać się na newsletter.
 
 ## Nawigacja globalna
 - Sticky header (top 0, backdrop blur) dostępny na każdej stronie – ✅ zaimplementowane.
@@ -58,6 +61,14 @@
 - `/order/native` prezentuje listę modeli i CTA do formularza – ✓.
 - Do ustalenia: backend (n8n / email); treść zgody RODO wdrożona, czeka ewentualne potwierdzenie prawne.
 
+## Panel klienta / Konto
+- `/account` jest mockową implementacją panelu klienta z czterema sekcjami: onboarding (hero), rejestracja, logowanie, historia zamówień, newsletter – ✓.
+- Formularze rejestracji/logowania wykorzystują lokalny state (mock), walidują pola podstawowe i raportują sukces – ✓.
+- Historia zamówień prezentuje listę przykładowych zamówień z datami i statusami – ✓.
+- Newsletter ma oddzielną walidację i komunikaty statusów – ✓.
+- TODO: podłączenie prawdziwego backendu auth + synchronizacja z Drizzle.
+- TODO: dodać łączniki nawigacyjne z headera/footeru do panelu po potwierdzeniu zakresu MVP.
+
 ## SEO i dostępność
 - Metadata:
   - Strony: `Home`, `Catalog`, `Product`, `Order`, `Contact`, `About` mają ustawione `title`/`description` – ✓.
@@ -95,6 +106,7 @@
 - [x] Zebrano wymagania SEO/a11y (zaktualizowane o status modalów i sitemap).
 - [x] Zatwierdzono treści About + RODO przez właściciela.
 - [x] Dodano legal footer (sitemap/robots pozostają do wdrożenia).
+- [x] Określono zakres mockowego panelu klienta wraz z checklistą TODO.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**

@@ -13,7 +13,7 @@
 ## Podsumowanie
 - MVP operuje na mockowanych danych w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień).
 - Endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` są dostępne; lista produktów i szczegóły obsługiwane są lokalnie (`CatalogExplorer`, `getProductBySlug`).
-- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`), brak jeszcze schematów Zod – do dodania przy wprowadzaniu backendu.
+- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schemat Zod w backendzie formularza kontaktowego.
 
 ## Model danych produktu
 | Pole | Typ | Opis |
@@ -55,7 +55,7 @@
   - Brak SSR fetch – dane z pliku TS.
 - **Order/Contact**
   - `OrderModalTrigger` wykorzystuje `orderReference` do preselektowania parametrów (URL query) w `/order/native`.
-  - Formularz kontaktowy przyjmuje `product` w query (`/contact?product=slug`) – do zaimplementowania autopodpowiedzi (TODO).
+  - Formularz kontaktowy przyjmuje `product` w query (`/contact?product=slug`) i automatycznie uzupełnia pole formularza, jeśli parametr jest obecny.
 
 ## Kontrakty endpointów API
 | Endpoint | Metoda | Input | Output | Notatki |
@@ -63,6 +63,7 @@
 | `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Cache domyślny (ISR) – do rozważenia `revalidate`. |
 | `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Mockowe dane z `data.ts`. |
 | `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; brak walidacji Zod. |
+| `/api/contact/submit` | POST | `{ name, email, phone?, message, product?, website? }` | `{ ok: true }` lub `{ error }` | Walidacja Zod, rate-limit per IP, honeypot `website`, wysyłka maila przez SMTP. |
 | `/api/products` | — | brak | — | Brak endpointu – filtracja po stronie klienta (zostawione do czasu integracji z DB). |
 | `/api/products/[slug]` | — | brak | — | Niezaimplementowane – strona produktu korzysta z funkcji bibliotecznych. |
 
@@ -71,7 +72,7 @@
 - Komponenty UI:
   - `CatalogExplorer` obsługuje brak wyników tekstem.
   - `ProductPage` wywołuje `notFound()` dla nieistniejącego sluga; brak fallbacku `error.tsx` (opcjonalny future work).
-  - `ContactForm` waliduje pola klientowo (regex email, required, consent) i ustawia `status` + komunikaty.
+- `ContactForm` waliduje pola klientowo (regex email, min 10 znaków, zgoda) i korzysta z API `/api/contact/submit` z walidacją Zod oraz kodami błędów 422/429/502.
 - Logging: `console.error` w `ContactForm` do rozważenia przy integracji backendu.
 
 ## Checklisty kontrolne
@@ -79,7 +80,8 @@
 - [x] Opisano, jak zasilać katalog i produkt bez back-endu.
 - [x] Spisano aktualne endpointy i ich status.
 - [ ] Dodano schematy Zod dla `PricingRequest` i potencjalnych API produktów.
-- [ ] Utworzono backend dla formularza kontaktowego / autopodpowiedź `product`.
+- [x] Utworzono backend dla formularza kontaktowego (`/api/contact/submit`).
+- [x] Autopodpowiedź pola `product` w formularzu na podstawie query paramu.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
@@ -89,7 +91,7 @@
 - **Decyzje do podjęcia**
   - Czy potrzebujemy `/api/products` przed integracją z Drizzle?
   - Jak mapować `orderReference` przy przejściu na realne dane (np. ID z bazy)?
-  - Czy `ContactForm` powinien wypełniać pole produktu na podstawie query paramu automatycznie?
+  - Autopodpowiedź pola `product` w `ContactForm` na podstawie query paramu – ✅ wdrożona (prefill po stronie klienta).
 - **Następne kroki**
   - Dodać walidację Zod i testy dla `calculateQuote` + endpointu.
   - Przygotować konwersję mocków do seeda Drizzle (JSON/SQL).

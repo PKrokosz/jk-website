@@ -113,7 +113,7 @@ export function AccountLoginForm() {
         <button className="button button--primary" type="submit" disabled={isSubmitDisabled}>
           {isSubmitting ? "Logujemy..." : "Zaloguj się"}
         </button>
-        <a className="button button--ghost" href="mailto:pracownia@jk-footwear.pl">
+        <a className="button button--ghost" href="mailto:kontakt@jkhandmade.pl">
           Zapomniałem hasła
         </a>
       </div>

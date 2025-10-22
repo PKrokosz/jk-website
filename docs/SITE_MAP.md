@@ -38,15 +38,15 @@
 │   ├── Detale (opis, proces)
 │   └── Warianty personalizacji
 ├── About (/about)
-│   └── Treść o pracowni (placeholder copy)
+│   └── Treść o pracowni (finalne copy + CTA)
 ├── Group Orders (/group-orders)
 │   ├── Hero (CTA mailto + link do kontaktu)
 │   ├── Lista benefitów współpracy
 │   └── Sekcja procesu 3 kroków + CTA konsultacji
 ├── Contact (/contact)
 │   ├── Hero kontaktu (dane, CTA)
-│   ├── Formularz
-│   └── Sekcja warsztatu (adres, godziny, social)
+│   ├── Sekcja warsztatu (adres, godziny, powody wizyty)
+│   └── Formularz
 └── Order (/order)
     ├── Osadzony formularz (iframe)
     └── Order native (/order/native) – lista modeli + CTA do pełnego formularza
@@ -85,7 +85,7 @@
 | --- | --- | --- | --- |
 | Hero kontaktu | H1, lead, dane kontaktowe, social | `mailto`, `tel`, anchor do formularza | Stały |
 | Formularz | Inputy, textarea, checkbox zgody | Submit (walidacja, status), `mailto` fallback | Status `idle/submitting/success/error` |
-| Sekcja warsztatu | Adres, godziny, social | Link do Instagram/Facebook | Placeholder content |
+| Sekcja warsztatu | Adres, godziny, lista benefitów wizyty | Link anchor do formularza | Stały content |
 
 ### 3.5 Order
 | Sekcja | Elementy | CTA | Stany |
@@ -96,7 +96,7 @@
 ### 3.6 Group Orders
 | Sekcja | Elementy | CTA | Stany |
 | --- | --- | --- | --- |
-| Hero współpracy | Eyebrow, H1, lead, opis, CTA `mailto` i anchor do `/contact#contact-form` | `mailto:pracownia@jk-footwear.pl`, `/contact#contact-form` | Stały |
+| Hero współpracy | Eyebrow, H1, lead, opis, CTA `mailto` i anchor do `/contact#contact-form` | `mailto:kontakt@jkhandmade.pl`, `/contact#contact-form` | Stały |
 | Korzyści partnerstwa | Karta benefitów (lista 3 pozycji) | Linki w tekście (brak dodatkowych CTA) | Stały |
 | Proces w 3 krokach | Lista numerowana (counter), lead | Brak – informacyjna | Stały |
 | CTA konsultacji | Panel CTA z przyciskami kontaktu | `mailto`, `tel` | Stały |
@@ -116,7 +116,7 @@
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
   - Brak skeletonów na stronie produktu może skutkować migotaniem przy wczytywaniu (zwł. w ISR/SSR).
-  - Formularz kontaktowy bez backendu może powodować niespójność flow.
+  - Backend formularza kontaktowego (SMTP) wymaga konfiguracji środowiskowej i monitoringu błędów.
 - **Decyzje do podjęcia**
   - Czy dodajemy sekcję powiązanych modeli lub FAQ w `/catalog/[slug]` i `/order/native`?
   - Czy `/order/native` ma zastąpić modal w przyszłości (spójność flow)?

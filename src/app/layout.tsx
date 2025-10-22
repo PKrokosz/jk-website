@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import React, { type ReactNode } from "react";
 
 import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 import { AppProviders } from "./providers";
 import "./globals.css";
 
@@ -57,9 +58,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      maxImagePreview: "large",
-      maxSnippet: -1,
-      maxVideoPreview: -1
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1
     }
   }
 };
@@ -78,6 +79,7 @@ export default function RootLayout({
           <div className="site-content" id="main-content">
             {children}
           </div>
+          <Footer />
         </AppProviders>
       </body>
     </html>

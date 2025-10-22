@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 
 import { ContactForm } from "@/components/contact/ContactForm";
+import { sanitizeProductQuery } from "@/lib/contact/sanitizeProduct";
 
 export const metadata: Metadata = {
   title: "Kontakt",
@@ -9,7 +10,13 @@ export const metadata: Metadata = {
     "Umów konsultację w pracowni JK Handmade Footwear. Skontaktuj się z nami telefonicznie, mailowo lub przez formularz."
 };
 
-export default function ContactPage() {
+type ContactPageProps = {
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default function ContactPage({ searchParams }: ContactPageProps) {
+  const productHint = sanitizeProductQuery(searchParams?.product ?? null);
+
   return (
     <main className="page contact-page" aria-labelledby="contact-heading">
       <section className="section hero hero--immersive contact-hero" aria-labelledby="contact-heading">
@@ -17,7 +24,7 @@ export default function ContactPage() {
           <div className="hero__background-image">
             <Image
               src="/image/models/12.jfif"
-              alt=""
+              alt="Skórzane buty męskie typu derby szyte ręcznie w warszawskiej pracowni JK Handmade."
               fill
               sizes="(max-width: 1024px) 140vw, 100vw"
               priority
@@ -28,20 +35,18 @@ export default function ContactPage() {
         <div className="container hero__layout">
           <div className="hero__intro">
             <p className="eyebrow">Warszawska pracownia bespoke</p>
-            <h1 id="contact-heading">Skontaktuj się z mistrzem</h1>
+            <h1 id="contact-heading">Umów konsultację w JK Handmade Footwear</h1>
             <p className="lead">
-              Opowiedz nam o swojej wizji obuwia i scenariuszu LARP. Odpowiemy z terminem konsultacji oraz rekomendacją
-              personalizacji.
+              Opowiedz nam o projekcie, wydarzeniu i oczekiwanym terminie. Odpowiemy z propozycją konsultacji oraz listą kroków do zamówienia.
             </p>
             <p>
-              Spotkania prowadzimy w pracowni oraz online. Zadzwoń, napisz lub umów się przez formularz — wrócimy z
-              konkretnymi krokami zamówienia.
+              Przyjmujemy w pracowni i online. Zadzwoń, napisz lub zostaw wiadomość przez formularz — odezwiemy się z rekomendacją dopasowaną do Twojego projektu.
             </p>
             <dl className="contact-info contact-info--hero" aria-label="Sposoby kontaktu">
               <div>
                 <dt>Email</dt>
                 <dd>
-                  <a href="mailto:pracownia@jk-footwear.pl">pracownia@jk-footwear.pl</a>
+                  <a href="mailto:kontakt@jkhandmade.pl">kontakt@jkhandmade.pl</a>
                 </dd>
               </div>
               <div>
@@ -66,8 +71,7 @@ export default function ContactPage() {
             <div className="contact-hero__card" aria-labelledby="contact-details-heading">
               <h2 id="contact-details-heading">Godziny i lokalizacja</h2>
               <p className="contact-hero__summary">
-                Mistrz szycia czeka na Ciebie w sercu Warszawy. Uprzedź nas o wizycie, a przygotujemy próbki skór i modele z
-                katalogu.
+                Uprzedź nas o wizycie, a przygotujemy próbki skór, kopyta i wybrane modele z katalogu.
               </p>
               <dl className="contact-hero__details">
                 <div>
@@ -78,9 +82,7 @@ export default function ContactPage() {
                   <dt>Godziny konsultacji</dt>
                   <dd>
                     <ul>
-                      <li>Poniedziałek – Piątek: 10:00 – 18:00</li>
-                      <li>Sobota: 10:00 – 14:00</li>
-                      <li>Niedziela: zamknięte</li>
+                      <li>Poniedziałek – Piątek: 10:00–18:00 (po wcześniejszym umówieniu)</li>
                     </ul>
                   </dd>
                 </div>
@@ -98,6 +100,38 @@ export default function ContactPage() {
         </div>
       </section>
 
+      <section className="section contact-workshop" aria-labelledby="contact-workshop-heading">
+        <div className="container contact-workshop__container">
+          <div className="contact-workshop__content">
+            <h2 id="contact-workshop-heading">Odwiedź nasz warsztat</h2>
+            <p>
+              Pracownia mieści się w Warszawie, w spokojnej okolicy, gdzie zapach skóry miesza się z aromatem wosku i kawy.
+            </p>
+            <p>
+              Tu obejrzysz próbki skór, dopasujesz kopyta i zobaczysz, jak powstają Twoje buty – krok po kroku.
+            </p>
+            <dl className="contact-workshop__hours" aria-label="Godziny przyjęć">
+              <div>
+                <dt>Godziny przyjęć</dt>
+                <dd>pon.–pt. 10:00–18:00 (po wcześniejszym umówieniu)</dd>
+              </div>
+            </dl>
+            <div className="contact-workshop__reasons" aria-label="Dlaczego warto wpaść">
+              <h3>Dlaczego warto wpaść:</h3>
+              <ul>
+                <li>zobaczysz rzemiosło z bliska</li>
+                <li>omówisz projekt z mistrzem</li>
+                <li>przymierzysz próbne formy</li>
+                <li>otrzymasz wstępną wycenę i termin realizacji</li>
+              </ul>
+            </div>
+            <a className="button button--primary" href="#contact-form">
+              Umów konsultację
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section id="contact-form" className="section contact-form-section" aria-labelledby="contact-form-heading">
         <div className="container contact-layout">
           <div className="contact-panel">
@@ -105,7 +139,7 @@ export default function ContactPage() {
             <p className="lead">
               Opisz wydarzenie, styl ubioru i preferowany termin odbioru. Odezwiesz się – my zaproponujemy rozwiązanie.
             </p>
-            <ContactForm />
+            <ContactForm initialProduct={productHint} />
           </div>
         </div>
       </section>

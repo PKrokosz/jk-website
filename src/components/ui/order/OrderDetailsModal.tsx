@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import type { PricingQuote } from "@/lib/pricing/calc";
 
@@ -46,7 +46,7 @@ export function OrderDetailsModal({
 }: OrderDetailsModalProps) {
   const [formValues, setFormValues] = useState<OrderDetailsFormValues>(initialFormValues);
   const [errors, setErrors] = useState<Partial<Record<keyof OrderDetailsFormValues, string>>>({});
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<ReactNode>(null);
   const [submitting, setSubmitting] = useState(false);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
@@ -175,7 +175,12 @@ export function OrderDetailsModal({
       setFormValues(initialFormValues);
     } catch (error) {
       console.error("Nie udało się zapisać konfiguracji w koszyku", error);
-      setFormError("Nie udało się dodać konfiguracji. Spróbuj ponownie.");
+      setFormError(
+        <>
+          Nie udało się przesłać formularza. Sprawdź połączenie lub napisz bezpośrednio na{" "}
+          <a href="mailto:kontakt@jkhandmade.pl">kontakt@jkhandmade.pl</a>.
+        </>
+      );
     } finally {
       setSubmitting(false);
     }

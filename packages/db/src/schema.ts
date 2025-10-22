@@ -1,5 +1,11 @@
 import {
-  pgTable, serial, text, integer, boolean, timestamp, jsonb
+  pgTable,
+  serial,
+  text,
+  integer,
+  boolean,
+  timestamp,
+  jsonb
 } from "drizzle-orm/pg-core";
 
 /** Słowniki */
@@ -82,4 +88,14 @@ export const order = pgTable("order", {
   totalsJson: jsonb("totals_json"),                     // breakdown ceny
   acceptTerms: boolean("accept_terms").default(false),
   createdAt: timestamp("created_at").defaultNow()
+});
+
+/** Logi zapytań o wycenę */
+export const quoteRequest = pgTable("quote_requests", {
+  id: serial("id").primaryKey(),
+  ipAddress: text("ip_address").notNull(),
+  userAgent: text("user_agent"),
+  payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+  quote: jsonb("quote").$type<Record<string, unknown>>().notNull(),
+  requestedAt: timestamp("requested_at").defaultNow().notNull()
 });

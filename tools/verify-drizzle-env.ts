@@ -211,10 +211,16 @@ export const extractDatabaseUrlFromEnvExample = (
   return match ? match[1].trim() : null;
 };
 
+type DatabaseUrlComparison = {
+  envDatabaseUrl: string | null;
+  composeDatabaseUrl: string | null;
+  matches: boolean | null;
+};
+
 export const compareDatabaseUrlWithCompose = (
   envExampleContent: string,
   composeContent: string
-) => {
+): DatabaseUrlComparison => {
   const envDatabaseUrl = extractDatabaseUrlFromEnvExample(envExampleContent);
   const composeConfig = parseDockerComposeDatabaseConfig(composeContent);
   const composeDatabaseUrl =
@@ -226,7 +232,7 @@ export const compareDatabaseUrlWithCompose = (
     return {
       envDatabaseUrl,
       composeDatabaseUrl,
-      matches: null as const
+      matches: null
     };
   }
 
@@ -267,7 +273,7 @@ export const warnOnDatabaseUrlMismatch = (
     return {
       envDatabaseUrl: null,
       composeDatabaseUrl: null,
-      matches: null as const
+      matches: null
     };
   }
 };

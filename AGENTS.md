@@ -14,8 +14,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `pnpm test:coverage`               # raport pokrycia (opcjonalnie na PR)
 - `pnpm test:e2e`                    # scenariusze Playwright (najpierw `pnpm exec playwright install --with-deps`)
 - `pnpm depcheck`                    # higiena zależności
-- `pnpm qa`                          # lokalna bramka jakości (lint, typecheck, test)
-- `pnpm qa:ci`                       # pełny zestaw CI (lint, typecheck, build, test, coverage, e2e, depcheck)
+- `pnpm qa`                          # lokalna bramka jakości (lint, typecheck, test, dry-run `pnpm db:generate` blokujący brudny katalog `drizzle/`)
+- `pnpm qa:ci`                       # pełny zestaw CI (lint, typecheck, build, test, coverage, e2e, depcheck, dry-run `pnpm db:generate`)
 - `pnpm test:integration`            # testy Vitest z realną bazą (wymaga `.env.test`, migracji i seeda)
 - `pnpm db:generate`                 # generuje migracje (Drizzle Kit >= 0.31 korzysta z komendy `generate`)
 
@@ -127,6 +127,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.
 - Używaj `pnpm qa` do lokalnych kontroli jakości oraz `pnpm qa:ci` do pełnego przebiegu przed PR.
 - Flagi CLI: `--dry-run` (podgląd kroków) oraz `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`).
+- Pierwszy krok po weryfikacji środowiska uruchamia `pnpm db:generate -- --dry-run` i przerywa proces, jeśli `git status --short drizzle` zwraca zmiany – traktuj to jak obowiązkową bramkę.
 - `quality:ci` zawiera krok `cleanup-node20-db`, który po scenariuszu Node 20 uruchamia `docker compose down --volumes jkdb`; można go pominąć flagą `--skip=cleanup-node20-db`.
 - CLI przed parsowaniem argumentów ładuje zmienne środowiskowe z `.env.local`, następnie `.env`, a na końcu `.env.example` (tylko gdy plik istnieje i nie nadpisuje ustawionych wartości).
 - Pierwszy krok `quality`/`quality:ci` odpala `tools/verify-drizzle-env.ts`, aby upewnić się, że komplet zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) jest skonfigurowany. Skrypt wypisuje brakujące wpisy, przykładowe wartości i zgłasza ostrzeżenie, gdy `DATABASE_URL` odbiega od konfiguracji Dockera – popraw `.env.local` oraz `.env.example` zanim ruszysz dalej.

@@ -105,8 +105,8 @@ Po skończonej pracy zatrzymaj kontener i usuń wolumeny poleceniem `docker comp
 | `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 | `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) oraz sprawdza zgodność `DATABASE_URL` z `docker-compose.yml`. |
-| `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test). |
-| `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright, depcheck i sprzątaniem `docker compose down --volumes jkdb`). |
+| `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test + dry-run `pnpm db:generate` pilnujący czystości `drizzle/`). |
+| `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright, depcheck, sprzątaniem `docker compose down --volumes jkdb` i dry-run `pnpm db:generate`). |
 | `pnpm simulate:user-journeys` | Uruchamia symulacje ścieżek użytkowników na podstawie modułu `src/lib/navigation`. |
 | `pnpm simulate:navigation` | Agreguje dane przejść na grafie nawigacji (obsługuje flagi `--config`, `--user-count`, `--summary`). |
 | `pnpm db:generate` | Generuje migrację Drizzle na podstawie zmian w schemacie. |
@@ -118,8 +118,8 @@ Po skończonej pracy zatrzymaj kontener i usuń wolumeny poleceniem `docker comp
 Repozytorium udostępnia warstwę CLI (`pnpm run cli`), która orkiestruje kroki jakościowe i udostępnia flagi ułatwiające automatyzację:
 
 - `pnpm run cli -- --list` – lista dostępnych komend wraz z opisem.
-- `pnpm run cli -- quality` – pełny przebieg lint + typecheck + test (skrót dostępny jako `pnpm qa`).
-- `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck; skrót `pnpm qa:ci`).
+- `pnpm run cli -- quality` – pełny przebieg lint + typecheck + test wraz z dry-run `pnpm db:generate`, który blokuje zadanie przy braku commitów migracji (skrót dostępny jako `pnpm qa`).
+- `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck + dry-run `pnpm db:generate`; skrót `pnpm qa:ci`).
 - Po scenariuszu Node 20 CLI automatycznie wywołuje `docker compose down --volumes jkdb`, aby zutylizować kontener bazy; w razie debugowania można pominąć krok flagą `--skip=cleanup-node20-db`.
 - `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
 
@@ -168,6 +168,7 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 - `pnpm test:ci` wykonuje ten sam zestaw testów w trybie bez interakcji i kończy się błędem, jeśli próg pokrycia nie zostanie spełniony.
 - `pnpm test:e2e` wykonuje scenariusze Playwright (pobranie dokumentów prawnych + smoke test nawigacji i API katalogu; przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
 - `pnpm test:integration` korzysta z `.env.test` oraz helpera Drizzle, aby wykonać zapytania na żywej bazie danych (uruchom wcześniej `docker compose up -d jkdb`, a następnie `pnpm db:migrate` i `pnpm db:seed`).
+- Bramka `pnpm qa`/`pnpm qa:ci` od razu upewnia się, że `pnpm db:generate -- --dry-run` nie wprowadza zmian w `drizzle/`, więc PR nie przejdzie z niezatwierdzonymi migracjami.
 - Linting (`pnpm lint`), statyczna analiza typów (`pnpm typecheck`) i kontrola zależności (`pnpm depcheck`) odtwarzają etapy pipeline CI.
 - Dla modułu nawigacji dostępne są dodatkowe symulacje (`pnpm simulate:*`) z testami snapshotowymi agregacji przejść.
 

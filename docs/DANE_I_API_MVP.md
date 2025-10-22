@@ -12,12 +12,12 @@
 
 ## Podsumowanie
 - Referencyjne dane katalogu (style, skóry, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`).
-- Endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` są dostępne; `/api/styles` i `/api/leather` korzystają z Drizzle ORM zamiast mocków.
+- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote` są dostępne; `/api/styles`, `/api/leather` i `/api/products` korzystają z Drizzle ORM (styl/skóra) oraz templatek katalogowych.
 - Front (`/catalog`, `/catalog/[slug]`) konsumuje dane przez API Next.js, wykorzystując `fetchCatalogStyles`/`fetchCatalogLeathers` z revalidacją ISR.
-- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`), brak jeszcze schematów Zod – do dodania przy wprowadzaniu backendu.
+- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów i formularza kontaktowego.
 - MVP operuje na mockowanych danych w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień).
-- Endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` są dostępne; lista produktów i szczegóły obsługiwane są lokalnie (`CatalogExplorer`, `getProductBySlug`).
-- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schemat Zod w backendzie formularza kontaktowego.
+- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote` są dostępne; `/api/products` obsługuje listę produktów i szczegóły na podstawie templatek katalogowych i danych z bazy.
+- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów i formularza kontaktowego.
 
 ## Model danych produktu
 | Pole | Typ | Opis |
@@ -68,11 +68,11 @@
 | `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Dane z tabeli `leather` (Drizzle ORM, revalidate 3600 s). |
 | `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; brak walidacji Zod. |
 | `/api/contact/submit` | POST | `{ name, email, phone?, message, product?, website? }` | `{ ok: true }` lub `{ error }` | Walidacja Zod, rate-limit per IP, honeypot `website`, wysyłka maila przez SMTP. |
-| `/api/products` | — | brak | — | Brak endpointu – filtracja po stronie klienta (zostawione do czasu integracji z DB). |
+| `/api/products` | GET | `?slug?` | `{ data: CatalogProductSummary[] }` lub `{ data: CatalogProductDetail }` | Lista produktów katalogu lub szczegóły pojedynczego produktu. Walidacja query i payloadu w Zod. |
 | `/api/products/[slug]` | — | brak | — | Niezaimplementowane – strona produktu korzysta z funkcji bibliotecznych. |
 
 ## Walidacja i obsługa błędów
-- Walidacja requestów API: brak Zod – dodać `PricingRequestSchema`, `QuoteResponseSchema`.
+- Walidacja requestów API: dodano schematy Zod dla `/api/products` (query i payload), nadal brak dla `PricingRequest`/`QuoteResponse`.
 - Komponenty UI:
   - `CatalogExplorer` obsługuje brak wyników tekstem.
   - `ProductPage` wywołuje `notFound()` dla nieistniejącego sluga; brak fallbacku `error.tsx` (opcjonalny future work).

@@ -1,7 +1,12 @@
 import "server-only";
 
 import { resolveApiUrl } from "@/lib/http/base-url";
-import type { CatalogLeather, CatalogStyle } from "@/lib/catalog/types";
+import type {
+  CatalogLeather,
+  CatalogProductDetail,
+  CatalogProductSummary,
+  CatalogStyle
+} from "@/lib/catalog/types";
 
 interface ApiResponse<T> {
   data: T;
@@ -26,4 +31,13 @@ export function fetchCatalogStyles(): Promise<CatalogStyle[]> {
 
 export function fetchCatalogLeathers(): Promise<CatalogLeather[]> {
   return fetchCatalogResource<CatalogLeather[]>("/api/leather");
+}
+
+export function fetchCatalogProducts(): Promise<CatalogProductSummary[]> {
+  return fetchCatalogResource<CatalogProductSummary[]>("/api/products");
+}
+
+export function fetchCatalogProductDetail(slug: string): Promise<CatalogProductDetail> {
+  const path = `/api/products?slug=${encodeURIComponent(slug)}`;
+  return fetchCatalogResource<CatalogProductDetail>(path);
 }

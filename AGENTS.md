@@ -50,7 +50,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Assets: folder `public/image/` zawiera zdjęcia produktów i background hero; traktuj nazwy plików jako źródło prawdy dla nazw modeli w mockach (`src/lib/catalog`).
 
 ## API/DB
-- Endpointy: `/api/styles`, `/api/leather`, `/api/pricing/quote` (mock). Brak `/api/products` – filtracja po stronie klienta.
+- Endpointy: `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote` (mock). `/api/products` korzysta z Drizzle (styl/skóra) + templatek, walidacja Zod.
+- Testy kontraktowe API opieraj o schematy z `src/lib/catalog/schemas.ts`, mockuj moduł `@/lib/catalog/repository`, aby nie łączyć się z bazą.
 - Mocki (`src/lib/catalog`) z rozszerzonym modelem (slug, warianty, order reference) do czasu podłączenia Drizzle.
 - Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku.
 

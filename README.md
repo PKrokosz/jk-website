@@ -67,11 +67,12 @@ Repozytorium sklepu MTO „JK Handmade Footwear” zbudowanego na Next.js 14 (Ap
    ```bash
    pnpm approve-builds
    ```
-3. Skopiuj konfiguracje środowiska:
+3. (Opcjonalnie) Skopiuj konfiguracje środowiska, jeśli chcesz od razu nadpisać wartości domyślne:
    ```bash
    cp .env.example .env.local
    cp .env.test.example .env.test   # opcjonalnie, jeśli uruchamiasz testy integracyjne
    ```
+   > Skrypt weryfikujący środowisko samodzielnie wczytuje `.env.local`, `.env` oraz `.env.example`, dlatego pierwszy start projektu nie wymaga ręcznego kopiowania zmiennych.
 4. (Opcjonalnie) Uruchom walidację środowiska:
    ```bash
    pnpm exec tsx tools/verify-drizzle-env.ts
@@ -87,7 +88,7 @@ Repozytorium sklepu MTO „JK Handmade Footwear” zbudowanego na Next.js 14 (Ap
 - `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` – identyfikatory skryptów marketingowych.
 - `NAVIGATION_WEIGHTS_PATH` / `NAVIGATION_WEIGHTS_JSON` – opcjonalne źródło wag dla symulatora nawigacji (`pnpm simulate:navigation`).
 
-`tools/verify-drizzle-env.ts` raportuje brakujące wartości, podpowiada przykładowe wpisy i porównuje `DATABASE_URL` z konfiguracją Dockera. Skrypt działa jako pierwszy krok komend `pnpm qa` i `pnpm qa:ci`.
+`tools/verify-drizzle-env.ts` raportuje brakujące wartości, podpowiada przykładowe wpisy, automatycznie ładuje `.env.local`, `.env` i `.env.example`, a także porównuje `DATABASE_URL` z konfiguracją Dockera. Dzięki temu pierwsze uruchomienie projektu nie wymaga wcześniejszego kopiowania zmiennych — wystarczy w razie potrzeby nadpisać je lokalnie. Skrypt działa jako pierwszy krok komend `pnpm qa` i `pnpm qa:ci`.
 
 ### Uruchomienie Postgresa lokalnie
 

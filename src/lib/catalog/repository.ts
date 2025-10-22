@@ -31,6 +31,16 @@ async function loadDbModule(): Promise<DbModule | null> {
   }
 }
 
+export const __catalogRepositoryInternals = {
+  loadDbModule,
+  getCachedDbModule(): DbModule | null {
+    return cachedDbModule;
+  },
+  resetDbModuleCache(): void {
+    cachedDbModule = null;
+  }
+};
+
 function getFallbackStyles(): CatalogStyle[] {
   return [...catalogStyles].sort((a, b) => a.id - b.id);
 }

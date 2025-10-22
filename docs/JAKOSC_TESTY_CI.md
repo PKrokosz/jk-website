@@ -46,6 +46,7 @@ Checklist dla każdego PR:
 | --- | --- | --- | --- | --- |
 | Nawigacja (`Header`, `NavLink`, skip link) | Unit | Render linków, stan aktywny, aria-current | Vitest + RTL | ✅ `layout.test.tsx` |
 | Katalog (`CatalogExplorer`) | Component | Filtry (style/leather), sortowanie, empty state | Vitest + RTL | ✅ (testy w `src/components/catalog/__tests__`) |
+| Repozytorium katalogu (cache modułu DB) | Unit | Cache importu `@jk/db`, fallback ostrzeżeń | Vitest | ✅ (`src/lib/catalog/__tests__/repository.loadDbModule.test.ts`) |
 | Strona produktu | Component/server | Render breadcrumb, galeria, CTA, 404 fallback | Vitest + RTL | ✅ (testy w `src/app/catalog/__tests__`) |
 | SEO/Metadata | Unit | `generateMetadata` zwraca właściwe tytuły/opisy | Vitest | ✅ (pokryte w `product-page.test.tsx`) |
 | UI prymitywy (`button`, `badge`) | Accessibility | Style/role, focus ring, warianty kolorystyczne | Vitest + `@testing-library/react` | ✅ (`src/components/ui/__tests__/button.primitive.test.tsx`, `src/components/ui/__tests__/badge.primitive.test.tsx`) |

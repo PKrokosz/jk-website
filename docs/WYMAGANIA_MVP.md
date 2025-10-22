@@ -83,6 +83,7 @@
 
 ## Elementy dodatkowe dla klikowalnego MVP
 - Sticky header + skip link – ✓.
+- Panel klienta: rejestracja, logowanie, historia zamówień i newsletter (mock) – ✓.
 - Footer – obecnie minimalny (copyright brak) – TODO.
 - Loading states: katalog ma skeleton, produkt/iframe rely on native fallback – dodać w razie potrzeby.
 - Testowe dane (mock JSON/TS) – ✓.

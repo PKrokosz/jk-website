@@ -45,6 +45,7 @@ describe("Header", () => {
     expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Group Orders" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Account" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Przejdź do koszyka" })).toBeInTheDocument();
   });
 

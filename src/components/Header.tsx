@@ -9,6 +9,8 @@ const navigationItems = [
   { href: "/", label: "Home", exact: true },
   { href: "/catalog", label: "Catalog" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+  { href: "/account", label: "Account" }
   { href: "/group-orders", label: "Group Orders" },
   { href: "/contact", label: "Contact" }
 ] satisfies ReadonlyArray<{

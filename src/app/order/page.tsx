@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import React from "react";
 
 import { ORDER_FORM_URL } from "@/config/order";
@@ -67,6 +68,18 @@ export default function OrderPage() {
             loading="lazy"
           />
         </div>
+
+        <nav className="page-navigation order-page__navigation" aria-label="Alternatywne ścieżki zamówienia">
+          <Link className="button button--primary" href="/order/native">
+            Przetestuj formularz natywny
+          </Link>
+          <Link className="button button--ghost" href="/catalog">
+            Przeglądaj katalog modeli
+          </Link>
+          <Link className="button button--ghost" href="/contact">
+            Skontaktuj się z nami
+          </Link>
+        </nav>
       </div>
     </main>
   );

@@ -3,6 +3,7 @@
 import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 
 import { sanitizeProductQuery } from "@/lib/contact/sanitizeProduct";
+import React, { ChangeEvent, FormEvent, useMemo, useState } from "react";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -273,6 +274,10 @@ export function ContactForm({ initialProduct }: ContactFormProps) {
           </span>
           <span className="field__hint">
             Administratorem jest JK Handmade Footwear. Szczegóły w {" "}
+            Wyrażam zgodę na przetwarzanie moich danych osobowych w celu udzielenia odpowiedzi na zapytanie wysłane przez formularz kontaktowy.
+          </span>
+          <span className="field__hint">
+            Administratorem danych jest <strong>JK Handmade Footwear</strong>. Dane nie będą przekazywane podmiotom trzecim i zostaną usunięte po zakończeniu korespondencji. Szczegóły znajdziesz w naszej {" "}
             <a href="/privacy-policy">Polityce prywatności</a>.
           </span>
         </span>

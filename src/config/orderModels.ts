@@ -7,30 +7,36 @@ export interface OrderModel {
   requiresCalfMeasurement?: boolean;
 }
 
-const modelImages = [
-  "1.jfif",
-  "2.jfif",
-  "3.jfif",
-  "4.jfif",
-  "5.jfif",
-  "6.jfif",
-  "7.jfif",
-  "8.jfif",
-  "9.jfif",
-  "10.jfif",
-  "11.jfif",
-  "12.jfif",
-  "13.jfif",
-  "14.jfif",
-  "15.jfif",
-  "16.jfif"
-];
-
 const placeholderImage = "placeholder.svg";
 
-const imageForIndex = (index: number) => {
-  const value = modelImages[index];
-  return `/image/models/${value ?? placeholderImage}`;
+const MODEL_IMAGE_MAP = {
+  szpic: "1.jfif",
+  owal: "2.jfif",
+  klamry: "3.jfif",
+  "wysokie-szpice": "4.jfif",
+  "krowie-pyski": "5.jfif",
+  tamer: "6.jfif",
+  "wysokie-cholewy": "7.jfif",
+  "przelotka-na-sabatony": "8.jfif",
+  trzewiki: "9.jfif",
+  zakladki: "16.jfif",
+  obiezyswiat: "10.jfif",
+  "obiezyswiat-szyta-warga": "11.jfif",
+  dragonki: "12.jfif",
+  wonderer: "13.jfif",
+  "kamienny-przodek": "14.jfif",
+  "wysokie-krowie-pyski": "15.jfif"
+} as const;
+
+const MODEL_IMAGE_ALIAS_MAP = {
+  "krowie-pyski-za-kostke": "krowie-pyski"
+} as const;
+
+const resolveModelImage = (id: string) => {
+  const aliasTarget = (MODEL_IMAGE_ALIAS_MAP as Record<string, keyof typeof MODEL_IMAGE_MAP>)[id];
+  const lookupId = aliasTarget ?? (id as keyof typeof MODEL_IMAGE_MAP);
+  const filename = (MODEL_IMAGE_MAP as Record<string, string>)[lookupId];
+  return `/image/models/${filename ?? placeholderImage}`;
 };
 
 export const ORDER_MODELS: OrderModel[] = [
@@ -38,28 +44,28 @@ export const ORDER_MODELS: OrderModel[] = [
     id: "szpic",
     name: "Szpic",
     price: 750,
-    image: imageForIndex(0),
+    image: resolveModelImage("szpic"),
     googleValue: "Szpic - 750 zł"
   },
   {
     id: "owal",
     name: "Owal",
     price: 750,
-    image: imageForIndex(1),
+    image: resolveModelImage("owal"),
     googleValue: "Owal - 750 zł"
   },
   {
     id: "klamry",
     name: "Klamry",
     price: 1100,
-    image: imageForIndex(2),
-    googleValue: "Klamry -1100 zł"
+    image: resolveModelImage("klamry"),
+    googleValue: "Klamry - 1100 zł"
   },
   {
     id: "wysokie-szpice",
     name: "Wysokie szpice",
     price: 1150,
-    image: imageForIndex(3),
+    image: resolveModelImage("wysokie-szpice"),
     googleValue: "Wysokie szpice - 1150 zł",
     requiresCalfMeasurement: true
   },
@@ -67,21 +73,21 @@ export const ORDER_MODELS: OrderModel[] = [
     id: "krowie-pyski",
     name: "Krowie pyski",
     price: 600,
-    image: imageForIndex(4),
+    image: resolveModelImage("krowie-pyski"),
     googleValue: "Krowie pyski - 600 zł"
   },
   {
     id: "tamer",
     name: "Tamer",
     price: 1200,
-    image: imageForIndex(5),
+    image: resolveModelImage("tamer"),
     googleValue: "Tamer - 1200 zł"
   },
   {
     id: "wysokie-cholewy",
     name: "Wysokie Cholewy",
     price: 1300,
-    image: imageForIndex(6),
+    image: resolveModelImage("wysokie-cholewy"),
     googleValue: "Wysokie Cholewy - 1300 zł",
     requiresCalfMeasurement: true
   },
@@ -89,63 +95,63 @@ export const ORDER_MODELS: OrderModel[] = [
     id: "przelotka-na-sabatony",
     name: "Przelotka na sabatony",
     price: 700,
-    image: imageForIndex(7),
+    image: resolveModelImage("przelotka-na-sabatony"),
     googleValue: "Przelotka na sabatony - 700 zł"
   },
   {
     id: "trzewiki",
     name: "Trzewiki",
     price: 550,
-    image: imageForIndex(8),
+    image: resolveModelImage("trzewiki"),
     googleValue: "Trzewiki - 550 zł"
   },
   {
     id: "zakladki",
     name: "Zakładki",
     price: 700,
-    image: imageForIndex(9),
+    image: resolveModelImage("zakladki"),
     googleValue: "Zakładki - 700 zł"
   },
   {
     id: "obiezyswiat",
     name: "Obieżyświat",
     price: 1150,
-    image: imageForIndex(10),
-    googleValue: "Obieżyświat 1150 zł"
+    image: resolveModelImage("obiezyswiat"),
+    googleValue: "Obieżyświat - 1150 zł"
   },
   {
     id: "obiezyswiat-szyta-warga",
     name: "Obieżyświat, szyta warga",
     price: 1150,
-    image: imageForIndex(11),
-    googleValue: "Obieżyświat, szyta warga 1150 zł"
+    image: resolveModelImage("obiezyswiat-szyta-warga"),
+    googleValue: "Obieżyświat, szyta warga - 1150 zł"
   },
   {
     id: "dragonki",
     name: "Dragonki",
     price: 1600,
-    image: imageForIndex(12),
+    image: resolveModelImage("dragonki"),
     googleValue: "Dragonki - 1600 zł"
   },
   {
     id: "wonderer",
     name: "Wonderer",
     price: 1300,
-    image: imageForIndex(13),
+    image: resolveModelImage("wonderer"),
     googleValue: "Wonderer - 1300 zł"
   },
   {
     id: "kamienny-przodek",
     name: "Kamienny przodek",
     price: 1800,
-    image: imageForIndex(14),
+    image: resolveModelImage("kamienny-przodek"),
     googleValue: "Kamienny przodek - 1800 zł"
   },
   {
     id: "wysokie-krowie-pyski",
     name: "Wysokie Krowie Pyski",
     price: 1600,
-    image: imageForIndex(15),
+    image: resolveModelImage("wysokie-krowie-pyski"),
     googleValue: "Wysokie Krowie Pyski - 1600 zł",
     requiresCalfMeasurement: true
   },
@@ -153,7 +159,7 @@ export const ORDER_MODELS: OrderModel[] = [
     id: "krowie-pyski-za-kostke",
     name: "Krowie Pyski za kostkę",
     price: 700,
-    image: `/image/models/${placeholderImage}`,
+    image: resolveModelImage("krowie-pyski-za-kostke"),
     googleValue: "Krowie Pyski za kostkę - 700 zł"
   },
   {
@@ -189,7 +195,7 @@ export const ORDER_MODELS: OrderModel[] = [
     name: "Ciżmy Artur",
     price: 750,
     image: `/image/models/${placeholderImage}`,
-    googleValue: "Ciżmy Artur -750 zł"
+    googleValue: "Ciżmy Artur - 750 zł"
   },
   {
     id: "xvii-wiek",

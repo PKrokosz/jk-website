@@ -11,12 +11,15 @@ export function Footer() {
             <Link href="/privacy-policy">Polityka prywatności</Link>
             <span aria-hidden="true">•</span>
             <Link href="/terms">Regulamin</Link>
+            <Link href="/terms">Regulamin sklepu</Link>
           </nav>
         </div>
         <address className="site-footer__address">
           <p>JK Handmade Footwear – Pracownia Butów Na Miarę</p>
           <p>ul. [adres docelowy], Warszawa</p>
           <p>NIP: [xxx-xxx-xx-xx] | REGON: [xxxxxxx]</p>
+          <p>ul. Miedziana 12, Warszawa</p>
+          <p>NIP: 525-000-00-00 | REGON: 012345678</p>
         </address>
       </div>
     </footer>

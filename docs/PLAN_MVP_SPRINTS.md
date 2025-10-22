@@ -15,19 +15,20 @@
 
 ## Podsumowanie
 - Sekwencja zadań prowadzi od stabilizacji środowiska, przez UI foundation, dane mock, strony katalogu/produktów, po kontakt i CI.
-- Status (2024-xx-xx): T2–T5 zakończone, T6 częściowo wdrożone (workflow CI, testy podstawowe), T0/T1 wymagają dopięcia (`DATABASE_URL`, design tokens w CSS).
+- Status (2024-xx-xx): T0 oraz T2–T5 zakończone, T6 częściowo wdrożone (workflow CI, testy podstawowe), T1 wymaga dopięcia (design tokens w CSS).
 - Każde zadanie ma dedykowany branch `codex/<kontekst>` i Definition of Done.
 
 ## Zadania T0–T6
 ### T0 — Stabilizacja środowiska
 - **Branch**: `codex/env-hardening`
-- **Status**: 🔄 w toku (czeka na ujednolicenie `DATABASE_URL` + dokumentacji Postgresa).
+- **Status**: ✅ zakończone (ujednolicone poświadczenia DB + dodany `drizzle.config.ts`).
 - **Zakres**: Ujednolicenie `DATABASE_URL` z `docker-compose.yml`, dodanie instrukcji `.env`, opcjonalnie `drizzle.config.ts` (bez migracji).
 - **DoD**:
-  - [ ] Aktualizacja dokumentacji `.env` (README z nowym źródłem prawdy) – częściowo wykonane, wymaga finalizacji danych logowania.
+  - [x] Aktualizacja dokumentacji `.env` (README z nowym źródłem prawdy) – dane logowania `devuser/devpass@jkdb` spójne.
   - [x] Dodane testy smoke `pnpm lint`, `pnpm test` (w CI).
   - [x] Potwierdzony start `pnpm dev`.
-- **Ryzyka**: rozbieżne dane dostępowe w środowiskach; brak Dockera w CI.
+  - [x] Dodany `drizzle.config.ts` wskazujący na `packages/db/src/schema.ts`.
+- **Ryzyka**: konieczność zaktualizowania lokalnych envów i secrets CI pod nowe dane; brak Dockera w CI.
 - **Rollback**: przywrócenie poprzedniego `.env.example` i compose.
 - **Estymata**: S.
 
@@ -122,5 +123,5 @@
   - Priorytet: dokończyć T0/T1/T6 czy rozszerzać katalog? (wymaga akceptacji właściciela).
   - Czy T5 wymaga integracji z backendem przed startem kampanii marketingowej?
 - **Następne kroki**
-  - Przygotować zadania follow-up dla: `drizzle-kit`, CSS tokens, testy `ContactForm`/`ProductPage`, template PR.
+  - Przygotować zadania follow-up dla: integracji API z Drizzle (styles/leather), CSS tokens, testy `ContactForm`/`ProductPage`, template PR.
   - Uzyskać akceptację planu od właściciela i zaktualizować timeline.

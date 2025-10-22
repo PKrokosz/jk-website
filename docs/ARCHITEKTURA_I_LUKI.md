@@ -12,8 +12,8 @@
 ## Podsumowanie
 - Routing App Routera obejmuje Home, Catalog (statyczny), Product (dynamiczny slug), Order (iframe + natywny landing), Contact (formularz) i About.
 - Globalny layout (`src/app/layout.tsx`) dostarcza metadata SEO, skip link, sticky header oraz wrapper `main-content` dla dostępności.
-- Mocki katalogowe (`src/lib/catalog`) generują produkty z kategoriami, funnel stage, wariantami oraz referencjami do formularza zamówień; integracja z Drizzle pozostaje do wykonania.
-- Krytyczne luki: brak migracji `drizzle-kit`, niespójny `DATABASE_URL`, brak konfiguracji design tokens w CSS (obecne wartości hard-coded) i brak backendu dla formularza kontaktowego.
+- Mocki katalogowe (`src/lib/catalog`) generują produkty z kategoriami, funnel stage, wariantami oraz referencjami do formularza zamówień; integracja z Drizzle (API → baza) pozostaje do wykonania.
+- Krytyczne luki: brak podpięcia App Routera pod Drizzle (mimo dostępnych migracji i seeda), brak konfiguracji design tokens w CSS (obecne wartości hard-coded) i brak backendu dla formularza kontaktowego.
 
 ## Routing App Routera
 ```
@@ -63,7 +63,7 @@ src/app
 - Pakiet `@jk/db`:
   - `src/lib/db.ts` – inicjalizacja `drizzle(pool)` na podstawie `DATABASE_URL` (wymagana zmienna środowiskowa).
   - `src/schema.ts` – definicje tabel: `style`, `leather`, `sole`, `option`, `customer`, `measurements`, `order` (brak migracji).
-  - Brak konfiguracji `drizzle.config.ts` i CLI migracji.
+  - Dostępna konfiguracja `drizzle.config.ts` i CLI `drizzle-kit`; migracje nie zostały jeszcze wygenerowane.
 - Frontend (Next.js) korzysta z mocków w `src/lib/catalog`:
   - `data.ts` – `catalogStyles`, `catalogLeathers` (rozszerzone o `slug`, `description`, `priceModGrosz`).
   - `products.ts` – `listProductSlugs`, `getProductBySlug`, generacja `CatalogProductSummary`/`Detail` z kategoriami, funnel stage, orderReference.
@@ -74,8 +74,8 @@ src/app
 ## Black-boxy i warianty rozwiązania
 | Luka / pytanie | Opis | Wariant A | Plusy | Minusy | Wariant B | Plusy | Minusy |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Migracje Drizzle | Brak `drizzle-kit` i migracji | Dodać `drizzle-kit`, `drizzle.config.ts`, workflow seeda | Standaryzowane migracje, gotowość pod prod | Wymaga czasu na konfigurację, pipeline Docker | Pozostać na mockach do czasu integracji | Zero kosztu teraz | Dług techniczny, brak pewności danych |
-| Konfiguracja DB | `.env.example` ≠ `docker-compose.yml` | Ujednolicić do `devuser/devpass@jkdb` + dokumentacja | Koniec niespójności, łatwiejszy onboarding | Wymaga zmian w dotychczasowych envach | Pozostawić jak jest + komentarz | Brak zmian | Ryzyko błędów przy startach |
+| Migracje Drizzle | Brak wygenerowanych migracji mimo dostępnego `drizzle-kit` | Utworzyć migrację inicjalną i workflow seeda | Standaryzowane migracje, gotowość pod prod | Wymaga czasu na konfigurację, pipeline Docker | Pozostać na mockach do czasu integracji | Zero kosztu teraz | Dług techniczny, brak pewności danych |
+| Konfiguracja DB | `.env.example` i `docker-compose.yml` używają `devuser/devpass@jkdb` | Zweryfikować secrets w CI/staging | Spójne środowiska, brak rozjazdów | Wymaga komunikacji z zespołem infra | Brak dodatkowych działań | Brak kosztu teraz | Ryzyko pominięcia aktualizacji secrets |
 | Formularz kontaktowy | Brak backendu / wysyłki maili | Integracja z API (server action, n8n) | Realna obsługa leadów, brak manuali | Potrzebna infrastruktura i bezpieczeństwo | Pozostawić mock i CTA mailto | Zero kosztu teraz | Brak automatyzacji, UX ograniczony |
 | UI tokens vs. CSS | Globals mają hard-coded wartości | Dodać design tokens do CSS custom properties / Tailwind | Spójność, łatwiejsze zmiany | Refactor styli globalnych | Pozostawić obecny styl | Szybkie MVP | Ryzyko rozjazdów kolorów i kontrastu |
 | Modale zamówień | `OrderModalTrigger` otwiera modal w Home/Product | Zastąpić modala dedykowaną stroną `/order/native` | Mniej kodu klientowego, prostsze testy | Potencjalnie gorsza konwersja | Utrzymać modal + Ulepszyć A11y | Większa kontrola flow | Więcej pracy przy testach |
@@ -84,12 +84,12 @@ src/app
 - [x] Zmapowano istniejące route'y App Routera.
 - [x] Zidentyfikowano obecne metadane i layout.
 - [x] Opisano aktualne wykorzystanie mocków katalogu i CTA zamówień.
-- [ ] Dodano proces migracji (`drizzle-kit`).
+- [x] Dodano proces migracji (`drizzle-kit`).
 - [ ] Zrefaktoryzowano style globalne na bazie tokens.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak migracji utrudni integrację zamówień i przyszłe endpointy.
+  - Brak integracji Next.js ↔ Drizzle utrzymuje dublowanie danych (mocki vs DB).
   - Hard-coded kolory w `globals.css` mogą rozjechać się z design tokens (kontrast, brand).
   - Formularz kontaktowy bez backendu = ryzyko utraty leadów.
 - **Decyzje do podjęcia**
@@ -97,6 +97,6 @@ src/app
   - Czy zachowujemy modal zamówienia, czy promujemy `/order/native` jako główne CTA.
   - Kiedy przenieść styling na system tokens (Tailwind/shadcn).
 - **Następne kroki**
-  - Przygotować `drizzle.config.ts` i pierwszą migrację inicjalną.
+  - Wykorzystać `drizzle.config.ts` do przygotowania pierwszej migracji inicjalnej i pipeline seeda.
   - Wprowadzić zmienne CSS odpowiadające tokens z `docs/UI_TOKENS.md`.
   - Zaprojektować integrację formularza kontaktowego (n8n / email service).

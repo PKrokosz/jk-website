@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import type { Route } from "next";
 
 import { ORDER_MODELS } from "@/config/orderModels";
 import { listProductSlugs } from "@/lib/catalog/products";
@@ -31,9 +32,11 @@ const PricingCalculator = dynamic(
   }
 );
 
+type HashLink = `#${string}`;
+
 type FaqLinkSegment = {
   type: "link";
-  href: string;
+  href: Route | HashLink;
   label: string;
 };
 
@@ -172,6 +175,8 @@ const faqEntries: FaqEntry[] = [
 const isLinkSegment = (segment: string | FaqLinkSegment): segment is FaqLinkSegment =>
   typeof segment !== "string";
 
+const isHashLink = (href: FaqLinkSegment["href"]): href is HashLink => href.startsWith("#");
+
 const getParagraphText = (paragraph: FaqParagraph) =>
   paragraph.map((segment) => (isLinkSegment(segment) ? segment.label : segment)).join("");
 
@@ -287,9 +292,6 @@ export default function Home() {
               <a className="button button--ghost" href="mailto:kontakt@jkhandmade.pl">
                 Umów konsultację
               </a>
-              <Link className="button button--ghost" href="/api/pricing/quote">
-                Zobacz API wyceny
-              </Link>
               <Link className="button button--primary order-modal__mobile-link" href="/order/native">
                 Zamów buty
               </Link>
@@ -410,15 +412,27 @@ export default function Home() {
                 <h3>{entry.question}</h3>
                 {entry.paragraphs.map((paragraph, paragraphIndex) => (
                   <p key={`${entry.question}-${paragraphIndex}`}>
-                    {paragraph.map((segment, segmentIndex) =>
-                      typeof segment === "string" ? (
-                        segment
-                      ) : (
-                        <Link key={`${segment.href}-${segmentIndex}`} href={segment.href}>
-                          {segment.label}
+                    {paragraph.map((segment, segmentIndex) => {
+                      if (typeof segment === "string") {
+                        return segment;
+                      }
+
+                      const { href, label } = segment;
+
+                      if (isHashLink(href)) {
+                        return (
+                          <a key={`${href}-${segmentIndex}`} href={href}>
+                            {label}
+                          </a>
+                        );
+                      }
+
+                      return (
+                        <Link key={`${href}-${segmentIndex}`} href={href} prefetch={false}>
+                          {label}
                         </Link>
-                      )
-                    )}
+                      );
+                    })}
                   </p>
                 ))}
               </article>

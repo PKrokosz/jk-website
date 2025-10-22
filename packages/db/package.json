@@ -5,7 +5,11 @@
   "type": "module",
   "exports": {
     "./schema": "./src/schema.ts",
+    "./seed-data": "./src/seed-data.ts",
     ".": "./src/index.ts"
+  },
+  "scripts": {
+    "seed": "tsx src/seed.ts"
   },
   "dependencies": {
     "dotenv": "16.4.5",
@@ -13,6 +17,7 @@
     "pg": "8.12.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.15.5"
+    "@types/pg": "^8.15.5",
+    "tsx": "^4.16.2"
   }
 }

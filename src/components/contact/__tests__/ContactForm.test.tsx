@@ -22,6 +22,7 @@ describe("ContactForm", () => {
   };
 
   const toggleConsent = () => {
+    const checkbox = screen.getByLabelText(/wyrażam zgodę/i);
     const checkbox = screen.getByLabelText(consentLabel);
     fireEvent.click(checkbox);
   };
@@ -76,6 +77,7 @@ describe("ContactForm", () => {
     expect(screen.getByLabelText(/imię/i)).toHaveValue("");
     expect(screen.getByLabelText(/adres e-mail/i)).toHaveValue("");
     expect(screen.getByLabelText(/wiadomość/i)).toHaveValue("");
+    expect(screen.getByLabelText(/wyrażam zgodę/i)).not.toBeChecked();
     expect(screen.getByLabelText(consentLabel)).not.toBeChecked();
     expect(screen.getByRole("button", { name: "Wyślij wiadomość" })).toBeDisabled();
   });

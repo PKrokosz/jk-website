@@ -11,6 +11,10 @@
 - [8. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
+- Referencyjne dane katalogu (style, skóry, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`).
+- Endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` są dostępne; `/api/styles` i `/api/leather` korzystają z Drizzle ORM zamiast mocków.
+- Front (`/catalog`, `/catalog/[slug]`) konsumuje dane przez API Next.js, wykorzystując `fetchCatalogStyles`/`fetchCatalogLeathers` z revalidacją ISR.
+- Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`), brak jeszcze schematów Zod – do dodania przy wprowadzaniu backendu.
 - MVP operuje na mockowanych danych w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień).
 - Endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` są dostępne; lista produktów i szczegóły obsługiwane są lokalnie (`CatalogExplorer`, `getProductBySlug`).
 - Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schemat Zod w backendzie formularza kontaktowego.
@@ -46,13 +50,13 @@
 
 ## Zasilanie katalogu i produktu
 - **Katalog (`/catalog`)**
-  - Importuje `catalogStyles`, `catalogLeathers`, `createProductSummaries()` z `products.ts`.
-  - `CatalogExplorer` filtruje lokalnie (bez API) – sortowanie, filtry, aria-live.
+  - Wczytuje dane przez `fetchCatalogStyles()` i `fetchCatalogLeathers()` (Next.js route handlers + Drizzle).
+  - `CatalogExplorer` filtruje lokalnie – sortowanie, filtry, aria-live.
   - CTA kart kieruje do `/catalog/[slug]`.
 - **Produkt (`/catalog/[slug]`)**
-  - `getProductBySlug(slug, styles, leathers)` zwraca `CatalogProductDetail` z galerą, wariantami i CTA.
-  - `generateStaticParams` wykorzystuje `listProductSlugs()` do pre-renderu.
-  - Brak SSR fetch – dane z pliku TS.
+  - `getProductBySlug(slug, styles, leathers)` otrzymuje dane z API; w razie błędu strona zwraca fallback z komunikatem.
+  - `generateStaticParams` wykorzystuje `listProductSlugs()` do pre-renderu (wciąż z templatek).
+  - Metadane generowane są na podstawie danych z API; w razie błędu zwracany jest fallback.
 - **Order/Contact**
   - `OrderModalTrigger` wykorzystuje `orderReference` do preselektowania parametrów (URL query) w `/order/native`.
   - Formularz kontaktowy przyjmuje `product` w query (`/contact?product=slug`) i automatycznie uzupełnia pole formularza, jeśli parametr jest obecny.
@@ -60,8 +64,8 @@
 ## Kontrakty endpointów API
 | Endpoint | Metoda | Input | Output | Notatki |
 | --- | --- | --- | --- | --- |
-| `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Cache domyślny (ISR) – do rozważenia `revalidate`. |
-| `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Mockowe dane z `data.ts`. |
+| `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Dane z tabeli `style` (Drizzle ORM, revalidate 3600 s). |
+| `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Dane z tabeli `leather` (Drizzle ORM, revalidate 3600 s). |
 | `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; brak walidacji Zod. |
 | `/api/contact/submit` | POST | `{ name, email, phone?, message, product?, website? }` | `{ ok: true }` lub `{ error }` | Walidacja Zod, rate-limit per IP, honeypot `website`, wysyłka maila przez SMTP. |
 | `/api/products` | — | brak | — | Brak endpointu – filtracja po stronie klienta (zostawione do czasu integracji z DB). |
@@ -78,6 +82,7 @@
 ## Checklisty kontrolne
 - [x] Zdefiniowano model danych produktu z kategoriami i wariantami.
 - [x] Opisano, jak zasilać katalog i produkt bez back-endu.
+- [x] Zaktualizowano opis połączenia z Drizzle (API + seedy współdzielone z `@jk/db`).
 - [x] Spisano aktualne endpointy i ich status.
 - [ ] Dodano schematy Zod dla `PricingRequest` i potencjalnych API produktów.
 - [x] Utworzono backend dla formularza kontaktowego (`/api/contact/submit`).
@@ -85,7 +90,7 @@
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Mocki mogą rozjechać się z przyszłym schematem DB – konieczne mapowanie podczas migracji.
+  - Błędy połączenia z bazą zwracają fallback UI na stronach katalogu/produktu – brak jeszcze mechanizmu retry/alertingu.
   - Brak walidacji w API (`/api/pricing/quote`) może dopuścić niepoprawne payloady.
   - Brak endpointu `/api/products` ogranicza re-use danych w przyszłych integracjach (np. SSR/CSR fetch).
 - **Decyzje do podjęcia**

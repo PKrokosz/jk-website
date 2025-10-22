@@ -4,45 +4,9 @@ import Link from "next/link";
 
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
 import { NativeModelShowcase } from "@/components/catalog/NativeModelShowcase";
+import { fetchCatalogLeathers, fetchCatalogStyles } from "@/lib/catalog/api";
 import { createMockProducts } from "@/lib/catalog/products";
-import { resolveApiUrl } from "@/lib/http/base-url";
-import type {
-  CatalogLeather,
-  CatalogProductSummary,
-  CatalogStyle
-} from "@/lib/catalog/types";
-
-interface ApiResponse<T> {
-  data: T;
-}
-
-async function fetchStyles(): Promise<CatalogStyle[]> {
-  const response = await fetch(resolveApiUrl("/api/styles"), {
-    next: { revalidate: 3600 }
-  });
-
-  if (!response.ok) {
-    throw new Error("Nie udało się pobrać listy stylów");
-  }
-
-  const { data } = (await response.json()) as ApiResponse<CatalogStyle[]>;
-
-  return data;
-}
-
-async function fetchLeathers(): Promise<CatalogLeather[]> {
-  const response = await fetch(resolveApiUrl("/api/leather"), {
-    next: { revalidate: 3600 }
-  });
-
-  if (!response.ok) {
-    throw new Error("Nie udało się pobrać listy skór");
-  }
-
-  const { data } = (await response.json()) as ApiResponse<CatalogLeather[]>;
-
-  return data;
-}
+import type { CatalogLeather, CatalogProductSummary, CatalogStyle } from "@/lib/catalog/types";
 
 export const metadata: Metadata = {
   title: "Katalog",
@@ -52,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function CatalogPage() {
   try {
-    const [styles, leathers] = await Promise.all([fetchStyles(), fetchLeathers()]);
+    const [styles, leathers] = await Promise.all([fetchCatalogStyles(), fetchCatalogLeathers()]);
     const products: CatalogProductSummary[] = createMockProducts(styles, leathers);
 
     return (

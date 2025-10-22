@@ -17,6 +17,15 @@ import ProductPage, { generateMetadata, generateStaticParams } from "../[slug]/p
 import { catalogLeathers, catalogStyles } from "@/lib/catalog/data";
 import { getProductBySlug, listProductSlugs } from "@/lib/catalog/products";
 
+const fetchStylesMock = vi.hoisted(() => vi.fn(async () => catalogStyles));
+const fetchLeathersMock = vi.hoisted(() => vi.fn(async () => catalogLeathers));
+
+vi.mock("@/lib/catalog/api", () => ({
+  __esModule: true,
+  fetchCatalogStyles: fetchStylesMock,
+  fetchCatalogLeathers: fetchLeathersMock
+}));
+
 vi.mock("next/link", () => ({
   __esModule: true,
   default: ({ children, href, prefetch: _prefetch, ...rest }: any) => (
@@ -40,6 +49,8 @@ vi.mock("next/image", () => ({
 describe("Product page metadata", () => {
   afterEach(() => {
     notFoundMock.mockClear();
+    fetchStylesMock.mockClear();
+    fetchLeathersMock.mockClear();
   });
 
   it("zwraca metadane dla istniejącego produktu", async () => {
@@ -78,19 +89,23 @@ describe("Product page metadata", () => {
 describe("ProductPage", () => {
   beforeEach(() => {
     notFoundMock.mockClear();
+    fetchStylesMock.mockClear();
+    fetchLeathersMock.mockClear();
   });
 
   afterEach(() => {
     notFoundMock.mockClear();
+    fetchStylesMock.mockClear();
+    fetchLeathersMock.mockClear();
   });
 
-  it("renderuje kluczowe informacje o produkcie", () => {
+  it("renderuje kluczowe informacje o produkcie", async () => {
     const slug = listProductSlugs()[0];
     const product = getProductBySlug(slug, catalogStyles, catalogLeathers);
 
     expect(product).toBeTruthy();
 
-    render(<ProductPage params={{ slug }} />);
+    render(await ProductPage({ params: { slug } }));
 
     expect(screen.getByRole("heading", { level: 1, name: product!.name })).toBeInTheDocument();
     expect(screen.getByText(product!.description)).toBeInTheDocument();
@@ -102,8 +117,8 @@ describe("ProductPage", () => {
     expect(screen.getAllByRole("list")).not.toHaveLength(0);
   });
 
-  it("używa notFound dla nieistniejącego sluga", () => {
-    expect(() => render(<ProductPage params={{ slug: "brak-produktu" }} />)).toThrow("NOT_FOUND");
+  it("używa notFound dla nieistniejącego sluga", async () => {
+    await expect(ProductPage({ params: { slug: "brak-produktu" } })).rejects.toThrow("NOT_FOUND");
     expect(notFoundMock).toHaveBeenCalled();
   });
 });

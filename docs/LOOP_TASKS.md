@@ -67,8 +67,9 @@
 ### Zadanie bazowe `x₆`: Uspójnić fallback katalogu z docelową bazą danych
 - `-x₆`: Monitorować logi ostrzeżeń o fallbacku i dodać alert w telemetrii, aby łatwiej wykrywać brak połączenia z DB.
 - `1/x₆`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB. ✅ 2025-10-30 — `repository.drizzle.test.ts` pokrywa ścieżkę DB→fallback, pozostaje scenariusz API bez połączenia w Playwright.
-- `x₆²`: Zaimplementować cache warstwy katalogu (ISR + lokalny cache) i zsynchronizować go z Drizzle.
-- `x₆ˣ`: Dostarczyć healthcheck katalogu publikujący metryki (dostępność DB, czasy odpowiedzi, liczba fallbacków) do panelu obserwowalności.
+- ✅ 2025-11-02 — `x₆²`: Zaimplementowano cache warstwy katalogu (ISR + lokalny cache) i zsynchronizowano go z Drizzle (`resolveCatalogCache`, `/api/products/[slug]`).
+- ✅ 2025-11-02 — `x₆ˣ`: Dodano healthcheck katalogu (`/api/catalog/health`) raportujący metryki cache i źródła danych.
+- ⏭️ 2025-11-02 — Dopisać testy integracyjne SSR `/catalog` i monitoring `/api/catalog/health` (alerting `status: degraded/error`).
 
 ### Zadanie bazowe `x₇`: Utrzymać SEO artefakty i structured data
 - `-x₇`: Dodać brakujące ścieżki (`/cart`, strony prawne, B2B) do `sitemap.ts` i `robots.ts`.

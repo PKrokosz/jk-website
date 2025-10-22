@@ -1,17 +1,17 @@
 # Architektura i luki
 
-## Meta audytu 2025-10-30
-- **Status zagadnień**: Migracje Drizzle i seed referencyjny są wdrożone (`drizzle/0000`–`0002`, `pnpm db:seed`), a repozytorium katalogu ma testy potwierdzające zgodność danych DB ↔ fallback. Wciąż pozostają otwarte: diagram przepływu danych, adopcja tokens oraz integracja `/cart` i `/group-orders` z backendem leadów.
+## Meta audytu 2025-10-31
+- **Status zagadnień**: Migracje Drizzle i seed referencyjny są wdrożone (`drizzle/0000`–`0003`, `pnpm db:seed`), a cache katalogu zasila teraz zarówno API, jak i strony `/catalog` oraz `/catalog/[slug]`. Otwarte pozostają: diagram przepływu danych, adopcja tokens oraz integracja `/cart` i `/group-orders` z backendem leadów.
 - **Nowe ścieżki rozwoju**:
-  - Przygotować diagram przepływu danych katalogu (API → Drizzle → fallback → UI) i umieścić go w sekcji 4 wraz z opisem cache.
+  - Przygotować diagram przepływu danych katalogu (API → cache → Drizzle → UI) i umieścić go w sekcji 4 wraz z planem obserwowalności.
   - Zaplanować zadanie na obsługę `prefers-reduced-motion` i modularyzację animacji (powiązane z `FRONTEND_INTERFACE_SPEC.md`).
-  - Doprecyzować zakres zadania `x₆²` dotyczącego cache katalogu oraz healthchecku (`x₆ˣ`).
+  - Dostarczyć testy integracyjne UI/API (SSR katalogu, healthcheck) i monitorować degradację cache w `/api/catalog/health`.
 - **Rekomendacja archiwizacji**: Nie — dokument nadal identyfikuje kluczowe ryzyka architektoniczne.
 - **Sens dokumentu**: Prezentuje strukturę App Routera, layouty, warstwę danych i najważniejsze black-boxy. Stanowi podstawę do planowania refaktoryzacji i priorytetyzacji długu technicznego.
 - **Aktualizacje wykonane**:
-  - Uzupełniono sekcję warstwy danych o dostępne migracje Drizzle, seed oraz testy mapujące katalog.
+  - Uzupełniono sekcję warstwy danych o cache katalogu i podłączenie stron App Routera do API.
   - Zsynchronizowano opis repozytorium katalogu z dokumentacją `DANE_I_API_MVP.md`.
-  - Doprecyzowano otwarte prace wokół cache katalogu i healthchecku.
+  - Dodano rekomendacje dotyczące obserwowalności i testów integracyjnych katalogu.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -25,7 +25,7 @@
 ## Podsumowanie
 - Routing App Routera obejmuje Home, Catalog (statyczny), Product (dynamiczny slug), Order (iframe + natywny landing), Contact (formularz) i About.
 - Globalny layout (`src/app/layout.tsx`) dostarcza metadata SEO, skip link, sticky header oraz wrapper `main-content` dla dostępności.
-- Mocki katalogowe (`src/lib/catalog`) generują produkty z kategoriami, funnel stage, wariantami oraz referencjami do formularza zamówień; integracja z Drizzle (API → baza) pozostaje do wykonania.
+- Warstwa katalogowa (`src/lib/catalog`) korzysta z Drizzle (seed `product_template`), lokalnego cache oraz endpointów `/api/products` i `/api/products/[slug]`, które są teraz źródłem danych dla stron `/catalog` i `/catalog/[slug]`.
 - Krytyczne luki: brak podpięcia App Routera pod Drizzle (mimo dostępnych migracji i seeda), brak konfiguracji design tokens w CSS (obecne wartości hard-coded) i brak backendu dla formularza kontaktowego.
 
 ## Routing App Routera
@@ -99,9 +99,10 @@ src/app
   - `src/schema.ts` – definicje tabel: `style`, `leather`, `sole`, `option`, `customer`, `measurements`, `order`, `quote_requests`.
   - Migracje `drizzle/0000_breezy_cannonball.sql`–`0002_add_quote_requests.sql` tworzą słowniki katalogu i logi wycen; `pnpm db:migrate` stosuje je na dowolnym środowisku.
   - `packages/db/src/seed.ts` resetuje słowniki i odtwarza referencyjne rekordy z `seed-data.ts` (`pnpm db:seed`).
-- Frontend (Next.js) korzysta z mocków w `src/lib/catalog`:
-  - `data.ts` – `catalogStyles`, `catalogLeathers` (rozszerzone o `slug`, `description`, `priceModGrosz`).
-  - `products.ts` – `listProductSlugs`, `getProductBySlug`, generacja `CatalogProductSummary`/`Detail` z kategoriami, funnel stage, orderReference.
+- Frontend (Next.js) korzysta z cache katalogu i Drizzle przez helpery w `src/lib/catalog`:
+  - `api.ts` – `fetchCatalogStyles`, `fetchCatalogLeathers`, `fetchCatalogProducts`, `fetchCatalogProductDetail` z błędami `CatalogApiError` i cache Next.js.
+  - `products.ts` – mapowanie templatek (`mapProductTemplateRow`, `createProductsFromTemplates`) oraz fallbackowe slug-i (`listProductSlugs`) używane przy degradacji.
+  - `data.ts` – `catalogStyles`, `catalogLeathers` jako referencja i fallback testowy.
   - `types.ts` – definicje `CatalogProductDetail` (gallery, craftProcess, variants, `orderReference`).
 - Formularz kontaktowy posiada backend (`/api/contact/submit`) z walidacją Zod, rate-limitami i integracją SMTP (transport konfigurowany przez env).
 - Kalkulator wycen (`src/lib/pricing`) operuje na mockowanych cennikach (`ORDER_MODELS`, `ORDER_ACCESSORIES`) z możliwością zapisu logów wycen w tabeli `quote_requests`.
@@ -110,7 +111,7 @@ src/app
 ## Black-boxy i warianty rozwiązania
 | Luka / pytanie | Opis | Wariant A | Plusy | Minusy | Wariant B | Plusy | Minusy |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Migracje Drizzle | Migracje słowników (style/leather/option/sole + `quote_requests`) istnieją, produkty nadal bazują na mockach | Przenieść `productTemplates` do seeda Drizzle + endpoint `/api/products/[slug]` | Spójny katalog DB→UI, brak dublowania mocków | Większa migracja danych i testów | Pozostawić produkty w mockach i synchronizować ręcznie | Brak natychmiastowego kosztu | Ryzyko rozjazdu danych, dług w produktach |
+| Cache katalogu | SSR `/catalog` i `/catalog/[slug]` bazuje na `resolveCatalogCache`, ale brak obserwowalności i testów integracyjnych | Wpiąć `/api/catalog/health` do monitoringu + dopisać testy SSR/API z realnym Drizzle | Wczesne ostrzeganie o degradacji cache, pewność danych w UI | Wymaga środowiska testowego i alertów | Pozostawić ręczne QA cache'u | Brak kosztu teraz | Ryzyko ukrytych degradacji i opóźnione reakcje |
 | Konfiguracja DB | `.env.example` i `docker-compose.yml` używają `devuser/devpass@jkdb` | Zweryfikować secrets w CI/staging | Spójne środowiska, brak rozjazdów | Wymaga komunikacji z zespołem infra | Brak dodatkowych działań | Brak kosztu teraz | Ryzyko pominięcia aktualizacji secrets |
 | Formularz kontaktowy | Brak backendu / wysyłki maili | Integracja z API (server action, n8n) | Realna obsługa leadów, brak manuali | Potrzebna infrastruktura i bezpieczeństwo | Pozostawić mock i CTA mailto | Zero kosztu teraz | Brak automatyzacji, UX ograniczony |
 | UI tokens vs. CSS | Globals mają hard-coded wartości | Dodać design tokens do CSS custom properties / Tailwind | Spójność, łatwiejsze zmiany | Refactor styli globalnych | Pozostawić obecny styl | Szybkie MVP | Ryzyko rozjazdów kolorów i kontrastu |
@@ -125,7 +126,7 @@ src/app
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Dublowanie danych dotyczy jeszcze produktów (`productTemplates` vs. docelowa baza); słowniki stylów/skór są już testowane przeciw Drizzle.
+  - Brak monitoringu cache katalogu utrudnia wykrycie degradacji `/api/products` i SSR katalogu w produkcji.
   - Hard-coded kolory w `globals.css` mogą rozjechać się z design tokens (kontrast, brand).
   - Formularz kontaktowy bez backendu = ryzyko utraty leadów.
 - **Decyzje do podjęcia**
@@ -133,6 +134,6 @@ src/app
   - Czy zachowujemy modal zamówienia, czy promujemy `/order/native` jako główne CTA.
   - Kiedy przenieść styling na system tokens (Tailwind/shadcn).
 - **Następne kroki**
-  - Przenieść `productTemplates` do seeda/migracji Drizzle i dostarczyć endpoint `/api/products/[slug]` oparty na bazie.
+  - Przygotować diagram przepływu danych katalogu (UI ↔ cache ↔ Drizzle) i wpiąć `/api/catalog/health` do monitoringu.
   - Wprowadzić zmienne CSS odpowiadające tokens z `docs/UI_TOKENS.md`.
   - Zaprojektować integrację formularza kontaktowego (n8n / email service).

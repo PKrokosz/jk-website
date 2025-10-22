@@ -28,11 +28,11 @@ Ten katalog zawiera komplet artefaktów discovery & gap assessment dla MVP sklep
 | Plik | Ostatni przegląd | Status | Kolejny krok w pętli |
 | --- | --- | --- | --- |
 | [`AUDYT_REPO.md`](./AUDYT_REPO.md) | 2025-10-29 | Aktualne (uwzględnia group-orders/cart/legal/API) | Zweryfikować po dodaniu nowych aplikacji lub migracji Drizzle. |
-| [`ARCHITEKTURA_I_LUKI.md`](./ARCHITEKTURA_I_LUKI.md) | 2025-10-30 | W toku (diagram przepływu, cache katalogu, prefers-reduced-motion) | Dopisać diagram danych i plan healthchecku katalogu oraz integracji `/cart`/`/group-orders`. |
+| [`ARCHITEKTURA_I_LUKI.md`](./ARCHITEKTURA_I_LUKI.md) | 2025-10-31 | W toku (diagram przepływu, prefers-reduced-motion) | Przygotować diagram danych (UI ↔ cache ↔ Drizzle) i zaplanować monitoring `/api/catalog/health`. |
 | [`WYMAGANIA_MVP.md`](./WYMAGANIA_MVP.md) | 2025-10-29 | Aktualne (rozszerzone o B2B/cart) | Zamknąć TODO dla backendu zamówień i rozszerzenia SEO (robots/sitemap). |
 | [`UI_TOKENS.md`](./UI_TOKENS.md) | 2025-10-29 | W toku (custom properties adopt + eksport) | Rozszerzyć tokens na nowe widoki i przygotować eksport JSON. |
 | [`SITE_MAP.md`](./SITE_MAP.md) | 2025-10-29 | Aktualne (dodano legal/cart) | Dopisać mapy ekranów dla `/cart` i `/group-orders`. |
-| [`DANE_I_API_MVP.md`](./DANE_I_API_MVP.md) | 2025-10-30 | W toku (produkty nadal w mockach) | Przenieść `productTemplates` do seeda Drizzle i zaplanować endpoint `/api/products/[slug]`. |
+| [`DANE_I_API_MVP.md`](./DANE_I_API_MVP.md) | 2025-11-02 | W toku (brak testów integracyjnych/monitoringu) | Dopisać testy SSR katalogu (`pnpm test:integration`) i opisać alerting healthchecku. |
 | [`JAKOSC_TESTY_CI.md`](./JAKOSC_TESTY_CI.md) | 2025-10-29 | Aktualne (ustalić próg coverage) | Zdecydować o progu coverage i automatyzacji checklisty PR. |
 | [`PLAN_MVP_SPRINTS.md`](./PLAN_MVP_SPRINTS.md) | 2025-10-29 | W toku (plan T8/T9 do dodania) | Dopisać zadania dla `/group-orders` i `/cart`. |
 | [`OPEN_QUESTIONS.md`](./OPEN_QUESTIONS.md) | 2025-10-29 | W toku (rozmiarówka/asset/analityka) | Zaplanować warsztat discovery i zebrać materiały brandowe. |

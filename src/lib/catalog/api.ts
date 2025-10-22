@@ -8,6 +8,17 @@ import type {
   CatalogStyle
 } from "@/lib/catalog/types";
 
+export class CatalogApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly path: string,
+    message: string
+  ) {
+    super(message);
+    this.name = "CatalogApiError";
+  }
+}
+
 interface ApiResponse<T> {
   data: T;
 }
@@ -18,7 +29,11 @@ async function fetchCatalogResource<T>(path: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Nie udało się pobrać zasobu API: ${path}`);
+    throw new CatalogApiError(
+      response.status,
+      path,
+      `Nie udało się pobrać zasobu API: ${path} (status ${response.status})`
+    );
   }
 
   const payload = (await response.json()) as ApiResponse<T>;
@@ -38,6 +53,6 @@ export function fetchCatalogProducts(): Promise<CatalogProductSummary[]> {
 }
 
 export function fetchCatalogProductDetail(slug: string): Promise<CatalogProductDetail> {
-  const path = `/api/products?slug=${encodeURIComponent(slug)}`;
+  const path = `/api/products/${encodeURIComponent(slug)}`;
   return fetchCatalogResource<CatalogProductDetail>(path);
 }

@@ -1,10 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { catalogLeathers, catalogStyles } from "../data";
-import { referenceLeathers, referenceStyles } from "@jk/db/seed-data";
+import {
+  referenceLeathers,
+  referenceProductTemplates,
+  referenceStyles
+} from "@jk/db/seed-data";
+import { getFallbackProductTemplates } from "../products";
 
 const sortById = <T extends { id: number }>(entries: readonly T[]): T[] =>
   [...entries].sort((a, b) => a.id - b.id);
+
+const sortBySlug = <T extends { slug: string }>(entries: readonly T[]): T[] =>
+  [...entries].sort((a, b) => a.slug.localeCompare(b.slug));
 
 describe("catalog repository with database connection", () => {
   beforeEach(() => {
@@ -80,5 +88,46 @@ describe("catalog repository with database connection", () => {
     expect(fromSpy).toHaveBeenCalledWith(leather);
     expect(leathers).toEqual(sortById(catalogLeathers));
     expect(leathers.some((entry) => entry.id === inactiveRow.id)).toBe(false);
+  });
+
+  it("returns product templates mapped from Drizzle rows", async () => {
+    const { loadCatalogProductTemplates } = await import("../repository");
+    const { productTemplate } = await import("@jk/db");
+
+    const templateRows = referenceProductTemplates.map((entry, index) => ({
+      id: index + 1,
+      templateId: entry.templateId,
+      slug: entry.slug,
+      name: entry.name,
+      styleId: entry.styleId,
+      leatherId: entry.leatherId,
+      descriptionMd: entry.description,
+      highlight: entry.highlight,
+      galleryImages: entry.galleryImages,
+      galleryCaptions: entry.galleryCaptions,
+      variantLeatherIds: entry.variantLeatherIds,
+      sizes: entry.sizes,
+      craftProcess: entry.craftProcess,
+      seo: entry.seo,
+      category: entry.category,
+      funnelStage: entry.funnelStage,
+      orderReference: entry.orderReference ?? null,
+      priceOverrideGrosz: entry.priceOverrideGrosz ?? null
+    }));
+
+    const fromSpy = vi.fn().mockResolvedValue(templateRows);
+    const selectSpy = vi.fn(() => ({ from: fromSpy }));
+
+    const database = {
+      select: selectSpy
+    } as unknown as import("@jk/db").Database;
+
+    const result = await loadCatalogProductTemplates(database);
+    const fallbackTemplates = sortBySlug(getFallbackProductTemplates());
+
+    expect(selectSpy).toHaveBeenCalledTimes(1);
+    expect(fromSpy).toHaveBeenCalledWith(productTemplate);
+    expect(result.source).toBe("database");
+    expect(result.data).toEqual(fallbackTemplates);
   });
 });

@@ -23,6 +23,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 const connectionString = process.env.DATABASE_URL;
+const migrationsOutDirectory = process.env.DRIZZLE_OUT ?? "./drizzle";
 
 if (!connectionString) {
   throw new Error(
@@ -32,7 +33,7 @@ if (!connectionString) {
 
 export default defineConfig({
   schema: "./packages/db/src/schema.ts",
-  out: "./drizzle",
+  out: migrationsOutDirectory,
   dialect: "postgresql",
   dbCredentials: {
     url: connectionString

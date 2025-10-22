@@ -1,6 +1,7 @@
 import { execFile, spawn } from "node:child_process";
-
-type SpawnFunction = typeof spawn;
+import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 export class DrizzleMigrationsOutOfSyncError extends Error {
   constructor(public readonly statusOutput: string) {
@@ -11,17 +12,33 @@ export class DrizzleMigrationsOutOfSyncError extends Error {
   }
 }
 
+export class DrizzleMigrationsPendingGenerationError extends Error {
+  constructor(public readonly generatedArtifacts: readonly string[]) {
+    super(
+      "::error::Wykryto brakujące migracje Drizzle. Uruchom `pnpm db:generate` i dołącz powstałe pliki w katalogu drizzle/ do commita."
+    );
+    this.name = "DrizzleMigrationsPendingGenerationError";
+  }
+}
+
+type SpawnFunction = typeof spawn;
+
 export interface RunOptions {
   spawnImpl?: SpawnFunction;
   execFileImpl?: typeof execFile;
 }
 
-const runCommand = (command: string, args: string[], spawnImpl: SpawnFunction): Promise<void> =>
+const runCommand = (
+  command: string,
+  args: string[],
+  spawnImpl: SpawnFunction,
+  envOverrides?: NodeJS.ProcessEnv
+): Promise<void> =>
   new Promise((resolve, reject) => {
     const child = spawnImpl(command, args, {
       stdio: "inherit",
       shell: false,
-      env: process.env
+      env: { ...process.env, ...envOverrides }
     });
 
     if (!child || typeof child.once !== "function") {
@@ -67,7 +84,20 @@ export const ensureDrizzleMigrationsAreClean = async ({
   spawnImpl = spawn,
   execFileImpl = execFile
 }: RunOptions = {}): Promise<void> => {
-  await runCommand("pnpm", ["db:generate", "--", "--dry-run"], spawnImpl);
+  const tempOutDir = await mkdtemp(join(tmpdir(), "drizzle-generate-check-"));
+
+  try {
+    await runCommand("pnpm", ["db:generate"], spawnImpl, { DRIZZLE_OUT: tempOutDir });
+
+    const generatedArtifacts = await readdir(tempOutDir);
+    const visibleArtifacts = generatedArtifacts.filter((entry) => !entry.startsWith("."));
+
+    if (visibleArtifacts.length > 0) {
+      throw new DrizzleMigrationsPendingGenerationError(visibleArtifacts);
+    }
+  } finally {
+    await rm(tempOutDir, { recursive: true, force: true });
+  }
 
   const { stdout } = await getDrizzleStatus(execFileImpl);
   if (stdout.trim().length > 0) {
@@ -79,6 +109,16 @@ export const main = async (): Promise<void> => {
   try {
     await ensureDrizzleMigrationsAreClean();
   } catch (error) {
+    if (error instanceof DrizzleMigrationsPendingGenerationError) {
+      console.error(error.message);
+      if (error.generatedArtifacts.length > 0) {
+        for (const artifact of error.generatedArtifacts) {
+          console.error(` - ${artifact}`);
+        }
+      }
+      process.exit(1);
+    }
+
     if (error instanceof DrizzleMigrationsOutOfSyncError) {
       console.error(error.message);
       if (error.statusOutput.trim().length > 0) {

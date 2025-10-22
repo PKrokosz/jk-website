@@ -17,6 +17,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `pnpm qa`                          # lokalna bramka jakości (lint, typecheck, test)
 - `pnpm qa:ci`                       # pełny zestaw CI (lint, typecheck, build, test, coverage, e2e, depcheck)
 - `pnpm test:integration`            # testy Vitest z realną bazą (wymaga `.env.test`, migracji i seeda)
+- `pnpm db:generate`                 # generuje migracje (Drizzle Kit >= 0.31 korzysta z komendy `generate`)
 
 ### Konfiguracja środowiska
 - `.env.example` zawiera komplet wymaganych przez walidator zmiennych z bezpiecznymi placeholderami (`NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, identyfikatory marketingowe). Skopiuj plik bez zmian, aby odpalić środowisko lokalne.

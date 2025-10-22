@@ -22,7 +22,7 @@
     "qa:ci": "pnpm run cli -- quality:ci",
     "simulate:user-journeys": "tsx scripts/simulate-user-journeys.ts",
     "simulate:navigation": "tsx scripts/simulate-navigation.ts",
-    "db:generate": "drizzle-kit generate:pg",
+    "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "pnpm --filter @jk/db run seed",
     "approve-builds": "pnpm approve-builds"
@@ -51,7 +51,7 @@
     "@vitest/coverage-v8": "2.1.1",
     "depcheck": "^1.4.7",
     "dotenv": "16.4.5",
-    "drizzle-kit": "^0.24.0",
+    "drizzle-kit": "^0.31.5",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.13",
     "jsdom": "^27.0.1",

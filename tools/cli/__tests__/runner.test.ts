@@ -17,6 +17,15 @@ vi.mock("node:child_process", () => ({
 const { spawn } = await import("node:child_process");
 const spawnMock = vi.mocked(spawn);
 
+// Mirrors the first quality step so expectations stay aligned with CLI defaults.
+const VERIFY_DRIZZLE_ENV_STEP = {
+  id: "verify-drizzle-env",
+  title: "Verify Drizzle env",
+  command: "pnpm",
+  args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
+  env: {}
+} as const;
+
 describe("runner", () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -36,6 +45,7 @@ describe("runner", () => {
         id: "qa",
         description: "Quality checks",
         steps: [
+          VERIFY_DRIZZLE_ENV_STEP,
           { id: "lint", title: "Lint", command: "pnpm", args: ["lint"], env: {} },
           { id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} }
         ]
@@ -47,8 +57,15 @@ describe("runner", () => {
       }
     );
 
-    expect(result).toEqual<RunResult>({ executedSteps: ["test"], skippedSteps: ["lint"] });
-    expect(consoleSpy).toHaveBeenCalledWith("• Test: pnpm test");
+    expect(result).toEqual<RunResult>({
+      executedSteps: ["verify-drizzle-env", "test"],
+      skippedSteps: ["lint"]
+    });
+    expect(consoleSpy).toHaveBeenNthCalledWith(
+      1,
+      "• Verify Drizzle env: pnpm exec tsx tools/verify-drizzle-env.ts"
+    );
+    expect(consoleSpy).toHaveBeenNthCalledWith(2, "• Test: pnpm test");
     expect(consoleSpy).not.toHaveBeenCalledWith("• Lint: pnpm lint");
     expect(executor).not.toHaveBeenCalled();
   });

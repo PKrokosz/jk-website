@@ -1,5 +1,7 @@
 # Plan wdrożenia MVP (ticketing)
 
+> **Status aktualizacji**: 2025-10-22 — rozszerzono harmonogram o zadanie T7 (panel klienta) i wpięto pętlę dokumentacyjną.
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Zadania T0–T6](#zadania-t0t6)
@@ -14,11 +16,11 @@
 - [4. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- Sekwencja zadań prowadzi od stabilizacji środowiska, przez UI foundation, dane mock, strony katalogu/produktów, po kontakt i CI.
-- Status (2024-xx-xx): T0 oraz T2–T5 zakończone, T6 częściowo wdrożone (workflow CI, testy podstawowe), T1 wymaga dopięcia (design tokens w CSS).
+- Sekwencja zadań prowadzi od stabilizacji środowiska, przez UI foundation, dane mock, strony katalogu/produktów, kontakt, CI oraz panel klienta.
+- Status (2025-10-22): T0, T2–T5, T7 zakończone, T6 częściowo wdrożone (workflow CI, testy podstawowe), T1 wymaga dopięcia (design tokens w CSS).
 - Każde zadanie ma dedykowany branch `codex/<kontekst>` i Definition of Done.
 
-## Zadania T0–T6
+## Zadania T0–T7
 ### T0 — Stabilizacja środowiska
 - **Branch**: `codex/env-hardening`
 - **Status**: ✅ zakończone (ujednolicone poświadczenia DB + dodany `drizzle.config.ts`).
@@ -110,8 +112,22 @@
 - **Rollback**: wyłączenie workflow, revert commitów.
 - **Estymata**: M.
 
+### T7 — Panel klienta (mock onboarding)
+- **Branch**: `codex/account-onboarding`
+- **Status**: ✅ zakończone (mock panel `/account` z formularzami i testami komponentów).
+- **Zakres**: Landing `/account` z hero, rejestracją, logowaniem, historią zamówień i newsletterem (mock logic, brak backendu).
+- **DoD**:
+  - [x] Strona `app/account/page.tsx` z sekcjami hero, rejestracja, logowanie, historia zamówień, newsletter.
+  - [x] Komponenty formularzy w `src/app/account/components/*` z testami Vitest.
+  - [x] Copy i metadata dopasowane do brand voice.
+  - [ ] Integracja backendu auth/newsletter – do zaplanowania jako oddzielne zadania (`LOOP_TASKS.md`).
+  - [x] `pnpm lint`, `pnpm test`.
+- **Ryzyka**: brak prawdziwego backendu auth powoduje rozjazd oczekiwań użytkownika, potrzeba jasnego komunikatu o mocku.
+- **Rollback**: powrót do wersji repo sprzed dodania `/account` (zachowanie poprzedniego sitemap/plan).
+- **Estymata**: L.
+
 ## Checklisty kontrolne
-- [x] Zdefiniowano zadania T0–T6 z branchami i statusem.
+- [x] Zdefiniowano zadania T0–T7 z branchami i statusem.
 - [x] Ujęto DoD, ryzyka, rollback, estymaty.
 - [ ] Zatwierdzono plan przez właściciela produktu (w toku).
 

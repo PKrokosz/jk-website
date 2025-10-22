@@ -53,11 +53,14 @@ const mockedCreateDbClient = vi.mocked(dbModule.createDbClient);
 
 const { GET } = await import("./route");
 
-function makeRequest() {
-  return new NextRequest("https://jkhandmade.pl/api/products");
+function makeRequest(slug: string) {
+  return [
+    new NextRequest(`https://jkhandmade.pl/api/products/${slug}`),
+    { params: { slug } }
+  ] as const;
 }
 
-describe("GET /api/products", () => {
+describe("GET /api/products/[slug]", () => {
   const ORIGINAL_DATABASE_URL = process.env.DATABASE_URL;
   const restoreDatabaseUrl = () => {
     if (typeof ORIGINAL_DATABASE_URL === "string") {
@@ -100,28 +103,46 @@ describe("GET /api/products", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("zwraca listę produktów katalogu", async () => {
-    const response = await GET(makeRequest());
+  it("zwraca szczegóły produktu dla poprawnego slugu", async () => {
+    const [request, context] = makeRequest(sampleDetail.slug);
+    const response = await GET(request, context);
 
     expect(response.status).toBe(200);
 
     const body = await response.json();
-    expect(body).toEqual({ data: [sampleSummary] });
+    expect(body).toEqual({ data: sampleDetail });
     expect(resolveCatalogCacheMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("zwraca 404 dla nieistniejącego produktu", async () => {
+    const [request, context] = makeRequest("brak");
+    const response = await GET(request, context);
+
+    expect(response.status).toBe(404);
+  });
+
+  it("zwraca 422 dla pustego slugu", async () => {
+    const [request, context] = makeRequest("");
+    const response = await GET(request, context);
+
+    expect(response.status).toBe(422);
+    expect(resolveCatalogCacheMock).not.toHaveBeenCalled();
   });
 
   it("zwraca 500 w przypadku błędu cache", async () => {
     resolveCatalogCacheMock.mockRejectedValueOnce(new Error("cache down"));
+    const [request, context] = makeRequest(sampleDetail.slug);
 
-    const response = await GET(makeRequest());
+    const response = await GET(request, context);
 
     expect(response.status).toBe(500);
   });
 
   it("zwraca 500 gdy brakuje konfiguracji bazy danych", async () => {
     delete process.env.DATABASE_URL;
+    const [request, context] = makeRequest(sampleDetail.slug);
 
-    const response = await GET(makeRequest());
+    const response = await GET(request, context);
 
     expect(response.status).toBe(500);
     expect(resolveCatalogCacheMock).not.toHaveBeenCalled();

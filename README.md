@@ -21,7 +21,7 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 | --- | --- | --- |
 | `src/app` | App Router ze stronami `/`, `/catalog`, `/catalog/[slug]`, `/order`, `/order/native`, `/contact`, `/about`, `/account` oraz `/healthz`. | Strony produkcyjne są kompletne, a smoke test `pages.compile.test.ts` pilnuje możliwości importu każdej z nich. |
 | `src/components` | Współdzielone komponenty (`Header`, `CatalogExplorer`, formularze kontaktowe i zamówień, prymitywy UI). | Kluczowe komponenty mają testy RTL (np. `ContactForm`) obejmujące walidację, stany błędów oraz telemetrię. |
-| `src/lib/catalog` | Mocki katalogu (produkty, style, skóry) oraz repozytorium z fallbackiem do danych referencyjnych. | Dane referencyjne są gotowe na MVP; przełączenie na Drizzle zaplanowane po wdrożeniu migracji. |
+| `src/lib/catalog` | Cache katalogu (styles/leathers/product templates), repozytorium Drizzle oraz fallback referencyjny. | API `/api/products` i `/api/products/[slug]` korzystają z cache `resolveCatalogCache`, a strony katalogu pobierają dane z tych endpointów. |
 | `src/lib/pricing` | Schematy Zod dla kalkulatora wyceny i repozytorium zapisu zapytań. | Kontrakty request/response są pokryte testami API (`/api/pricing/quote`). |
 | `src/lib/navigation` & `scripts/` | Symulacje ścieżek użytkowników + skrypty CLI do agregacji wyników. | Moduły posiadają testy Vitest oraz skrypty `simulate:user-journeys`/`simulate:navigation`. |
 | `packages/db` | Pakiet `@jk/db` z konfiguracją Drizzle, schematem tabel i seedem danych. | Migracja inicjalna i seed referencyjny dostępne; kolejne migracje wymagają osobnych tasków. |
@@ -153,7 +153,7 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 ## Funkcjonalności aplikacji
 
 - **Strona główna (`/`)** – hero z wideo, sekcja procesu MTO, carousel selling points, portfolio modeli, kalkulator wyceny oraz CTA do formularza zamówień.
-- **Katalog (`/catalog`)** – lista produktów w oparciu o mocki (`src/lib/catalog`), filtry stylów/skór, sortowanie i stany pusty/loading.
+- **Katalog (`/catalog`)** – lista produktów oparta o `/api/products` (cache Drizzle), filtry stylów/skór, sortowanie i stany pusty/loading.
 - **Strona produktu (`/catalog/[slug]`)** – breadcrumbs, galeria, warianty personalizacji, CTA do modala zamówienia i linków do `/order/native` oraz `/contact`.
 - **Kontakt (`/contact`)** – sekcja hero z danymi pracowni, formularz kontaktowy z walidacją oraz statusami sukces/błąd, linki do sociali.
 - **Zamówienie (`/order`, `/order/native`)** – osadzony formularz natywny (`NEXT_PUBLIC_ORDER_FORM_URL`) i fallback link do pełnej wersji.

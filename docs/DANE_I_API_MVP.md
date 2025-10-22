@@ -1,17 +1,16 @@
 # Dane i API dla MVP
 
-## Meta audytu 2025-10-30
-- **Status zagadnień**: Migracje Drizzle (`style`, `leather`, `option`, `sole`, `quote_requests`) oraz seed referencyjny są dostępne i używane przez endpointy katalogu. Dodano testy weryfikujące mapowanie rekordów Drizzle na fallback `catalogStyles`/`catalogLeathers`. Nadal brakuje `/api/products/[slug]` oraz przeniesienia templatek produktów do bazy.
+- **Status zagadnień**: Template produktów przeniesiono do seeda/migracji Drizzle, `/api/products` i `/api/products/[slug]` korzystają z cache `resolveCatalogCache`, a strony `/catalog` i `/catalog/[slug]` pobierają dane z API. Testy repozytorium pokrywają style, skóry i template produktów zarówno w trybie Drizzle, jak i fallback.
 - **Nowe ścieżki rozwoju**:
-  - Przenieść `productTemplates` do źródła danych Drizzle lub osobnego seeda JSON i dopisać migrację wraz z testem kontraktowym dla `/api/products`.
-  - Rozszerzyć `JAKOSC_TESTY_CI.md` o checklistę uruchamiania `pnpm db:seed`, `pnpm test:integration` oraz testów mapowania `repository.drizzle.test.ts`.
-  - Opisać plan cache (ISR + lokalny cache) i healthcheck katalogu (`x₆²`, `x₆ˣ`) po stronie backendu danych.
+  - Dopisać testy integracyjne/SSR sprawdzające render `/catalog` i `/catalog/[slug]` na realnej bazie (z użyciem `pnpm test:integration`).
+  - Rozszerzyć `JAKOSC_TESTY_CI.md` o checklistę uruchamiania `pnpm db:seed`, `pnpm test:integration` oraz logów healthchecku katalogu.
+  - Zaplanować mechanizm obserwowalności (alert przy `status: degraded/error` z `/api/catalog/health`).
 - **Rekomendacja archiwizacji**: Nie — dokument pozostaje źródłem prawdy dla modelu danych i kontraktów API.
 - **Sens dokumentu**: Definiuje schemat produktu, mapowanie stylów/skór oraz opisuje kontrakty API wykorzystywane przez UI i testy.
 - **Aktualizacje wykonane**:
-  - Dodano sekcję tabeli `quote_requests` i opisano kolumny w kontekście logów wycen.
-  - Zsynchronizowano opis stylów/skór z kolumnami Drizzle (`descriptionMd`, `description`) i seeda `@jk/db`.
-  - Wskazano automatyczne testy mapujące dane Drizzle na fallback katalogu oraz procedurę migracji/seedowania.
+  - Uzupełniono seeda Drizzle o template produktów (`product_template`) wraz z migracją SQL i scenariuszami testowymi.
+  - Udokumentowano lokalny cache katalogu oraz healthcheck `/api/catalog/health` raportujący źródła danych i statystyki cache.
+  - Zaktualizowano kontrakty API o dynamiczny endpoint `/api/products/[slug]` i nowy mechanizm fallbacku; strony katalogu wykorzystują teraz `fetchCatalogProducts`/`fetchCatalogProductDetail`.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -24,11 +23,10 @@
 - [8. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- Referencyjne dane katalogu (style, skóry, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`, `pnpm db:seed`).
-- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]` są dostępne; `/api/styles`, `/api/leather` korzystają z Drizzle ORM i mają testy potwierdzające zgodność z fallbackiem katalogu.
-- Front (`/catalog`, `/catalog/[slug]`, `/cart`, `/group-orders`) konsumuje dane przez API Next.js, wykorzystując `fetchCatalogStyles`/`fetchCatalogLeathers` z revalidacją ISR.
+- Referencyjne dane katalogu (style, skóry, template produktów, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`, `pnpm db:seed`).
+- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/products/[slug]`, `/api/pricing/quote`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]`, `/api/catalog/health` są dostępne; `/api/products` i `/api/products/[slug]` korzystają z cache `resolveCatalogCache` budowanego na Drizzle.
+- Front (`/catalog`, `/catalog/[slug]`, `/cart`, `/group-orders`) konsumuje dane przez API Next.js; katalog korzysta z cache `/api/products`/`[slug]`, a fallback mocków pozostaje jedynie na potrzeby testów i build-time.
 - Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów, formularza kontaktowego i zamówień.
-- MVP operuje na mockowanych danych produktów w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień); przeniesienie produktów do Drizzle pozostaje otwarte.
 
 ## Model danych produktu
 | Pole | Typ | Opis |
@@ -71,14 +69,14 @@
 
 ## Zasilanie katalogu i produktu
 - **Katalog (`/catalog`)**
-  - Wczytuje dane przez `fetchCatalogStyles()` i `fetchCatalogLeathers()` (Next.js route handlers + Drizzle).
+  - Wczytuje dane przez `fetchCatalogStyles()`, `fetchCatalogLeathers()` oraz `fetchCatalogProducts()` (Next.js route handlers + Drizzle + cache).
   - `CatalogExplorer` filtruje lokalnie – sortowanie, filtry, aria-live.
   - CTA kart kieruje do `/catalog/[slug]`.
   - Test `src/lib/catalog/__tests__/repository.drizzle.test.ts` potwierdza zgodność danych Drizzle z fallbackiem katalogu.
 - **Produkt (`/catalog/[slug]`)**
-  - `getProductBySlug(slug, styles, leathers)` otrzymuje dane z API; w razie błędu strona zwraca fallback z komunikatem.
-  - `generateStaticParams` wykorzystuje `listProductSlugs()` do pre-renderu (wciąż z templatek).
-  - Metadane generowane są na podstawie danych z API; w razie błędu zwracany jest fallback.
+  - `fetchCatalogProductDetail(slug)` zasila SSR i metadane; 404 kończy się `notFound()`, a błędy zwracają fallback.
+  - `generateStaticParams` próbuje zbudować listę slugów z `/api/products`, a w razie degradacji wraca do `listProductSlugs()`.
+  - Metadane generowane są na podstawie danych z API z fallbackiem przy błędach.
 - **Order/Contact**
   - `OrderModalTrigger` wykorzystuje `orderReference` do preselektowania parametrów (URL query) w `/order/native`.
   - Formularz kontaktowy przyjmuje `product` w query (`/contact?product=slug`) i automatycznie uzupełnia pole formularza, jeśli parametr jest obecny.
@@ -90,8 +88,9 @@
 | `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Dane z tabeli `leather` (Drizzle ORM, revalidate 3600 s). |
 | `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; walidacja request/response w Zod. |
 | `/api/contact/submit` | POST | `{ name, email, phone?, message, product?, website? }` | `{ ok: true }` lub `{ error }` | Walidacja Zod, rate-limit per IP, honeypot `website`, wysyłka maila przez SMTP. |
-| `/api/products` | GET | `?slug?` | `{ data: CatalogProductSummary[] }` lub `{ data: CatalogProductDetail }` | Lista produktów katalogu lub szczegóły pojedynczego produktu. Walidacja query i payloadu w Zod. |
-| `/api/products/[slug]` | — | brak | — | Niezaimplementowane – strona produktu korzysta z funkcji bibliotecznych. |
+| `/api/products` | GET | brak | `{ data: CatalogProductSummary[] }` | Lista produktów generowana na podstawie cache `resolveCatalogCache` (Drizzle + fallback). |
+| `/api/products/[slug]` | GET | Param `slug` | `{ data: CatalogProductDetail }` | Szczegóły produktu pobrane z cache katalogu, 404 dla braku wpisu. |
+| `/api/catalog/health` | GET | brak | `{ ok, status, counts, sources, cache }` | Healthcheck katalogu odświeżający cache (status `healthy/degraded/error`). |
 
 ## Walidacja i obsługa błędów
 - Walidacja requestów API: `/api/products` (query i payload) oraz `/api/pricing/quote` (request + response) korzystają z Zod.

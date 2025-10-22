@@ -92,6 +92,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 
 ## API/DB
 - Endpointy: `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote` (mock). `/api/products` korzysta z Drizzle (styl/skóra) + templatek, walidacja Zod.
+- `/catalog` i `/catalog/[slug]` pobierają dane z `/api/products` oraz `/api/products/[slug]`; w testach SSR mockuj `fetchCatalogProducts`/`fetchCatalogProductDetail` i wykorzystuj klasę `CatalogApiError` do symulacji statusów (404, 500).
 - `/api/pricing/quote` korzysta z `pricingQuoteRequestSchema`/`pricingQuoteResponseSchema` (`src/lib/pricing/schemas.ts`) – przy zmianach aktualizuj testy kontraktowe w `src/app/api/pricing/quote/route.test.ts`.
 - Logi `/api/pricing/quote` są zapisywane w tabeli `quote_requests` (Drizzle); korzystaj z repozytorium `src/lib/pricing/quote-requests-repository.ts`, aby łatwo mockować zapisy w testach.
 - Handlery API korzystające z bazy sprawdzają `process.env.DATABASE_URL` w runtime i inicjalizują klienta DB dopiero wewnątrz funkcji `GET`/`POST` (bez top-level side-effectów); w razie braku konfiguracji zwracaj `HTTP 500` z komunikatem dla klienta.

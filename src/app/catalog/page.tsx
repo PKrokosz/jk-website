@@ -4,9 +4,11 @@ import Link from "next/link";
 
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
 import { NativeModelShowcase } from "@/components/catalog/NativeModelShowcase";
-import { fetchCatalogLeathers, fetchCatalogStyles } from "@/lib/catalog/api";
-import { createMockProducts } from "@/lib/catalog/products";
-import type { CatalogLeather, CatalogProductSummary, CatalogStyle } from "@/lib/catalog/types";
+import {
+  fetchCatalogLeathers,
+  fetchCatalogProducts,
+  fetchCatalogStyles
+} from "@/lib/catalog/api";
 
 export const metadata: Metadata = {
   title: "Katalog",
@@ -16,8 +18,11 @@ export const metadata: Metadata = {
 
 export default async function CatalogPage() {
   try {
-    const [styles, leathers] = await Promise.all([fetchCatalogStyles(), fetchCatalogLeathers()]);
-    const products: CatalogProductSummary[] = createMockProducts(styles, leathers);
+    const [styles, leathers, products] = await Promise.all([
+      fetchCatalogStyles(),
+      fetchCatalogLeathers(),
+      fetchCatalogProducts()
+    ]);
 
     return (
       <main className="page home-page catalog-page" aria-labelledby="catalog-heading">

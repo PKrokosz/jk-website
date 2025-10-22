@@ -5,8 +5,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
-import { fetchCatalogLeathers, fetchCatalogStyles } from "@/lib/catalog/api";
-import { getProductBySlug, listProductSlugs } from "@/lib/catalog/products";
+import {
+  CatalogApiError,
+  fetchCatalogLeathers,
+  fetchCatalogProductDetail,
+  fetchCatalogProducts,
+  fetchCatalogStyles
+} from "@/lib/catalog/api";
+import { listProductSlugs } from "@/lib/catalog/products";
 import type { CatalogLeather, CatalogProductDetail } from "@/lib/catalog/types";
 
 interface ProductPageProps {
@@ -18,23 +24,21 @@ const currencyFormatter = new Intl.NumberFormat("pl-PL", {
   currency: "PLN"
 });
 
-export function generateStaticParams() {
-  return listProductSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  try {
+    const products = await fetchCatalogProducts();
+    return products.map((product) => ({ slug: product.slug }));
+  } catch (error) {
+    console.error("Nie udało się pobrać slugów produktów z API", error);
+    return listProductSlugs().map((slug) => ({ slug }));
+  }
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = params;
 
   try {
-    const [styles, leathers] = await Promise.all([fetchCatalogStyles(), fetchCatalogLeathers()]);
-    const product = getProductBySlug(slug, styles, leathers);
-
-    if (!product) {
-      return {
-        title: "Model niedostępny",
-        description: "Wybrany model nie istnieje w katalogu JK Handmade Footwear."
-      } satisfies Metadata;
-    }
+    const product = await fetchCatalogProductDetail(slug);
 
     return {
       title: product.seo.title,
@@ -42,6 +46,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       keywords: product.seo.keywords
     } satisfies Metadata;
   } catch (error) {
+    if (error instanceof CatalogApiError && error.status === 404) {
+      return {
+        title: "Model niedostępny",
+        description: "Wybrany model nie istnieje w katalogu JK Handmade Footwear."
+      } satisfies Metadata;
+    }
+
     console.error("Nie udało się pobrać danych produktu do metadanych", error);
     return {
       title: "Model niedostępny",
@@ -86,12 +97,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = params;
 
   try {
-    const [styles, leathers] = await Promise.all([fetchCatalogStyles(), fetchCatalogLeathers()]);
-    const product = getProductBySlug(slug, styles, leathers);
-
-    if (!product) {
-      notFound();
-    }
+    const [product, styles, leathers] = await Promise.all([
+      fetchCatalogProductDetail(slug),
+      fetchCatalogStyles(),
+      fetchCatalogLeathers()
+    ]);
 
     const leatherById = new Map<number, CatalogLeather>(leathers.map((entry) => [entry.id, entry]));
     const style = styles.find((entry) => entry.id === product.styleId);
@@ -311,6 +321,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </main>
     );
   } catch (error) {
+    if (error instanceof CatalogApiError && error.status === 404) {
+      notFound();
+    }
+
     if (error instanceof Error && (error.message === "NEXT_NOT_FOUND" || error.message === "NOT_FOUND")) {
       throw error;
     }

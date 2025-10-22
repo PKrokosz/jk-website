@@ -6,17 +6,14 @@ import CatalogPage from "../page";
 
 const fetchCatalogStylesMock = vi.fn();
 const fetchCatalogLeathersMock = vi.fn();
-const createMockProductsMock = vi.fn();
+const fetchCatalogProductsMock = vi.fn();
 
 const catalogExplorerProps: Array<{ styles: unknown; leathers: unknown; products: unknown }> = [];
 
 vi.mock("@/lib/catalog/api", () => ({
   fetchCatalogStyles: () => fetchCatalogStylesMock(),
-  fetchCatalogLeathers: () => fetchCatalogLeathersMock()
-}));
-
-vi.mock("@/lib/catalog/products", () => ({
-  createMockProducts: (...args: unknown[]) => createMockProductsMock(...args)
+  fetchCatalogLeathers: () => fetchCatalogLeathersMock(),
+  fetchCatalogProducts: () => fetchCatalogProductsMock()
 }));
 
 vi.mock("@/components/catalog/CatalogExplorer", () => ({
@@ -42,7 +39,7 @@ describe("CatalogPage", () => {
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     fetchCatalogStylesMock.mockReset();
     fetchCatalogLeathersMock.mockReset();
-    createMockProductsMock.mockReset();
+    fetchCatalogProductsMock.mockReset();
   });
 
   afterEach(() => {
@@ -58,7 +55,7 @@ describe("CatalogPage", () => {
 
     fetchCatalogStylesMock.mockResolvedValue(styles);
     fetchCatalogLeathersMock.mockResolvedValue(leathers);
-    createMockProductsMock.mockReturnValue(products);
+    fetchCatalogProductsMock.mockResolvedValue(products);
 
     const page = await CatalogPage();
     render(page);
@@ -76,6 +73,7 @@ describe("CatalogPage", () => {
   it("renders fallback section when catalog fetching fails", async () => {
     fetchCatalogStylesMock.mockRejectedValue(new Error("Failed"));
     fetchCatalogLeathersMock.mockResolvedValue([]);
+    fetchCatalogProductsMock.mockResolvedValue([]);
 
     const page = await CatalogPage();
     render(page);

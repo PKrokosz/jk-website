@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { resolveCatalogCache } from "@/lib/catalog/cache";
 import { DatabaseConfigurationError, getNextDbClient } from "@/lib/db/next-client";
-import { catalogProductListResponseSchema } from "@/lib/catalog/schemas";
+import { catalogProductDetailResponseSchema } from "@/lib/catalog/schemas";
 
-export async function GET(_request: NextRequest) {
+const slugSchema = z
+  .string()
+  .trim()
+  .min(1, "Slug nie może być pusty");
+
+export async function GET(
+  _request: NextRequest,
+  context: { params: { slug?: string } }
+) {
+  const parsedSlug = slugSchema.safeParse(context.params?.slug ?? "");
+
+  if (!parsedSlug.success) {
+    return NextResponse.json(
+      { error: "Invalid slug", issues: parsedSlug.error.issues },
+      { status: 422 }
+    );
+  }
+
   let database: import("@jk/db").Database;
 
   try {
@@ -29,12 +47,18 @@ export async function GET(_request: NextRequest) {
 
   try {
     const cache = await resolveCatalogCache(database);
-    const payload = catalogProductListResponseSchema.parse({ data: cache.summaries });
+    const detail = cache.detailsBySlug[parsedSlug.data];
+
+    if (!detail) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    const payload = catalogProductDetailResponseSchema.parse({ data: detail });
     return NextResponse.json(payload);
   } catch (error) {
-    console.error("Nie udało się pobrać listy produktów", error);
+    console.error("Nie udało się pobrać szczegółów produktu", error);
     return NextResponse.json(
-      { error: "Nie udało się pobrać listy produktów" },
+      { error: "Nie udało się pobrać szczegółów produktu" },
       { status: 500 }
     );
   }

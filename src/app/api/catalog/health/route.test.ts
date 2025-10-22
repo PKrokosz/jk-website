@@ -1,36 +1,12 @@
 import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const sampleSummary = {
-  id: "sample-id",
-  slug: "sample-slug",
-  name: "Sample",
-  styleId: 1,
-  leatherId: 2,
-  description: "Opis sample",
-  highlight: "Wyróżnik",
-  priceGrosz: 123_000,
-  category: "footwear" as const,
-  categoryLabel: "Buty",
-  funnelStage: "MOFU" as const,
-  funnelLabel: "MOFU — konfiguracja i porównanie oferty",
-  orderReference: undefined
-};
-
-const sampleDetail = {
-  ...sampleSummary,
-  gallery: [
-    { src: "/image/models/1.jfif", alt: "Model Sample — Ujęcie" }
-  ],
-  variants: { colors: [], sizes: [] },
-  craftProcess: [],
-  seo: { title: "Sample", description: "Sample", keywords: [] }
-};
-
 const resolveCatalogCacheMock = vi.fn();
+const getCatalogCacheSnapshotMock = vi.fn();
 
 vi.mock("@/lib/catalog/cache", () => ({
-  resolveCatalogCache: resolveCatalogCacheMock
+  resolveCatalogCache: resolveCatalogCacheMock,
+  getCatalogCacheSnapshot: getCatalogCacheSnapshotMock
 }));
 
 vi.mock("@jk/db", async () => {
@@ -54,10 +30,10 @@ const mockedCreateDbClient = vi.mocked(dbModule.createDbClient);
 const { GET } = await import("./route");
 
 function makeRequest() {
-  return new NextRequest("https://jkhandmade.pl/api/products");
+  return new NextRequest("https://jkhandmade.pl/api/catalog/health");
 }
 
-describe("GET /api/products", () => {
+describe("GET /api/catalog/health", () => {
   const ORIGINAL_DATABASE_URL = process.env.DATABASE_URL;
   const restoreDatabaseUrl = () => {
     if (typeof ORIGINAL_DATABASE_URL === "string") {
@@ -80,15 +56,25 @@ describe("GET /api/products", () => {
       styles: [],
       leathers: [],
       templates: [],
-      summaries: [sampleSummary],
-      detailsBySlug: { [sampleDetail.slug]: sampleDetail },
-      sources: { styles: "fallback", leathers: "fallback", templates: "fallback" },
+      summaries: [],
+      detailsBySlug: {},
+      sources: { styles: "database", leathers: "database", templates: "database" },
       generatedAt: Date.now()
+    });
+    getCatalogCacheSnapshotMock.mockReturnValue({
+      lastUpdatedAt: Date.now(),
+      expiresAt: Date.now() + 1000,
+      hits: 1,
+      misses: 0,
+      fallbackCount: 0,
+      errorCount: 0,
+      stale: false
     });
   });
 
   afterEach(() => {
     resolveCatalogCacheMock.mockReset();
+    getCatalogCacheSnapshotMock.mockReset();
     resetNextDbClient();
     mockedCreateDbClient.mockReset();
     restoreDatabaseUrl();
@@ -100,14 +86,37 @@ describe("GET /api/products", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("zwraca listę produktów katalogu", async () => {
+  it("zwraca status healthy gdy cache aktualne", async () => {
     const response = await GET(makeRequest());
 
     expect(response.status).toBe(200);
 
     const body = await response.json();
-    expect(body).toEqual({ data: [sampleSummary] });
-    expect(resolveCatalogCacheMock).toHaveBeenCalledTimes(1);
+    expect(body.ok).toBe(true);
+    expect(body.status).toBe("healthy");
+    expect(body.counts).toEqual({ styles: 0, leathers: 0, products: 0 });
+    expect(resolveCatalogCacheMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ forceRefresh: true })
+    );
+  });
+
+  it("oznacza status jako degraded gdy użyto fallbacku", async () => {
+    resolveCatalogCacheMock.mockResolvedValueOnce({
+      styles: [],
+      leathers: [],
+      templates: [],
+      summaries: [],
+      detailsBySlug: {},
+      sources: { styles: "fallback", leathers: "database", templates: "database" },
+      generatedAt: Date.now()
+    });
+
+    const response = await GET(makeRequest());
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.status).toBe("degraded");
   });
 
   it("zwraca 500 w przypadku błędu cache", async () => {

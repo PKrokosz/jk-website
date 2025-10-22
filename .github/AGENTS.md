@@ -7,3 +7,4 @@ Instrukcje w tym pliku obowiązują dla katalogu `.github/`.
 - Zachowuj spójność sekcji i nazewnictwa z dokumentem `docs/JAKOSC_TESTY_CI.md`.
 - Przy aktualizacji templatek pamiętaj o komentarzach pomagających wypełnić PR (po polsku).
 - Zmiany w workflow lub template zawsze synchronizuj z dokumentacją jakości w `docs/JAKOSC_TESTY_CI.md`.
+- W workflow `ci.yml` stosuj `pnpm/action-setup` w trybie `standalone`, aby wspierać macierz Node 22.x bez zainstalowanego `npm`.

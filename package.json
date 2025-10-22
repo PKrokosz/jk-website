@@ -56,5 +56,10 @@
     "typescript": "5.5.4",
     "vitest": "2.1.1"
   },
+  "pnpm": {
+    "overrides": {
+      "parse5": "7.1.2"
+    }
+  },
   "packageManager": "pnpm@10.18.3"
 }

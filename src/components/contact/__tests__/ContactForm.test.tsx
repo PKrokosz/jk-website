@@ -1,7 +1,15 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockedFunction
+} from "vitest";
 
 vi.mock("@/lib/telemetry", () => ({
   reportClientError: vi.fn()
@@ -17,22 +25,8 @@ function createResponse(status: number, statusText?: string) {
 
 describe("ContactForm", () => {
   const consentLabel = /wyrażam zgodę/i;
-  let submitRequest: MockedFunction<typeof fetch>;
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-    submitRequest = vi
-      .fn<typeof fetch>()
-      .mockResolvedValue(new Response(null, { status: 200 }));
-    vi.stubGlobal("fetch", submitRequest);
-  });
-
-  afterEach(() => {
-    vi.runOnlyPendingTimers();
-    vi.useRealTimers();
-    vi.unstubAllGlobals();
   const submitLabel = /wyślij wiadomość/i;
-  let submitRequest: ReturnType<typeof vi.fn<typeof fetch>>;
+  let submitRequest: MockedFunction<typeof fetch>;
 
   const fillField = async (label: RegExp, value: string) => {
     const field = screen.getByLabelText(label);
@@ -45,7 +39,7 @@ describe("ContactForm", () => {
   };
 
   beforeEach(() => {
-    submitRequest = vi.fn<typeof fetch>();
+    submitRequest = vi.fn<typeof fetch>().mockResolvedValue(createResponse(200));
   });
 
   afterEach(() => {

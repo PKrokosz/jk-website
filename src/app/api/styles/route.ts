@@ -1,32 +1,32 @@
 import { NextResponse } from "next/server";
 
-import { findActiveStyles } from "@/lib/catalog/repository";
+import { resolveCatalogCache } from "@/lib/catalog/cache";
 import { DatabaseConfigurationError, getNextDbClient } from "@/lib/db/next-client";
 
 export async function GET() {
-  let database: import("@jk/db").Database;
+  let database: import("@jk/db").Database | undefined;
 
   try {
     database = getNextDbClient().db;
   } catch (error) {
-    console.error("Failed to initialize database client", error);
-
     if (error instanceof DatabaseConfigurationError) {
+      console.warn(
+        "Baza danych katalogu nie jest skonfigurowana — korzystamy z danych referencyjnych",
+        error
+      );
+    } else {
+      console.error("Failed to initialize database client", error);
+
       return NextResponse.json(
-        { error: "Database connection is not configured. Please try again later." },
+        { error: "Unable to connect to the database. Please try again later." },
         { status: 500 }
       );
     }
-
-    return NextResponse.json(
-      { error: "Unable to connect to the database. Please try again later." },
-      { status: 500 }
-    );
   }
 
   try {
-    const styles = await findActiveStyles(database);
-    return NextResponse.json({ data: styles });
+    const cache = await resolveCatalogCache(database);
+    return NextResponse.json({ data: cache.styles });
   } catch (error) {
     console.error("Nie udało się pobrać listy stylów", error);
     return NextResponse.json({ error: "Nie udało się pobrać listy stylów" }, { status: 500 });

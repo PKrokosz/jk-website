@@ -14,14 +14,14 @@ vi.mock("@jk/db", async () => {
   };
 });
 
-const findActiveStylesMock = vi.fn();
+const resolveCatalogCacheMock = vi.fn();
 
-vi.mock("@/lib/catalog/repository", () => ({
-  findActiveStyles: findActiveStylesMock,
+vi.mock("@/lib/catalog/cache", () => ({
+  resolveCatalogCache: resolveCatalogCacheMock
 }));
 
 const dbClientHelper = await import("@/lib/db/next-client");
-const { resetNextDbClient } = dbClientHelper;
+const { resetNextDbClient, DatabaseConfigurationError } = dbClientHelper;
 
 const dbModule = await import("@jk/db");
 const mockedCreateDbClient = vi.mocked(dbModule.createDbClient);
@@ -38,6 +38,7 @@ describe("GET /api/styles", () => {
     }
   };
   const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
     resetNextDbClient();
@@ -47,11 +48,23 @@ describe("GET /api/styles", () => {
       pool: {} as unknown as import("pg").Pool
     });
     process.env.DATABASE_URL = "postgres://test:test@localhost:5432/db";
-    findActiveStylesMock.mockResolvedValue(catalogStyles);
+    resolveCatalogCacheMock.mockResolvedValue({
+      styles: catalogStyles,
+      leathers: [],
+      templates: [],
+      summaries: [],
+      detailsBySlug: {},
+      sources: {
+        styles: "fallback" as const,
+        leathers: "fallback" as const,
+        templates: "fallback" as const
+      },
+      generatedAt: Date.now()
+    });
   });
 
   afterEach(() => {
-    findActiveStylesMock.mockReset();
+    resolveCatalogCacheMock.mockReset();
     resetNextDbClient();
     mockedCreateDbClient.mockReset();
     restoreDatabaseUrl();
@@ -61,6 +74,7 @@ describe("GET /api/styles", () => {
     resetNextDbClient();
     restoreDatabaseUrl();
     consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   it("zwraca listę stylów do katalogu", async () => {
@@ -71,10 +85,11 @@ describe("GET /api/styles", () => {
     const body = await response.json();
     expect(Array.isArray(body.data)).toBe(true);
     expect(body.data).toHaveLength(catalogStyles.length);
+    expect(resolveCatalogCacheMock).toHaveBeenCalledWith({});
   });
 
   it("zwraca 500 gdy pobranie danych kończy się błędem", async () => {
-    findActiveStylesMock.mockRejectedValueOnce(new Error("db down"));
+    resolveCatalogCacheMock.mockRejectedValueOnce(new Error("cache down"));
 
     const response = await GET();
 
@@ -88,13 +103,19 @@ describe("GET /api/styles", () => {
     );
   });
 
-  it("zwraca 500 gdy brakuje konfiguracji bazy danych", async () => {
+  it("wraca do danych referencyjnych gdy brakuje konfiguracji bazy danych", async () => {
     delete process.env.DATABASE_URL;
 
     const response = await GET();
 
-    expect(response.status).toBe(500);
-    expect(findActiveStylesMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.data).toEqual(catalogStyles);
+    expect(resolveCatalogCacheMock).toHaveBeenCalledWith(undefined);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("nie jest skonfigurowana"),
+      expect.any(DatabaseConfigurationError)
+    );
     expect(mockedCreateDbClient).not.toHaveBeenCalled();
   });
 });

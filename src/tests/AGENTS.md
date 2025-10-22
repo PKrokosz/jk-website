@@ -11,3 +11,4 @@
 ## Integracje z bazą danych
 - Przed wykonaniem testów integracyjnych korzystaj z helpera `ensureIntegrationTestMigrations`, który zastosuje migracje z katalogu `drizzle` do lokalnej bazy testowej.
 - Jeśli dodajesz nowe migracje, upewnij się, że testy integracyjne ładują środowisko `.env.test` i nie polegają na ręcznym uruchamianiu `pnpm db:migrate`.
+- Importuj migrator Drizzle dynamicznie (`await import("drizzle-orm/node-postgres/migrator")`) i cache'uj rezultat w helperach, aby ominąć ograniczenia bundlera Vite dotyczące eksportów pakietu.

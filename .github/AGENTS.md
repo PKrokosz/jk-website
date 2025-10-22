@@ -8,6 +8,6 @@ Instrukcje w tym pliku obowiązują dla katalogu `.github/`.
 - Przy aktualizacji templatek pamiętaj o komentarzach pomagających wypełnić PR (po polsku).
 - Zmiany w workflow lub template zawsze synchronizuj z dokumentacją jakości w `docs/JAKOSC_TESTY_CI.md`.
 - W workflow `ci.yml` stosuj `pnpm/action-setup` w trybie `standalone`, aby wspierać macierz Node 22.x bez zainstalowanego `npm`.
-- Przy aktualizacji `ci.yml` utrzymuj krok przygotowujący bazę (`docker compose up -d jkdb` + `pnpm db:migrate` + `pnpm db:seed`) oraz końcowy etap `pnpm test:integration` – zapewniają one działanie helpera `ensureIntegrationTestMigrations`.
+- Przy aktualizacji `ci.yml` utrzymuj krok przygotowujący bazę (skrypt `pnpm exec tsx scripts/prepare-integration-db.ts` uruchamia `docker compose up -d jkdb`, migracje i seed z `.env.test`) oraz końcowy etap `pnpm test src/app/api/products/route.integration.test.ts` – zapewniają one działanie helpera `ensureIntegrationTestMigrations` i weryfikację degradacji katalogu.
 - Dodając nowe kroki do `ci.yml`, zachowaj weryfikację spójności Drizzle (`pnpm db:generate` + brak diffów w `drizzle/`).
 - Po testach integracyjnych dodawaj/utrzymuj krok `docker compose down --volumes jkdb` z `if: always()` ograniczony do macierzy Node 20.x, aby porządkować zasoby.

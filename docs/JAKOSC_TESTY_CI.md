@@ -1,6 +1,6 @@
 # Jakość, testy i CI/CD
 
-## Meta audytu 2025-10-30
+## Meta audytu 2025-10-31
 - **Status zagadnień**: Workflow CI działa i pokrywa wszystkie opisane kroki (`pnpm qa`, `pnpm qa:ci`). Pozostają otwarte działania opcjonalne (`pnpm test:e2e` dla kolejnych flow, monitorowanie coverage threshold). DoD wymaga konsekwentnego odhaczania pól.
 - **Nowe ścieżki rozwoju**:
   - Ustalić minimalny próg coverage i opisać go w dokumencie (np. 85% pokrycia statements) oraz dodać w pipeline.
@@ -9,11 +9,11 @@
 - **Rekomendacja archiwizacji**: Nie — dokument jest aktywnie używany jako DoD i referencja dla CI.
 - **Sens dokumentu**: Określa Definition of Done, plan testów, konfigurację CI i konwencje pracy. Zapewnia, że każda zmiana przechodzi spójny zestaw kontroli jakości.
 - **Aktualizacje wykonane**:
-  - Podbito meta audyt (2025-10-30) oraz utrzymano aktualność statusu dokumentu.
-  - Uzupełniono opis pipeline o krok przygotowujący bazę oraz uruchomienie `pnpm test:integration`.
-  - Doprecyzowano etap sprzątania kontenerów (`docker compose down --volumes jkdb`) po testach integracyjnych.
-  - Rozszerzono CLI `quality:ci` o automatyczne sprzątanie bazy `jkdb` po scenariuszu Node 20 oraz udokumentowano flagę `--skip=cleanup-node20-db`.
-  - Dodano krok dry-run `pnpm db:generate` w `pnpm qa`/`pnpm qa:ci`, który blokuje bramkę przy niezatwierdzonych zmianach w `drizzle/`.
+  - Podbito meta audyt (2025-10-31) oraz zsynchronizowano opis pipeline z aktualnym workflow.
+  - Dodano skrypt `scripts/prepare-integration-db.ts`, który startuje `jkdb`, czeka na połączenie i odpala migracje oraz seed z `.env.test`.
+  - Rozszerzono `pnpm qa:ci` o kroki przygotowania bazy i uruchomienie `pnpm test src/app/api/products/route.integration.test.ts`.
+  - Ujednolicono workflow CI z CLI – job `quality` korzysta z nowego skryptu i uruchamia docelowy plik testów integracyjnych.
+  - Zaktualizowano wymagania dotyczące sprzątania kontenera (`docker compose down --volumes jkdb`) po testach integracyjnych.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -25,9 +25,9 @@
 - [7. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`, które dodatkowo pilnują braku zmian w `drizzle/` po `pnpm db:generate -- --dry-run`.
+- DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`, które dodatkowo pilnują braku zmian w `drizzle/` po `pnpm db:generate -- --dry-run` i – w trybie CI – przygotowują bazę (`scripts/prepare-integration-db.ts`) przed integracjami.
 - Testy: Vitest + React Testing Library (layout, katalog, kalkulator, formularz kontaktowy, product page, NativeModelShowcase).
-- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck oraz dedykowane przygotowanie bazy + weryfikacja `pnpm db:generate` + testy integracyjne na Node 20.x; orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
+- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck oraz dedykowane przygotowanie bazy (`pnpm exec tsx scripts/prepare-integration-db.ts`) + weryfikacja `pnpm db:generate` + testy integracyjne na Node 20.x (uruchamiane zarówno w `pnpm qa:ci`, jak i osobnym kroku); orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
 - Commity: Conventional Commits, PR zawiera opis, listę zmian, wyniki komend, screeny dla UI.
 
 ## Definition of Done
@@ -107,25 +107,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Prepare integration database
         if: matrix.node-version == '20.x'
-        run: |
-          docker compose up -d jkdb
-          ready=0
-          for attempt in {1..30}; do
-            if docker compose exec -T jkdb pg_isready -U postgres > /dev/null 2>&1; then
-              echo "Database is ready"
-              ready=1
-              break
-            fi
-            echo "Waiting for database... (${attempt}/30)"
-            sleep 2
-          done
-          if [ "$ready" -ne 1 ]; then
-            echo "::error::Database did not become ready in time"
-            docker compose logs jkdb
-            exit 1
-          fi
-          pnpm db:migrate
-          pnpm db:seed
+        run: pnpm exec tsx scripts/prepare-integration-db.ts
       - name: Verify Drizzle schema metadata
         if: matrix.node-version == '20.x'
         run: |
@@ -143,7 +125,7 @@ jobs:
         run: pnpm qa:ci
       - name: Run integration tests
         if: matrix.node-version == '20.x'
-        run: pnpm test:integration
+        run: pnpm test src/app/api/products/route.integration.test.ts
       - name: Upload coverage report
         if: always() && matrix.node-version == '20.x'
         uses: actions/upload-artifact@v4
@@ -155,11 +137,12 @@ jobs:
         run: docker compose down --volumes jkdb
   ```
   - `pnpm qa` uruchamia lokalną bramkę jakościową (lint, typecheck, test) – wykorzystywane na macierzy Node 22.x.
-  - `pnpm qa:ci` odtwarza pełen pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck) – uruchamiane na Node 20.x.
+  - `pnpm qa:ci` odtwarza pełen pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck, przygotowanie bazy i test integracyjny) – uruchamiane na Node 20.x.
   - Obie komendy rozpoczynają się od dry-run `pnpm db:generate`, który kończy job błędem, jeżeli `drizzle/` zawiera niezatwierdzone zmiany.
-  - Kroki `pnpm db:migrate`, `pnpm db:seed` przygotowują kontener Postgresa (`jkdb`) i synchronizują schemat przed testami integracyjnymi.
+  - Skrypt `pnpm exec tsx scripts/prepare-integration-db.ts` uruchamia `docker compose up -d jkdb`, czeka na dostępność bazy i wywołuje `pnpm db:migrate` + `pnpm db:seed` z `.env.test` przed integracjami.
+  - Po przygotowaniu bazy CLI i workflow odpalają `pnpm test src/app/api/products/route.integration.test.ts`, aby upewnić się, że brak połączenia nie pomija scenariuszy degradacji katalogu.
   - `Verify Drizzle schema metadata` wymusza czysty diff po `pnpm db:generate`, dzięki czemu wychwycimy brakujące aktualizacje migracji/metadanych.
-  - `pnpm test:integration` korzysta z helpera `ensureIntegrationTestMigrations`, aby upewnić się, że migracje zostały zastosowane i dane referencyjne są dostępne.
+  - `pnpm test src/app/api/products/route.integration.test.ts` korzysta z helpera `ensureIntegrationTestMigrations`, aby upewnić się, że migracje zostały zastosowane i dane referencyjne są dostępne.
   - `docker compose down --volumes jkdb` gwarantuje zwolnienie wolumenów i kontenera `jkdb` po zakończeniu testów na Node 20.x.
   - Komenda `pnpm qa:ci` wywołuje ten sam krok sprzątający lokalnie; w razie potrzeby debugowania można użyć `pnpm qa:ci -- --skip=cleanup-node20-db`.
   - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.

@@ -2,7 +2,7 @@
 
 Repozytorium sklepu MTO „JK Handmade Footwear” zbudowanego na Next.js 14 (App Router) i TypeScript. Monorepo pnpm obejmuje frontend, API App Routera, pakiet Drizzle ORM (`@jk/db`), narzędzia CLI oraz dokumentację discovery – wszystkie elementy korzystają z jednego procesu jakościowego.
 
-> **CI/CD**: workflow [`CI`](.github/workflows/ci.yml) działa na Node.js 20.x i 22.x z `pnpm@10.18.3`. Pipeline instaluje zależności, uruchamia lint, typecheck, build, testy Vitest (wraz z raportem pokrycia), scenariusze Playwright, depcheck oraz – na macierzy 20.x – migracje i seed bazy Postgres.
+> **CI/CD**: workflow [`CI`](.github/workflows/ci.yml) działa na Node.js 20.x i 22.x z `pnpm@10.18.3`. Pipeline instaluje zależności, uruchamia lint, typecheck, build, testy Vitest (wraz z raportem pokrycia), scenariusze Playwright, depcheck oraz – na macierzy 20.x – przygotowuje bazę przez `scripts/prepare-integration-db.ts` i odpala test integracyjny katalogu (`pnpm test src/app/api/products/route.integration.test.ts`).
 
 ## Stos technologiczny
 
@@ -118,12 +118,13 @@ docker compose down --volumes jkdb
 | `pnpm test:watch` | Uruchamia Vitest w trybie watch dla szybkiego feedbacku. |
 | `pnpm test:coverage` | Generuje raport pokrycia (`coverage/`). |
 | `pnpm test:ci` | Vitest w trybie CI (reporter `dot`, próg pokrycia 85%). |
-| `pnpm test:integration` | Testy Drizzle na realnej bazie (`jkdb`, `.env.test`). |
+| `pnpm test:integration` | Alias dla `vitest run src/app/api/products/route.integration.test.ts` (wymaga `docker compose up -d jkdb`, `.env.test`, migracji i seeda). |
 | `pnpm test:e2e` | Scenariusze Playwright (najpierw `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analiza nieużywanych zależności. |
 | `pnpm exec tsx tools/verify-drizzle-env.ts` | Walidacja konfiguracji środowiskowej i spójności z Docker Compose. |
 | `pnpm qa` | `pnpm run cli -- quality` – lint + typecheck + test. |
-| `pnpm qa:ci` | `pnpm run cli -- quality:ci` – pełen pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, sprzątanie DB). |
+| `pnpm qa:ci` | `pnpm run cli -- quality:ci` – pełen pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, przygotowanie bazy `.env.test`, integracja katalogu, sprzątanie DB). |
+| `pnpm exec tsx scripts/prepare-integration-db.ts` | Startuje `jkdb`, czeka na dostępność, wykonuje migracje i seed korzystając z `.env.test`. |
 | `pnpm run cli -- --list` | Lista dostępnych komend CLI i opis kroków. |
 | `pnpm simulate:user-journeys` | Symulacje ścieżek użytkowników (`src/lib/navigation`). |
 | `pnpm simulate:navigation` | Agregacja przejść na grafie nawigacji (obsługa `--config`, `--user-count`, `--summary`). |
@@ -134,7 +135,7 @@ docker compose down --volumes jkdb
 ### CLI jakości
 
 - `pnpm run cli -- quality` – lint + typecheck + test (skrót `pnpm qa`).
-- `pnpm run cli -- quality:ci` – pełny pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck; skrót `pnpm qa:ci`).
+- `pnpm run cli -- quality:ci` – pełny pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, przygotowanie bazy `.env.test`, test integracyjny katalogu; skrót `pnpm qa:ci`).
 - CLI ładuje kolejno `.env.local`, `.env`, a następnie `.env.example` zanim wystartuje krok „Verify Drizzle env”.
 - `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, a `--skip=<id>` pozwala pominąć wskazane kroki (np. `--skip=build,e2e`).
 - Po scenariuszu Node 20 CLI wywołuje `docker compose down --volumes jkdb`; krok można pominąć flagą `--skip=cleanup-node20-db`.
@@ -179,7 +180,7 @@ pnpm db:seed       # zasila bazę danymi referencyjnymi
 - `pnpm test:coverage` generuje raport (`coverage/`) przy użyciu `@vitest/coverage-v8`.
 - `pnpm test:ci` (uruchamiane też w CI) wykorzystuje reporter `dot` i weryfikuje próg pokrycia 85% Statements/Lines.
 - `pnpm test:e2e` odpala Playwright (nawigacja po głównych stronach, health-checki API, dokumenty prawne). Przed pierwszym runem: `pnpm exec playwright install --with-deps`.
-- `pnpm test:integration` korzysta z `.env.test` i helpera `src/tests/integration/db.ts`, aby wykonać zapytania na realnej bazie (`docker compose up -d jkdb`, `pnpm db:migrate`, `pnpm db:seed`).
+- `pnpm test:integration` (alias `vitest run src/app/api/products/route.integration.test.ts`) korzysta z `.env.test` i helpera `src/tests/integration/db.ts`; przed uruchomieniem użyj `pnpm exec tsx scripts/prepare-integration-db.ts`, aby wystartować `jkdb`, zastosować migracje i seed.
 - `pnpm depcheck`, `pnpm lint` i `pnpm typecheck` odtwarzają etapy pipeline CI.
 - Dodatkowe symulacje nawigacji (`pnpm simulate:*`) mają testy snapshotowe weryfikujące konfiguracje wag i brak cykli.
 

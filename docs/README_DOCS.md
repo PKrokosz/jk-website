@@ -33,7 +33,7 @@ Ten katalog zawiera komplet artefaktów discovery & gap assessment dla MVP sklep
 | [`UI_TOKENS.md`](./UI_TOKENS.md) | 2025-10-29 | W toku (custom properties adopt + eksport) | Rozszerzyć tokens na nowe widoki i przygotować eksport JSON. |
 | [`SITE_MAP.md`](./SITE_MAP.md) | 2025-10-29 | Aktualne (dodano legal/cart) | Dopisać mapy ekranów dla `/cart` i `/group-orders`. |
 | [`DANE_I_API_MVP.md`](./DANE_I_API_MVP.md) | 2025-11-04 | W toku (katalog degraduje się do fallbacku, brak monitoringu alertów) | Dopisać testy SSR katalogu (`pnpm test:integration`) i opisać alerting healthchecku + obserwację ostrzeżeń fallbacku. |
-| [`JAKOSC_TESTY_CI.md`](./JAKOSC_TESTY_CI.md) | 2025-10-30 | Aktualne (ustalić próg coverage) | Zdecydować o progu coverage i automatyzacji checklisty PR. |
+| [`JAKOSC_TESTY_CI.md`](./JAKOSC_TESTY_CI.md) | 2025-10-31 | Aktualne (ustalić próg coverage) | Zdecydować o progu coverage i automatyzacji checklisty PR. |
 | [`PLAN_MVP_SPRINTS.md`](./PLAN_MVP_SPRINTS.md) | 2025-10-29 | W toku (plan T8/T9 do dodania) | Dopisać zadania dla `/group-orders` i `/cart`. |
 | [`OPEN_QUESTIONS.md`](./OPEN_QUESTIONS.md) | 2025-10-29 | W toku (rozmiarówka/asset/analityka) | Zaplanować warsztat discovery i zebrać materiały brandowe. |
 | [`SEO_CHECKLIST.md`](./SEO_CHECKLIST.md) | 2025-10-29 | W toku (structured data + Lighthouse) | Przygotować snippet `JSON-LD` i checklistę testów SEO. |

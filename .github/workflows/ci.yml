@@ -44,25 +44,7 @@ jobs:
 
       - name: Prepare integration database
         if: matrix.node-version == '20.x'
-        run: |
-          docker compose up -d jkdb
-          ready=0
-          for attempt in {1..30}; do
-            if docker compose exec -T jkdb pg_isready -U postgres > /dev/null 2>&1; then
-              echo "Database is ready"
-              ready=1
-              break
-            fi
-            echo "Waiting for database... (${attempt}/30)"
-            sleep 2
-          done
-          if [ "$ready" -ne 1 ]; then
-            echo "::error::Database did not become ready in time"
-            docker compose logs jkdb
-            exit 1
-          fi
-          pnpm db:migrate
-          pnpm db:seed
+        run: pnpm exec tsx scripts/prepare-integration-db.ts
 
       - name: Verify Drizzle schema metadata
         if: matrix.node-version == '20.x'
@@ -88,7 +70,7 @@ jobs:
 
       - name: Run integration tests
         if: matrix.node-version == '20.x'
-        run: pnpm test:integration
+        run: pnpm test src/app/api/products/route.integration.test.ts
 
       - name: Upload Playwright report
         if: always() && matrix.node-version == '20.x'

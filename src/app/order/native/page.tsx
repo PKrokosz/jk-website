@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-
 import { NativeOrderForm } from "./NativeOrderForm";
+
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Zamówienie natywne | JK Handmade Footwear",
@@ -33,6 +33,18 @@ export default function NativeOrderPage() {
         </header>
 
         <NativeOrderForm />
+
+        <nav className="page-navigation order-native__navigation" aria-label="Dalsze kroki po formularzu natywnym">
+          <Link className="button button--primary" href="/catalog">
+            Wróć do katalogu modeli
+          </Link>
+          <Link className="button button--ghost" href="/order">
+            Skorzystaj z formularza Google
+          </Link>
+          <Link className="button button--ghost" href="/contact">
+            Skontaktuj się z pracownią
+          </Link>
+        </nav>
       </div>
     </main>
   );

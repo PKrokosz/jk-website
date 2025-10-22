@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 
 import { TransferDetails } from "./TransferDetails";
@@ -44,6 +45,18 @@ export default function ThanksPage({ searchParams }: ThanksPageProps) {
         </header>
 
         <TransferDetails customerName={customerName} />
+
+        <nav className="page-navigation order-thanks__navigation" aria-label="Dalsze kroki po złożeniu zamówienia">
+          <Link className="button button--primary" href="/order/native">
+            Uzupełnij dodatkowe informacje
+          </Link>
+          <Link className="button button--ghost" href="/catalog">
+            Wróć do katalogu
+          </Link>
+          <Link className="button button--ghost" href="/contact">
+            Skontaktuj się z mistrzem
+          </Link>
+        </nav>
       </div>
     </main>
   );

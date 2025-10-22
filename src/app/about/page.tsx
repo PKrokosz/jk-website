@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { Metadata } from "next";
+
 import { AboutCarousel, type AboutSlide } from "./about-carousel";
 
 export const metadata: Metadata = {
@@ -70,11 +72,37 @@ const slides: AboutSlide[] = [
 
 export default function AboutPage() {
   return (
-    <main className="about-page" aria-labelledby="about-heading">
-      <h1 id="about-heading" className="sr-only">
-        O pracowni JK Handmade Footwear
-      </h1>
+    <main className="page about-page" aria-labelledby="about-heading">
+      <header className="about-hero" aria-labelledby="about-heading">
+        <div className="container about-hero__content">
+          <p className="eyebrow">Poznaj JK Handmade Footwear</p>
+          <h1 id="about-heading">O pracowni JK Handmade Footwear</h1>
+          <p className="lead">
+            Od rekonstrukcji historycznych po współczesne produkcje filmowe — od lat rozwijamy warsztat,
+            który prowadzi Cię przez cały proces tworzenia butów bespoke.
+          </p>
+          <p>
+            Przejdź przez kolejne etapy naszego rzemiosła, a następnie wybierz ścieżkę: katalog modeli,
+            formularz zamówień lub bezpośrednią konsultację z mistrzem.
+          </p>
+        </div>
+      </header>
+
       <AboutCarousel slides={slides} />
+
+      <div className="container">
+        <nav className="page-navigation about-navigation" aria-label="Kolejne kroki po sekcji o pracowni">
+          <Link className="button button--primary" href="/catalog">
+            Przeglądaj katalog modeli
+          </Link>
+          <Link className="button button--ghost" href="/order/native">
+            Złóż zamówienie natywne
+          </Link>
+          <Link className="button button--ghost" href="/contact">
+            Umów konsultację
+          </Link>
+        </nav>
+      </div>
     </main>
   );
 }

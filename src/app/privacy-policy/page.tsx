@@ -117,9 +117,9 @@ export default function PrivacyPolicyPage() {
         {sections.map(({ id, title, paragraphs }) => (
           <section key={id} className="legal-page__section" aria-labelledby={id}>
             <h2 id={id}>{title}</h2>
-            {paragraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
+            {paragraphs.map((paragraph, index) => {
+              return <p key={index}>{paragraph}</p>;
+            })}
           </section>
         ))}
         <section className="legal-page__section" aria-labelledby="privacy-policy-admin">

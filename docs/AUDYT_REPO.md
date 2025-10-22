@@ -86,7 +86,7 @@
   - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:coverage`, `pnpm depcheck`, `pnpm build` – odzwierciedlają kroki pipeline.
 - **Plik `.env`**
   - Skopiowano `.env.example` → `.env.local`.
-  - Dostępne zmienne: `DATABASE_URL=postgres://postgres:postgres@localhost:5432/jk`, `NEXT_PUBLIC_ORDER_FORM_URL=<embed url>`.
+- Dostępne zmienne: `DATABASE_URL=postgres://devuser:devpass@localhost:5432/jkdb`, `NEXT_PUBLIC_ORDER_FORM_URL=<embed url>`.
   - Pakiet `@jk/db` czyta `DATABASE_URL` (w `packages/db/src/lib/db.ts`).
 - **Docker Compose**
   - Uruchomienie `docker compose config` nie powiodło się (Docker nie jest dostępny w sandboxie):
@@ -117,24 +117,24 @@
 - Node 20.19.4 ≥ minimalnego wymaganego `>=20` – OK.
 - `package.json` wymusza `pnpm@10.18.3`; lokalna wersja zgodna.
 - Next.js `14.2.13` spójny z `eslint-config-next@14.2.13`.
-- Drizzle ORM (`0.34.1`) w pakiecie `@jk/db`; brak migracji `drizzle-kit` i workflow inicjalizacji.
+- Drizzle ORM (`0.34.1`) w pakiecie `@jk/db`; dostępna konfiguracja `drizzle.config.ts`, ale nadal brak wygenerowanych migracji.
 - `apps/web` jest pustym szkieletem; aplikacja korzysta z katalogu głównego – do decyzji, czy utrzymujemy multi-app, czy porządkujemy workspace.
-- Rozjazd konfiguracji bazy: `.env.example` używa `postgres/postgres@jk`, natomiast `docker-compose.yml` `devuser/devpass@jkdb` – wymaga ujednolicenia i dokumentacji.
+- Konfiguracja bazy została ujednolicona: `.env.example` i `docker-compose.yml` wskazują na `devuser/devpass@jkdb`.
 - Globalny motyw wizualny wykorzystuje jasną paletę (#f8f5f2 tło), która różni się od pierwotnych założeń w discovery – UI tokens zaktualizowane w `docs/UI_TOKENS.md`.
 
 ## Checklisty kontrolne
 - [x] Zidentyfikowano wszystkie aplikacje i pakiety w workspace.
 - [x] Zweryfikowano dostępne route'y App Routera oraz endpointy API.
 - [x] Uruchomiono komendy `pnpm -v`, `node -v`, `pnpm install`, `pnpm dev`.
-- [ ] Ustalono jednolitą konfigurację połączenia z bazą danych (w toku).
+- [x] Ustalono jednolitą konfigurację połączenia z bazą danych.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Rozbieżne dane logowania do Postgresa mogą blokować migracje i lokalne środowiska.
+  - Konieczne jest zsynchronizowanie nowych danych logowania z istniejącymi środowiskami developerskimi, aby uniknąć niespójności.
   - Brak migracji Drizzle utrudni przejście z mocków na realne dane.
   - Motyw wizualny wymaga re-użycia tokens w CSS, aby uniknąć rozjazdów.
 - **Decyzje do podjęcia**
-  - Ujednolicenie `DATABASE_URL` vs. `docker-compose.yml` (które dane są źródłem prawdy?).
+  - Potwierdzenie, że `devuser/devpass@jkdb` jest akceptowalne poza lokalnym Dockerem (np. dla stagingu) oraz aktualizacja secrets CI.
   - Czy utrzymujemy katalog `apps/web`, czy konsolidujemy aplikację w jednym package?
   - Strategia migracji z mocków (`src/lib/catalog`) na Drizzle.
 - **Następne kroki**

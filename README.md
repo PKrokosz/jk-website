@@ -52,10 +52,10 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 
 ### Zmienne środowiskowe
 
-- `DATABASE_URL` – connection string do instancji Postgresa; w repo przykład korzysta z użytkownika `postgres`.
+- `DATABASE_URL` – connection string do instancji Postgresa; domyślna wartość w repo korzysta z `devuser/devpass@jkdb` zgodnie z Docker Compose.
 - `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`).
 
-> **Tip:** Lokalnie możesz użyć wartości z `docker-compose.yml` (`devuser/devpass@jkdb`). Wyrównaj dane z `DATABASE_URL`, aby uniknąć niespójności.
+> **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d` i korzystać z `devuser/devpass@jkdb`.
 
 ### Uruchomienie Postgresa lokalnie
 
@@ -91,6 +91,13 @@ W katalogu `packages/db` znajduje się pakiet z konfiguracją Drizzle ORM. Bibli
 - `schema` – definicje tabel i modeli bazy (eksportowane z `src/schema.ts`).
 
 Pakiet korzysta z `dotenv`, aby wczytać zmienne środowiskowe. Brak zdefiniowanej zmiennej `DATABASE_URL` spowoduje błąd uruchomienia.
+
+Do generowania i stosowania migracji wykorzystaj `drizzle-kit` skonfigurowany w [`drizzle.config.ts`](./drizzle.config.ts):
+
+```bash
+pnpm db:generate   # generuje migrację na podstawie zmian w schema
+pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DATABASE_URL
+```
 
 ## Funkcjonalności aplikacji
 

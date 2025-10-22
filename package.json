@@ -14,6 +14,8 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "depcheck": "depcheck --skip-missing=true --ignores=@vitest/coverage-v8,@types/pg",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:migrate": "drizzle-kit migrate",
     "approve-builds": "pnpm approve-builds"
   },
   "engines": {
@@ -34,6 +36,7 @@
     "@types/react-dom": "18.3.0",
     "@vitest/coverage-v8": "2.1.1",
     "depcheck": "^1.4.7",
+    "drizzle-kit": "^0.24.0",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.13",
     "jsdom": "^27.0.1",

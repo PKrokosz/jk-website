@@ -9,7 +9,7 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
   3. **Dlaczego dokumentacja nie została zaktualizowana?** Priorytet przeniesiono na implementację katalogu i formularza, odkładając stabilizację środowiska.
   4. **Dlaczego backlog T0 nie został domknięty?** Brak dedykowanego ownera konfiguracji infra.
   5. **Dlaczego brak ownera?** Zadanie nie przypisane w `PLAN_MVP_SPRINTS.md` do konkretnej roli.
-- **Ulepszenie:** Wybrać docelowe poświadczenia (`devuser/devpass@jkdb`), zaktualizować `.env.example`, README, dodać `drizzle.config.ts` oraz job seeda w CI.
+- **Ulepszenie:** Wybrać docelowe poświadczenia (`devuser/devpass@jkdb`), zaktualizować `.env.example`, README, dodać `drizzle.config.ts` oraz job seeda w CI. _(Status: część wykonana – `.env`, dokumentacja i `drizzle.config.ts` ujednolicone; pending: seed workflow, aktualizacja secrets CI.)_
 
 ## 2. Brak design tokens w kodzie (5xWhy)
 - **Problem:** Kolory i spacing są hard-coded w `globals.css`.

@@ -40,7 +40,7 @@ export default function ThanksPage({ searchParams }: ThanksPageProps) {
           <h1 id="order-thanks-heading">Zamówienie dotarło do naszej pracowni</h1>
           <p>
             Prześlemy potwierdzenie wraz z terminem realizacji po zaksięgowaniu wpłaty. W razie pytań skontaktuj się z nami pod
-            adresem <a href="mailto:pracownia@jk-footwear.pl">pracownia@jk-footwear.pl</a>.
+            adresem <a href="mailto:kontakt@jkhandmade.pl">kontakt@jkhandmade.pl</a>.
           </p>
         </header>
 

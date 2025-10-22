@@ -1,6 +1,7 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -10,6 +11,8 @@ interface ContactFormData {
   phone: string;
   message: string;
   consent: boolean;
+  product: string;
+  website: string;
 }
 
 const initialData: ContactFormData = {
@@ -17,17 +20,53 @@ const initialData: ContactFormData = {
   email: "",
   phone: "",
   message: "",
-  consent: false
+  consent: false,
+  product: "",
+  website: ""
 };
 
 function validateEmail(email: string) {
   return /\S+@\S+\.\S+/.test(email);
 }
 
+function sanitizeProductQuery(value: string | null) {
+  if (!value) {
+    return "";
+  }
+
+  return value.replace(/\s+/g, " ").trim().slice(0, 120);
+}
+
 export function ContactForm() {
-  const [data, setData] = useState<ContactFormData>(initialData);
+  const searchParams = useSearchParams();
+  const queryProduct = useMemo(
+    () => sanitizeProductQuery(searchParams.get("product")),
+    [searchParams]
+  );
+
+  const [data, setData] = useState<ContactFormData>(() => ({
+    ...initialData,
+    product: queryProduct
+  }));
   const [status, setStatus] = useState<FormStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!queryProduct) {
+      return;
+    }
+
+    setData((current) => {
+      if (current.product.trim().length > 0) {
+        return current;
+      }
+
+      return {
+        ...current,
+        product: queryProduct
+      };
+    });
+  }, [queryProduct]);
 
   const isSubmitting = status === "submitting";
 
@@ -36,7 +75,7 @@ export function ContactForm() {
       isSubmitting ||
       data.name.trim().length === 0 ||
       data.email.trim().length === 0 ||
-      data.message.trim().length === 0 ||
+      data.message.trim().length < 10 ||
       !data.consent,
     [data, isSubmitting]
   );
@@ -71,22 +110,63 @@ export function ContactForm() {
       return;
     }
 
-    if (data.message.trim().length === 0) {
-      setError("Napisz kilka słów o projekcie, abyśmy mogli przygotować odpowiedź.");
+    if (data.message.trim().length < 10) {
+      setError("Napisz kilka słów o projekcie — minimum 10 znaków pomoże nam odpowiedzieć precyzyjnie.");
       setStatus("error");
       return;
     }
 
     if (!data.consent) {
-      setError("Zaznacz zgodę na kontakt, abyśmy mogli odpowiedzieć na wiadomość.");
+      setError("Zaznacz zgodę na przetwarzanie danych, abyśmy mogli odpowiedzieć na wiadomość.");
       setStatus("error");
       return;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    const payload = {
+      name: data.name.trim(),
+      email: data.email.trim(),
+      phone: data.phone.trim(),
+      message: data.message.trim(),
+      website: data.website.trim(),
+      ...(data.product.trim().length > 0 ? { product: data.product.trim() } : {})
+    };
 
-    setStatus("success");
-    setData(initialData);
+    try {
+      const response = await fetch("/api/contact/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        setStatus("success");
+        setData({
+          ...initialData,
+          product: queryProduct
+        });
+        return;
+      }
+
+      let errorMessage = "Wystąpił błąd. Spróbuj ponownie za chwilę.";
+
+      if (response.status === 422) {
+        errorMessage = "Sprawdź poprawność pól. Niektóre wymagają uzupełnienia.";
+      } else if (response.status === 429) {
+        errorMessage = "Za dużo prób. Spróbuj ponownie za minutę.";
+      } else if (response.status === 502) {
+        errorMessage =
+          "Usługa poczty chwilowo niedostępna. Wyślij maila bezpośrednio: kontakt@jkhandmade.pl.";
+      }
+
+      setError(errorMessage);
+      setStatus("error");
+    } catch (submitError) {
+      console.error("Contact form submit error", submitError);
+      setError("Nie udało się wysłać formularza. Sprawdź połączenie i spróbuj ponownie.");
+      setStatus("error");
+    }
   };
 
   return (
@@ -130,6 +210,20 @@ export function ContactForm() {
       </div>
 
       <div className="field">
+        <label htmlFor="contact-product">Model lub referencja (opcjonalnie)</label>
+        <input
+          id="contact-product"
+          name="product"
+          type="text"
+          value={data.product}
+          onChange={handleChange("product")}
+          autoComplete="off"
+          maxLength={120}
+          placeholder="Np. Oxford No. 8, zamówienie grupowe"
+        />
+      </div>
+
+      <div className="field">
         <label htmlFor="contact-message">Wiadomość</label>
         <textarea
           id="contact-message"
@@ -138,6 +232,19 @@ export function ContactForm() {
           value={data.message}
           onChange={handleChange("message")}
           required
+        />
+      </div>
+
+      <div className="visually-hidden" aria-hidden="true">
+        <label htmlFor="contact-website">Strona internetowa</label>
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          value={data.website}
+          onChange={handleChange("website")}
+          tabIndex={-1}
+          autoComplete="off"
         />
       </div>
 
@@ -150,8 +257,13 @@ export function ContactForm() {
           required
         />
         <span className="checkbox__content">
-          <span className="checkbox__label">Zgadzam się na kontakt mailowy w sprawie projektu obuwia.</span>
-          <span className="field__hint">Twoje dane wykorzystamy jedynie do odpowiedzi na zapytanie.</span>
+          <span className="checkbox__label">
+            Wyrażam zgodę na przetwarzanie moich danych osobowych w celu udzielenia odpowiedzi na zapytanie.
+          </span>
+          <span className="field__hint">
+            Administratorem jest JK Handmade Footwear. Szczegóły w {" "}
+            <a href="/privacy-policy">Polityce prywatności</a>.
+          </span>
         </span>
       </label>
 
@@ -159,7 +271,7 @@ export function ContactForm() {
         <button className="button button--primary" type="submit" disabled={isSubmitDisabled}>
           {isSubmitting ? "Wysyłanie..." : "Wyślij wiadomość"}
         </button>
-        <a className="button button--ghost" href="mailto:pracownia@jk-footwear.pl">
+        <a className="button button--ghost" href="mailto:kontakt@jkhandmade.pl">
           Wyślij e-mail
         </a>
       </div>
@@ -172,8 +284,8 @@ export function ContactForm() {
       >
         {status === "success" ? (
           <p>
-            Dziękujemy za wiadomość! Odezwiemy się najpóźniej w ciągu dwóch dni roboczych. Możesz także napisać bezpośrednio na
-            <a href="mailto:pracownia@jk-footwear.pl"> pracownia@jk-footwear.pl</a>.
+            Dziękujemy za wiadomość. Odpowiemy do 2 dni roboczych. W pilnych sprawach: {" "}
+            <a href="mailto:kontakt@jkhandmade.pl">kontakt@jkhandmade.pl</a>.
           </p>
         ) : null}
 

@@ -46,7 +46,13 @@ export default function GroupOrdersPage() {
       <section className="section hero hero--immersive group-orders-hero" aria-labelledby="group-orders-heading">
         <div className="hero__background" aria-hidden="true">
           <div className="hero__background-image">
-            <Image src="/image/models/15.jfif" alt="" fill sizes="(max-width: 1024px) 140vw, 100vw" priority />
+            <Image
+              src="/image/models/15.jfif"
+              alt="Zbliżenie na ręcznie szyte trzewiki JK Handmade podczas polerowania."
+              fill
+              sizes="(max-width: 1024px) 140vw, 100vw"
+              priority
+            />
           </div>
           <div className="hero__background-overlay" />
         </div>
@@ -63,7 +69,7 @@ export default function GroupOrdersPage() {
               Zadbamy o personalizację, logistykę i opiekę posprzedażową.
             </p>
             <div className="hero__actions">
-              <a className="button button--primary" href="mailto:pracownia@jk-footwear.pl?subject=Zam%C3%B3wienie%20grupowe">
+              <a className="button button--primary" href="mailto:kontakt@jkhandmade.pl?subject=Zam%C3%B3wienie%20grupowe">
                 Napisz do nas
               </a>
               <a className="button button--ghost" href="/contact#contact-form">
@@ -120,7 +126,7 @@ export default function GroupOrdersPage() {
               ofertę i zaplanujemy spotkanie w pracowni lub online.
             </p>
             <div className="group-orders-cta-panel__actions">
-              <a className="button button--primary" href="mailto:pracownia@jk-footwear.pl?subject=Brief%20wsp%C3%B3%C5%82pracy">
+              <a className="button button--primary" href="mailto:kontakt@jkhandmade.pl?subject=Brief%20wsp%C3%B3%C5%82pracy">
                 Skontaktuj się z nami
               </a>
               <a className="button button--ghost" href="tel:+48555123456">

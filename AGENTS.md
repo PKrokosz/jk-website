@@ -41,6 +41,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
+- Prymitywy UI (`OrderButton`, `.button`, `.badge`) posiadają testy RTL w `src/components/ui/__tests__`. Przy zmianach klas/tokens aktualizuj zarówno komponent jak i asercje aria/focus.
 - Testy `ContactForm` obejmują walidację, sanetyzację prefill produktu i obsługę limitów API — przy zmianach utrzymuj pokrycie w `src/components/contact/__tests__/ContactForm.test.tsx`.
 - Testy komponentów interaktywnych korzystają z `@testing-library/user-event`; gdy Vitest zgłasza brak modułu, uruchom `pnpm install`, aby pnpm 10 ponownie zlinkował pakiet w workspace.
 - Testy API kontaktu: w `src/app/api/contact/submit/route.test.ts` mockuj `nodemailer` przez `vi.hoisted`, aby uniknąć importu natywnego transportu.
@@ -48,6 +49,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Commity: Conventional Commits.
 - Strony w App Router pod `app/`: home, catalog, product, order/native, contact, about.
 - Stosuj design tokens z `docs/UI_TOKENS.md`; obecnie wartości zakodowane w `globals.css` – kolejne zadania powinny je przenieść do CSS variables.
+- `src/app/globals.css` definiuje `:root` custom properties (`--color-*`, `--space-*`, `--radius-*`). Nowe style dopisuj przy użyciu istniejących zmiennych lub rozszerzaj listę po aktualizacji `docs/UI_TOKENS.md`.
+- Zależności: pnpm override wymusza `parse5@7.1.2`, aby utrzymać kompatybilność z `jsdom@27` w środowisku Vitest — nie usuwaj, dopóki `jsdom` nie przejdzie w pełni na ESM.
 - Telemetria błędów: korzystaj z helperów `reportClientError` i `reportServerError` z `src/lib/telemetry`. W testach mockuj moduł `@/lib/telemetry` i potwierdzaj wywołania.
 - Przy testowaniu formularza kontaktowego wstrzykuj zależność `submitRequest` (mock `fetch`) lub korzystaj z helperów ustawionych globalnie.
 

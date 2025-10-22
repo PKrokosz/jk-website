@@ -163,13 +163,14 @@ export function OrderButton({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = originalOverflow;
 
-      if (previouslyFocusedElement.current) {
+      const elementToRestore = previouslyFocusedElement.current;
+      previouslyFocusedElement.current = null;
+
+      if (elementToRestore) {
         requestAnimationFrame(() => {
-          previouslyFocusedElement.current?.focus();
+          elementToRestore.focus();
         });
       }
-
-      previouslyFocusedElement.current = null;
     };
   }, [isOpen, resolvedMode, trapFocus, updateFocusableElements]);
 

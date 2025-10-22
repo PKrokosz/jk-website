@@ -18,13 +18,15 @@
 
 ### Zadanie bazowe `x₁`: Wdrożyć design tokens z `docs/UI_TOKENS.md` do kodu (T1)
 - `-x₁`: Usunąć duplikujące się style w `src/app/globals.css` po migracji tokens.
-- `1/x₁`: Zdefiniować minimalny zestaw `:root` custom properties odpowiadających tabeli w `UI_TOKENS.md` i opisać je w README.
+- `1/x₁`: Zdefiniować minimalny zestaw `:root` custom properties odpowiadających tabeli w `UI_TOKENS.md` i opisać je w README. ✅ 2025-10-24 — Dodano bazowe custom properties w `globals.css` oraz uzupełniono dokumentację.
+- ⏭️ 2025-10-24 — Rozszerzyć użycie zmiennych na sekcje hero/catalog (gradienty, CTA) i przygotować checklistę adopcji.
 - `x₁²`: Rozbudować tokens o wariant motywu ciemnego oraz responsywne typografie sterowane zmiennymi.
 - `x₁ˣ`: Przygotować skrypt eksportujący tokens z pliku źródłowego (np. Figma) do JSON i synchronizujący je z projektem.
 
 ### Zadanie bazowe `x₂`: Domknąć brakujące testy jakościowe (T6)
 - `-x₂`: Zidentyfikować i usunąć przestarzałe snapshoty/testy blokujące pokrycie po dopisaniu nowych przypadków.
 - `1/x₂`: Napisać test jednostkowy dla `ContactForm` (render, walidacja, komunikaty statusu). ✅ 2025-10-22 — zrealizowane wraz z pokryciem prefill i CTA katalogu.
+- ✅ 2025-10-23 — Dodano testy prymitywów UI (`OrderButton`, `button`, `badge`) z pokryciem aria i focus state zgodnie z `docs/JAKOSC_TESTY_CI.md`.
 - `x₂²`: Przygotować zestaw testów integracyjnych dla `/catalog/[slug]` i `/account` sprawdzających dostępność kluczowych CTA.
 - `x₂ˣ`: Skonfigurować automatyczny raport pokrycia z wysyłką do Slacka/emailem po każdej gałęzi PR.
 
@@ -40,6 +42,11 @@
 - `x₄²`: Wyprowadzić layout formularzy do komponentów wielokrotnego użytku i udokumentować je w specyfikacji.
 - `x₄ˣ`: Automatycznie generować checklistę z rozdziału 10 i integrować ją z CI (`pnpm qa`).
 
+### Zadanie bazowe `x₅`: Wydzielić i ustandaryzować prymitywy UI jako komponenty
+- `-x₅`: Usunąć duplikacje klas `.button`/`.badge` po migracji do komponentów.
+- `1/x₅`: Zaprojektować komponenty `Button` i `Badge` eksportowane z `src/components/ui/primitives` wraz z mapowaniem wariantów na tokens.
+- `x₅²`: Zintegrować nowe komponenty w kluczowych widokach (`Home`, `Catalog`, `Order`) i zapewnić storybook/preview.
+- `x₅ˣ`: Dodać generator dokumentacji komponentów (MDX) synchronizowany z design tokens.
 ### Zadanie bazowe `x₅`: Uspójnić fallback katalogu z docelową bazą danych
 - `-x₅`: Monitorować logi ostrzeżeń o fallbacku i dodać alert w telemetrii, aby łatwiej wykrywać brak połączenia z DB.
 - `1/x₅`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB.

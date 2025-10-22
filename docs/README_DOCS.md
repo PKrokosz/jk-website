@@ -18,7 +18,7 @@ Ten katalog zawiera komplet artefaktów discovery & gap assessment dla MVP sklep
 | [`AUDYT_REPO.md`](./AUDYT_REPO.md) | 2025-10-22 | Aktualne (uwzględnia `/account`) | Zweryfikować po zmianach w strukturze monorepo lub dodaniu nowych aplikacji. |
 | [`ARCHITEKTURA_I_LUKI.md`](./ARCHITEKTURA_I_LUKI.md) | 2025-09-18 | Wymaga rewizji przy wdrożeniu backendu leadów | Dopisać flow backendu formularza, gdy powstanie integracja. |
 | [`WYMAGANIA_MVP.md`](./WYMAGANIA_MVP.md) | 2025-10-22 | Aktualne (dodany panel klienta) | Po wdrożeniu backendu formularza zaktualizować sekcję „Kontakt / Zamówienie”. |
-| [`UI_TOKENS.md`](./UI_TOKENS.md) | 2025-08-30 | W toku (tokens niezaimportowane do CSS) | Dodać postępy migracji tokens → CSS custom properties. |
+| [`UI_TOKENS.md`](./UI_TOKENS.md) | 2025-10-24 | W toku (bazowe custom properties wdrożone) | Rozszerzyć adopcję zmiennych na sekcje i CTA, raportować postęp. |
 | [`SITE_MAP.md`](./SITE_MAP.md) | 2025-07-15 | Aktualne | Uaktualnić po dodaniu nowych route'ów (np. blog, FAQ). |
 | [`DANE_I_API_MVP.md`](./DANE_I_API_MVP.md) | 2025-09-18 | Częściowo aktualne | Dodać tabelę `quote_requests` po wdrożeniu migracji. |
 | [`JAKOSC_TESTY_CI.md`](./JAKOSC_TESTY_CI.md) | 2025-10-22 | Aktualne (uzupełnione testy ContactForm/ProductPage/NativeModelShowcase) | Monitorować pokrycie UI prymitywów i E2E. |

@@ -61,16 +61,17 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
    ```bash
    pnpm approve-builds
    ```
-3. Utwórz plik `.env.local` na podstawie `.env.example` i uzupełnij wymagane wartości.
+3. Utwórz plik `.env.local` na podstawie `.env.example`. Domyślne wartości są zgodne z walidatorem środowiska i pozwalają uruchomić aplikację lokalnie bez dodatkowej konfiguracji.
 
 ### Zmienne środowiskowe
 
 - `DATABASE_URL` – connection string do instancji Postgresa; domyślna wartość w repo korzysta z `devuser/devpass@jkdb` zgodnie z Docker Compose.
 - Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który poinformuje o brakującej zmiennej `DATABASE_URL`.
-- `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`).
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja serwera SMTP używanego do wysyłki wiadomości z formularza kontaktowego.
+- `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`). `.env.example` zawiera bezpieczną wersję demonstracyjną (`https://example.com/...`), którą możesz nadpisać w środowiskach staging/production.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja serwera SMTP używanego do wysyłki wiadomości z formularza kontaktowego. Repo dostarcza lokalne placeholdery (`localhost`, `jkhandmade-dev`, `jkhandmade-dev-secret`), aby walidator przepuszczał środowisko developerskie.
 - `MAIL_FROM`, `MAIL_TO` – adres nadawcy i odbiorcy wiadomości wysyłanych przez `/api/contact/submit`.
 - `APP_BASE_URL` – adres aplikacji wykorzystywany do walidacji nagłówków `Origin`/`Referer` w API kontaktowym.
+- `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` – identyfikatory skryptów marketingowych. W `.env.example` znajdziesz placeholdery akceptowane przez walidator (np. `GTM-XXXXXXX`), które można zastąpić realnymi identyfikatorami przy wdrożeniu integracji.
 
 > **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d` i korzystać z `devuser/devpass@jkdb`.
 

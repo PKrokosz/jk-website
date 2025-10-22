@@ -17,6 +17,10 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `pnpm qa`                          # lokalna bramka jakości (lint, typecheck, test)
 - `pnpm qa:ci`                       # pełny zestaw CI (lint, typecheck, build, test, coverage, e2e, depcheck)
 
+### Konfiguracja środowiska
+- `.env.example` zawiera komplet wymaganych przez walidator zmiennych z bezpiecznymi placeholderami (`NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, identyfikatory marketingowe). Skopiuj plik bez zmian, aby odpalić środowisko lokalne.
+- Nadpisuj wartości tylko, gdy integrujesz prawdziwe usługi (np. SMTP produkcyjne, realne piksle marketingowe). Dodając nowe zmienne, pamiętaj o aktualizacji `.env.example`, README i sekcji dokumentacyjnej opisującej walidację.
+
 ## Runbook (MVP workflow)
 1. Przeczytaj `docs/README_DOCS.md`, aby zrozumieć artefakty discovery.
 2. Dla nowego zadania określ zakres względem planu `docs/PLAN_MVP_SPRINTS.md`.

@@ -11,6 +11,7 @@
   - Uzupełniono seeda Drizzle o template produktów (`product_template`) wraz z migracją SQL i scenariuszami testowymi.
   - Udokumentowano lokalny cache katalogu oraz healthcheck `/api/catalog/health` raportujący źródła danych i statystyki cache.
   - Zaktualizowano kontrakty API o dynamiczny endpoint `/api/products/[slug]` i nowy mechanizm fallbacku; strony katalogu wykorzystują teraz `fetchCatalogProducts`/`fetchCatalogProductDetail`.
+  - 2025-11-04 — Ujednolicono degradację katalogu: wszystkie endpointy (`/api/products`, `/api/products/[slug]`, `/api/styles`, `/api/leather`) przełączają się na dane referencyjne `resolveCatalogCache` przy braku `DATABASE_URL`, co zostało pokryte testami jednostkowymi.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -24,7 +25,7 @@
 
 ## Podsumowanie
 - Referencyjne dane katalogu (style, skóry, template produktów, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`, `pnpm db:seed`).
-- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/products/[slug]`, `/api/pricing/quote`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]`, `/api/catalog/health` są dostępne; `/api/products` i `/api/products/[slug]` korzystają z cache `resolveCatalogCache` budowanego na Drizzle.
+- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/products/[slug]`, `/api/pricing/quote`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]`, `/api/catalog/health` są dostępne; cała rodzina katalogowa (`/api/products`, `/api/products/[slug]`, `/api/styles`, `/api/leather`) korzysta z cache `resolveCatalogCache` i w razie braku `DATABASE_URL` zwraca dane fallbackowe wraz z ostrzeżeniem w logach.
 - Front (`/catalog`, `/catalog/[slug]`, `/cart`, `/group-orders`) konsumuje dane przez API Next.js; katalog korzysta z cache `/api/products`/`[slug]`, a fallback mocków pozostaje jedynie na potrzeby testów i build-time.
 - Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów, formularza kontaktowego i zamówień.
 
@@ -84,12 +85,12 @@
 ## Kontrakty endpointów API
 | Endpoint | Metoda | Input | Output | Notatki |
 | --- | --- | --- | --- | --- |
-| `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Dane z tabeli `style` (Drizzle ORM, revalidate 3600 s). |
-| `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Dane z tabeli `leather` (Drizzle ORM, revalidate 3600 s). |
+| `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Dane z tabeli `style` (Drizzle ORM, revalidate 3600 s). Brak `DATABASE_URL` → fallback cache + ostrzeżenie w logach. |
+| `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Dane z tabeli `leather` (Drizzle ORM, revalidate 3600 s). Brak `DATABASE_URL` → fallback cache + ostrzeżenie w logach. |
 | `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; walidacja request/response w Zod. |
 | `/api/contact/submit` | POST | `{ name, email, phone?, message, product?, website? }` | `{ ok: true }` lub `{ error }` | Walidacja Zod, rate-limit per IP, honeypot `website`, wysyłka maila przez SMTP. |
-| `/api/products` | GET | brak | `{ data: CatalogProductSummary[] }` | Lista produktów generowana na podstawie cache `resolveCatalogCache` (Drizzle + fallback). |
-| `/api/products/[slug]` | GET | Param `slug` | `{ data: CatalogProductDetail }` | Szczegóły produktu pobrane z cache katalogu, 404 dla braku wpisu. |
+| `/api/products` | GET | brak | `{ data: CatalogProductSummary[] }` | Lista produktów generowana na podstawie cache `resolveCatalogCache` (Drizzle + fallback). Brak `DATABASE_URL` → fallback cache + ostrzeżenie. |
+| `/api/products/[slug]` | GET | Param `slug` | `{ data: CatalogProductDetail }` | Szczegóły produktu pobrane z cache katalogu, 404 dla braku wpisu. Brak `DATABASE_URL` → fallback cache + ostrzeżenie. |
 | `/api/catalog/health` | GET | brak | `{ ok, status, counts, sources, cache }` | Healthcheck katalogu odświeżający cache (status `healthy/degraded/error`). |
 
 ## Walidacja i obsługa błędów
@@ -111,7 +112,7 @@
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Błędy połączenia z bazą zwracają fallback UI na stronach katalogu/produktu – brak jeszcze mechanizmu retry/alertingu.
+  - Błędy połączenia z bazą (np. brak `DATABASE_URL`) przełączają wszystkie endpointy katalogu na dane fallbackowe – konieczny monitoring ostrzeżeń i alerting healthchecku, by wychwycić długotrwałe działanie w trybie zdegradowanym.
   - Walidacja `/api/pricing/quote` zabezpieczona schematami Zod i testami kontraktowymi (monitorować pokrycie przypadków edge).
   - Brak endpointu `/api/products` ogranicza re-use danych w przyszłych integracjach (np. SSR/CSR fetch).
 - **Decyzje do podjęcia**

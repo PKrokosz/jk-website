@@ -70,6 +70,8 @@
 - ✅ 2025-11-02 — `x₆²`: Zaimplementowano cache warstwy katalogu (ISR + lokalny cache) i zsynchronizowano go z Drizzle (`resolveCatalogCache`, `/api/products/[slug]`).
 - ✅ 2025-11-02 — `x₆ˣ`: Dodano healthcheck katalogu (`/api/catalog/health`) raportujący metryki cache i źródła danych.
 - ⏭️ 2025-11-02 — Dopisać testy integracyjne SSR `/catalog` i monitoring `/api/catalog/health` (alerting `status: degraded/error`).
+- ✅ 2025-11-04 — Domknięto degradację katalogu bez DB: `/api/styles` i `/api/leather` korzystają z `resolveCatalogCache`, a testy Vitest pokrywają scenariusz braku `DATABASE_URL`.
+- ⏭️ 2025-11-04 — Zautomatyzować alert na ostrzeżenia fallbacku katalogu (telemetria + `docs/JAKOSC_TESTY_CI.md` checklist).
 
 ### Zadanie bazowe `x₇`: Utrzymać SEO artefakty i structured data
 - `-x₇`: Dodać brakujące ścieżki (`/cart`, strony prawne, B2B) do `sitemap.ts` i `robots.ts`.

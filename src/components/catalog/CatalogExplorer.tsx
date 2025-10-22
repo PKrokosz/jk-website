@@ -295,7 +295,10 @@ export function CatalogExplorer({
         <header className="catalog-toolbar">
           <div className="catalog-toolbar__summary">
             {totalMatches === 0 ? (
-              <p>Brak wyników dla wybranych filtrów.</p>
+              <p>
+                Nie znaleziono butów spełniających wybrane kryteria. Spróbuj innych filtrów lub {" "}
+                <Link href="/catalog">zobacz całą kolekcję</Link>.
+              </p>
             ) : (
               <p>
                 {totalMatches} produkt{totalMatches === 1 ? "" : "y"} dopasowan{totalMatches === 1 ? "y" : "ych"}
@@ -333,7 +336,9 @@ export function CatalogExplorer({
                 <p>{segment.description}</p>
               </header>
               {segmentProducts.length === 0 ? (
-                <p className="catalog-segment__empty">Brak produktów w tym segmencie dla wybranych filtrów.</p>
+                <p className="catalog-segment__empty">
+                  W tym segmencie brak modeli dla wybranych filtrów. Zmień ustawienia, aby poznać więcej propozycji.
+                </p>
               ) : (
                 <ul className="catalog-grid" role="list" aria-label={`Lista produktów: ${segment.label}`}>
                   {segmentProducts.map((product) => {

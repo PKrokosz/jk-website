@@ -97,10 +97,7 @@ Do generowania i stosowania migracji wykorzystaj `drizzle-kit` skonfigurowany w 
 ```bash
 pnpm db:generate   # generuje migrację na podstawie zmian w schema
 pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DATABASE_URL
-pnpm db:seed       # czyści i wypełnia tabele referencyjne (style, skóry, podeszwy, opcje)
 ```
-
-Wygenerowane migracje trafiają do katalogu [`drizzle/`](./drizzle/) wraz z metadanymi (`meta/_journal.json`).
 
 ## Funkcjonalności aplikacji
 

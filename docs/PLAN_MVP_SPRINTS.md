@@ -21,15 +21,14 @@
 ## Zadania T0–T6
 ### T0 — Stabilizacja środowiska
 - **Branch**: `codex/env-hardening`
-- **Status**: ✅ zakończone (poświadczenia DB, `drizzle.config.ts`, migracja inicjalna + seed referencyjny).
-- **Zakres**: Ujednolicenie `DATABASE_URL` z `docker-compose.yml`, dodanie instrukcji `.env`, konfiguracja `drizzle.config.ts`, wygenerowanie pierwszej migracji i pipeline seeda.
+- **Status**: ✅ zakończone (ujednolicone poświadczenia DB + dodany `drizzle.config.ts`).
+- **Zakres**: Ujednolicenie `DATABASE_URL` z `docker-compose.yml`, dodanie instrukcji `.env`, opcjonalnie `drizzle.config.ts` (bez migracji).
 - **DoD**:
   - [x] Aktualizacja dokumentacji `.env` (README z nowym źródłem prawdy) – dane logowania `devuser/devpass@jkdb` spójne.
   - [x] Dodane testy smoke `pnpm lint`, `pnpm test` (w CI).
   - [x] Potwierdzony start `pnpm dev`.
   - [x] Dodany `drizzle.config.ts` wskazujący na `packages/db/src/schema.ts`.
-  - [x] Dostępna migracja inicjalna w `drizzle/` oraz skrypt `pnpm db:seed`.
-- **Ryzyka**: konieczność zaktualizowania lokalnych envów i secrets CI pod nowe dane; brak Dockera w CI; potrzeba zsynchronizowania mocków frontendowych z danymi seeda.
+- **Ryzyka**: konieczność zaktualizowania lokalnych envów i secrets CI pod nowe dane; brak Dockera w CI.
 - **Rollback**: przywrócenie poprzedniego `.env.example` i compose.
 - **Estymata**: S.
 

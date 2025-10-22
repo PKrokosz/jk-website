@@ -46,7 +46,13 @@ export default function GroupOrdersPage() {
       <section className="section hero hero--immersive group-orders-hero" aria-labelledby="group-orders-heading">
         <div className="hero__background" aria-hidden="true">
           <div className="hero__background-image">
-            <Image src="/image/models/15.jfif" alt="" fill sizes="(max-width: 1024px) 140vw, 100vw" priority />
+            <Image
+              src="/image/models/15.jfif"
+              alt="Zbliżenie na ręcznie szyte trzewiki JK Handmade podczas polerowania."
+              fill
+              sizes="(max-width: 1024px) 140vw, 100vw"
+              priority
+            />
           </div>
           <div className="hero__background-overlay" />
         </div>

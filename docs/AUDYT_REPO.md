@@ -36,7 +36,7 @@
   - `/order` – osadzony formularz natywny (iframe) z fallbackiem do pełnej wersji oraz metadata canonical.
   - `/order/native` – landing z listą modeli i CTA do zewnętrznego formularza.
   - `/contact` – rozbudowana strona kontaktowa z hero, danymi pracowni, formularzem i statusami.
-  - `/about` – sekcja o pracowni (placeholder copy do dopracowania).
+- `/about` – sekcja o pracowni z finalnym copy i CTA do kontaktu/zamówienia.
   - `/healthz` – endpoint statusowy (API route `route.ts`).
 - **Endpointy API**
   - `GET /api/styles` – zwraca mockowane style (`catalogStyles`).
@@ -117,7 +117,7 @@
 - Node 20.19.4 ≥ minimalnego wymaganego `>=20` – OK.
 - `package.json` wymusza `pnpm@10.18.3`; lokalna wersja zgodna.
 - Next.js `14.2.13` spójny z `eslint-config-next@14.2.13`.
-- Drizzle ORM (`^0.38`) w pakiecie `@jk/db`; konfiguracja `drizzle.config.ts` generuje migracje do `drizzle/0000_*.sql`, a seeding referencyjny wykonuje `pnpm db:seed`.
+- Drizzle ORM (`0.34.1`) w pakiecie `@jk/db`; dostępna konfiguracja `drizzle.config.ts`, ale nadal brak wygenerowanych migracji.
 - `apps/web` jest pustym szkieletem; aplikacja korzysta z katalogu głównego – do decyzji, czy utrzymujemy multi-app, czy porządkujemy workspace.
 - Konfiguracja bazy została ujednolicona: `.env.example` i `docker-compose.yml` wskazują na `devuser/devpass@jkdb`.
 - Globalny motyw wizualny wykorzystuje jasną paletę (#f8f5f2 tło), która różni się od pierwotnych założeń w discovery – UI tokens zaktualizowane w `docs/UI_TOKENS.md`.
@@ -131,7 +131,7 @@
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
   - Konieczne jest zsynchronizowanie nowych danych logowania z istniejącymi środowiskami developerskimi, aby uniknąć niespójności.
-  - Mocki katalogowe nadal nie korzystają z Drizzle; brak integracji Next.js ↔ baza utrzymuje podwójne źródła danych.
+  - Brak migracji Drizzle utrudni przejście z mocków na realne dane.
   - Motyw wizualny wymaga re-użycia tokens w CSS, aby uniknąć rozjazdów.
 - **Decyzje do podjęcia**
   - Potwierdzenie, że `devuser/devpass@jkdb` jest akceptowalne poza lokalnym Dockerem (np. dla stagingu) oraz aktualizacja secrets CI.

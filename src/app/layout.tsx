@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import React, { type ReactNode } from "react";
 
 import { Header } from "../components/Header";
+import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
+import { Footer } from "../components/Footer";
 import { AppProviders } from "./providers";
 import "./globals.css";
 
@@ -78,6 +80,7 @@ export default function RootLayout({
           <div className="site-content" id="main-content">
             {children}
           </div>
+          <Footer />
         </AppProviders>
       </body>
     </html>

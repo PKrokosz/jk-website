@@ -65,6 +65,7 @@ const sections = [
 export const metadata: Metadata = {
   title: "Regulamin",
   description:
+    "Regulamin serwisu JK Handmade Footwear dotyczący zamówień na obuwie wykonywane na zamówienie (MTO)."
     "Regulamin serwisu JK Handmade Footwear dotyczący zamówień na obuwie wykonywane na zamówienie (MTO).",
 };
 

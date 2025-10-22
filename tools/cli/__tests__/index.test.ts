@@ -1,11 +1,14 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ParsedArguments } from "../args";
+import type { CommandLookupOptions } from "../commands";
 import type { CommandDefinition } from "../types";
 
 const mockParseArguments = vi.fn<() => ParsedArguments>();
 const mockListCommandDefinitions = vi.fn<() => CommandDefinition[]>();
-const mockGetCommandDefinition = vi.fn<(name: string) => CommandDefinition | undefined>();
+const mockGetCommandDefinition = vi.fn<
+  (name: string, options?: CommandLookupOptions) => CommandDefinition | undefined
+>();
 const mockRunCommandDefinition = vi.fn();
 const mockLoadCliEnvironment = vi.fn();
 
@@ -55,6 +58,7 @@ const baseArgs = (): ParsedArguments => ({
   dryRun: false,
   list: false,
   help: false,
+  withIntegrationDb: false,
   skip: new Set<string>(),
   errors: []
 });

@@ -17,6 +17,41 @@ describe("command registry", () => {
     }
   });
 
+  it("nie dodaje przygotowania bazy do bazowej definicji quality", () => {
+    const baseStepIds = COMMANDS.quality.steps.map((step) => step.id);
+
+    expect(baseStepIds).not.toContain("prepare-integration-db");
+  });
+
+  it("dołącza krok przygotowania bazy po fladze withIntegrationDb", () => {
+    const extendedDefinition = getCommandDefinition("quality", {
+      withIntegrationDb: true
+    });
+
+    expect(extendedDefinition).toBeDefined();
+    expect(extendedDefinition).not.toBe(COMMANDS.quality);
+
+    const baseSteps = COMMANDS.quality.steps;
+    const extendedSteps = extendedDefinition?.steps ?? [];
+
+    const prepareIndex = extendedSteps.findIndex(
+      (step) => step.id === "prepare-integration-db"
+    );
+    const drizzleIndex = extendedSteps.findIndex(
+      (step) => step.id === "drizzle-generate-dry-run"
+    );
+
+    expect(extendedSteps).toHaveLength(baseSteps.length + 1);
+    expect(prepareIndex).toBe(drizzleIndex + 1);
+    expect(extendedSteps[prepareIndex]).toEqual(
+      expect.objectContaining({
+        command: "pnpm",
+        args: ["exec", "tsx", "scripts/prepare-integration-db.ts"],
+        description: expect.stringContaining("jkdb")
+      })
+    );
+  });
+
   it("definiuje krok sprzątania dla scenariusza quality:ci", () => {
     const cleanupSteps = COMMANDS["quality:ci"].cleanupSteps ?? [];
 

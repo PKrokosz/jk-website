@@ -129,7 +129,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## Warstwa CLI
 - Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.
 - Używaj `pnpm qa` do lokalnych kontroli jakości oraz `pnpm qa:ci` do pełnego przebiegu przed PR.
-- Flagi CLI: `--dry-run` (podgląd kroków) oraz `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`).
+- Flagi CLI: `--dry-run` (podgląd kroków), `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`) oraz `--with-integration-db` (dodaje do `quality` krok `scripts/prepare-integration-db.ts`).
 - Pierwszy krok po weryfikacji środowiska uruchamia `pnpm db:generate` z tymczasowym katalogiem (`DRIZZLE_OUT`) i przerywa proces, jeśli polecenie wygeneruje artefakty lub `git status --short drizzle` zwróci zmiany – traktuj to jak obowiązkową bramkę.
 - `quality:ci` zawiera krok `cleanup-node20-db`, który po scenariuszu Node 20 uruchamia `docker compose down --volumes jkdb`; można go pominąć flagą `--skip=cleanup-node20-db`.
 - CLI przed parsowaniem argumentów ładuje zmienne środowiskowe z `.env.local`, następnie `.env`, a na końcu `.env.example` (tylko gdy plik istnieje i nie nadpisuje ustawionych wartości).

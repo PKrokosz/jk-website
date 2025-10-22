@@ -6,12 +6,20 @@ import { ContactForm } from "../ContactForm";
 
 describe("ContactForm", () => {
   const consentLabel = /wyrażam zgodę/i;
+  let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.useFakeTimers();
+    fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
   });
@@ -22,7 +30,6 @@ describe("ContactForm", () => {
   };
 
   const toggleConsent = () => {
-    const checkbox = screen.getByLabelText(/wyrażam zgodę/i);
     const checkbox = screen.getByLabelText(consentLabel);
     fireEvent.click(checkbox);
   };

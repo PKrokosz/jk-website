@@ -20,8 +20,18 @@ describe("runCommandDefinition", () => {
     const { executor, calls } = createExecutor();
     const result = await runCommandDefinition(COMMANDS.quality, { executor });
 
-    expect(result.executedSteps).toEqual(["lint", "typecheck", "unit-tests"]);
-    expect(calls).toEqual(["lint", "typecheck", "unit-tests"]);
+    expect(result.executedSteps).toEqual([
+      "verify-drizzle-env",
+      "lint",
+      "typecheck",
+      "unit-tests"
+    ]);
+    expect(calls).toEqual([
+      "verify-drizzle-env",
+      "lint",
+      "typecheck",
+      "unit-tests"
+    ]);
   });
 
   it("skips steps provided in options", async () => {
@@ -41,7 +51,12 @@ describe("runCommandDefinition", () => {
 
     const result = await runCommandDefinition(COMMANDS.quality, { dryRun: true });
 
-    expect(result.executedSteps).toEqual(["lint", "typecheck", "unit-tests"]);
+    expect(result.executedSteps).toEqual([
+      "verify-drizzle-env",
+      "lint",
+      "typecheck",
+      "unit-tests"
+    ]);
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("ESLint"));
 
     logSpy.mockRestore();

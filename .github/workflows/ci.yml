@@ -64,6 +64,16 @@ jobs:
           pnpm db:migrate
           pnpm db:seed
 
+      - name: Verify Drizzle schema metadata
+        if: matrix.node-version == '20.x'
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --short drizzle)" ]; then
+            echo "::error::Drizzle schema metadata is out of sync. Run 'pnpm db:generate' locally and commit the changes."
+            git status --short drizzle
+            exit 1
+          fi
+
       - name: Install Playwright browsers
         if: matrix.node-version == '20.x'
         run: pnpm exec playwright install --with-deps

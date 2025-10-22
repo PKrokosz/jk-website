@@ -9,8 +9,7 @@
 - **Rekomendacja archiwizacji**: Nie — dokument jest aktywnie używany jako DoD i referencja dla CI.
 - **Sens dokumentu**: Określa Definition of Done, plan testów, konfigurację CI i konwencje pracy. Zapewnia, że każda zmiana przechodzi spójny zestaw kontroli jakości.
 - **Aktualizacje wykonane**:
-  - Dodano sekcję meta audytu i wskazano konieczność decyzji o progu coverage.
-  - Zsynchronizowano status dokumentu z audytem (2025-10-30).
+  - Podbito meta audyt (2025-10-30) oraz utrzymano aktualność statusu dokumentu.
   - Uzupełniono opis pipeline o krok przygotowujący bazę oraz uruchomienie `pnpm test:integration`.
   - Doprecyzowano etap sprzątania kontenerów (`docker compose down --volumes jkdb`) po testach integracyjnych.
   - Rozszerzono CLI `quality:ci` o automatyczne sprzątanie bazy `jkdb` po scenariuszu Node 20 oraz udokumentowano flagę `--skip=cleanup-node20-db`.
@@ -28,8 +27,7 @@
 ## Podsumowanie
 - DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`, które dodatkowo pilnują braku zmian w `drizzle/` po `pnpm db:generate -- --dry-run`.
 - Testy: Vitest + React Testing Library (layout, katalog, kalkulator, formularz kontaktowy, product page, NativeModelShowcase).
-- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck oraz dedykowane przygotowanie bazy + testy integracyjne na Node 20.x; orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
-- CLI `quality:ci` po zakończeniu pełnej bramki uruchamia `docker compose down --volumes jkdb`, aby domknąć scenariusz Node 20 (można pominąć przy debugowaniu `--skip=cleanup-node20-db`).
+- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck oraz dedykowane przygotowanie bazy + weryfikacja `pnpm db:generate` + testy integracyjne na Node 20.x; orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
 - Commity: Conventional Commits, PR zawiera opis, listę zmian, wyniki komend, screeny dla UI.
 
 ## Definition of Done
@@ -128,6 +126,15 @@ jobs:
           fi
           pnpm db:migrate
           pnpm db:seed
+      - name: Verify Drizzle schema metadata
+        if: matrix.node-version == '20.x'
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --short drizzle)" ]; then
+            echo "::error::Drizzle schema metadata is out of sync. Run 'pnpm db:generate' locally and commit the changes."
+            git status --short drizzle
+            exit 1
+          fi
       - name: Quality gate
         if: matrix.node-version == '22.x'
         run: pnpm qa
@@ -151,6 +158,7 @@ jobs:
   - `pnpm qa:ci` odtwarza pełen pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck) – uruchamiane na Node 20.x.
   - Obie komendy rozpoczynają się od dry-run `pnpm db:generate`, który kończy job błędem, jeżeli `drizzle/` zawiera niezatwierdzone zmiany.
   - Kroki `pnpm db:migrate`, `pnpm db:seed` przygotowują kontener Postgresa (`jkdb`) i synchronizują schemat przed testami integracyjnymi.
+  - `Verify Drizzle schema metadata` wymusza czysty diff po `pnpm db:generate`, dzięki czemu wychwycimy brakujące aktualizacje migracji/metadanych.
   - `pnpm test:integration` korzysta z helpera `ensureIntegrationTestMigrations`, aby upewnić się, że migracje zostały zastosowane i dane referencyjne są dostępne.
   - `docker compose down --volumes jkdb` gwarantuje zwolnienie wolumenów i kontenera `jkdb` po zakończeniu testów na Node 20.x.
   - Komenda `pnpm qa:ci` wywołuje ten sam krok sprzątający lokalnie; w razie potrzeby debugowania można użyć `pnpm qa:ci -- --skip=cleanup-node20-db`.

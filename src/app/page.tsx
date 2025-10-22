@@ -1,13 +1,48 @@
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 
 import { ORDER_MODELS } from "@/config/orderModels";
 import { listProductSlugs } from "@/lib/catalog/products";
 import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
-
-import { PricingCalculator } from "./components/PricingCalculator";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { HeroShowcaseFrame } from "./components/HeroShowcaseFrame";
 import { SellingPointsCarousel } from "./components/SellingPointsCarousel";
+
+const siteUrl = "https://jk-footwear.pl";
+
+const PricingCalculator = dynamic(
+  () => import("./components/PricingCalculator").then((module) => module.PricingCalculator),
+  {
+    loading: () => (
+      <section className="section" aria-labelledby="calculator-heading">
+        <div className="container">
+          <div className="section-header">
+            <h2 id="calculator-heading">Kalkulator wyceny</h2>
+            <p>Ładujemy kalkulator wyceny butów JK Handmade Footwear…</p>
+          </div>
+          <div className="loading-placeholder" role="status" aria-live="polite">
+            Trwa przygotowywanie danych o modelach…
+          </div>
+        </div>
+      </section>
+    ),
+    ssr: false
+  }
+);
+
+type FaqLinkSegment = {
+  type: "link";
+  href: string;
+  label: string;
+};
+
+type FaqParagraph = Array<string | FaqLinkSegment>;
+
+interface FaqEntry {
+  question: string;
+  paragraphs: FaqParagraph[];
+}
 
 const heroShowcase = [
   {
@@ -77,13 +112,150 @@ const portfolioItems = ORDER_MODELS.filter(
     alt: `Model ${model.name} z katalogu JK Handmade Footwear`
   }));
 
+const faqEntries: FaqEntry[] = [
+  {
+    question: "Jak zamówić buty na miarę JK Handmade Footwear?",
+    paragraphs: [
+      [
+        "Wypełnij ",
+        { type: "link", href: "/order/native", label: "formularz zamówienia natywnego" },
+        ", aby przejść przez proces wyboru modelu, skóry i dodatków."
+      ],
+      [
+        "Jeżeli potrzebujesz konsultacji, skorzystaj ze strony ",
+        { type: "link", href: "/contact", label: "kontakt" },
+        " i ustal termin wizyty w warszawskiej pracowni."
+      ]
+    ]
+  },
+  {
+    question: "Ile trwa proces wykonania butów na miarę?",
+    paragraphs: [
+      [
+        "Standardowo przygotowanie pary obejmuje cztery etapy opisane powyżej i zajmuje średnio od ośmiu do dwunastu tygodni."
+      ],
+      [
+        "Po konsultacji otrzymasz harmonogram przymiarek oraz aktualizacje e-mailowe na każdym etapie produkcji."
+      ]
+    ]
+  },
+  {
+    question: "Czy mogę zobaczyć dostępne modele i ceny przed złożeniem zamówienia?",
+    paragraphs: [
+      [
+        "Tak. Przeglądaj ",
+        { type: "link", href: "/catalog", label: "katalog modeli" },
+        ", aby porównać stylistykę, warianty skóry i dodatki dostępne w ofercie."
+      ],
+      [
+        "Następnie użyj ",
+        { type: "link", href: "#calculator-heading", label: "kalkulatora wyceny" },
+        ", aby sprawdzić orientacyjny koszt i dobrać akcesoria."
+      ]
+    ]
+  },
+  {
+    question: "Czy realizujecie zamówienia grupowe lub produkcje filmowe?",
+    paragraphs: [
+      [
+        "Tak, przygotowujemy kolekcje dla grup rekonstrukcyjnych, ekip filmowych oraz wydarzeń LARP."
+      ],
+      [
+        "Dowiedz się więcej na stronie ",
+        { type: "link", href: "/group-orders", label: "zamówień grupowych" },
+        " lub napisz, aby otrzymać dedykowaną wycenę."
+      ]
+    ]
+  }
+];
+
+const isLinkSegment = (segment: string | FaqLinkSegment): segment is FaqLinkSegment =>
+  typeof segment !== "string";
+
+const getParagraphText = (paragraph: FaqParagraph) =>
+  paragraph.map((segment) => (isLinkSegment(segment) ? segment.label : segment)).join("");
+
+const getAnswerText = (entry: FaqEntry) =>
+  entry.paragraphs.map((paragraph) => getParagraphText(paragraph)).join("\n\n");
+
 export default function Home() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["Organization", "LocalBusiness"],
+        "@id": `${siteUrl}#organization`,
+        name: "JK Handmade Footwear",
+        url: siteUrl,
+        logo: `${siteUrl}/favicon.svg`,
+        image: heroShowcase.map((item) => `${siteUrl}${item.src}`),
+        description:
+          "JK Handmade Footwear tworzy miarowe obuwie w warszawskiej pracowni. Transparentny proces MTO, ręczne wykończenia i wsparcie na każdym etapie.",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Warszawa",
+          addressCountry: "PL"
+        },
+        contactPoint: [
+          {
+            "@type": "ContactPoint",
+            contactType: "customer service",
+            email: "pracownia@jk-footwear.pl",
+            availableLanguage: ["pl", "en"]
+          }
+        ],
+        areaServed: {
+          "@type": "AdministrativeArea",
+          name: "Polska"
+        },
+        hasOfferCatalog: {
+          "@id": `${siteUrl}#portfolio`
+        }
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${siteUrl}#portfolio`,
+        name: "Katalog modeli JK Handmade Footwear",
+        itemListElement: portfolioItems.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${siteUrl}/catalog/${item.id}`,
+          name: item.title,
+          image: `${siteUrl}${item.image}`,
+          description: "Model miarowy dostępny w formularzu zamówienia JK Handmade Footwear."
+        }))
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${siteUrl}#faq`,
+        mainEntity: faqEntries.map((entry) => ({
+          "@type": "Question",
+          name: entry.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: getAnswerText(entry)
+          }
+        }))
+      }
+    ]
+  };
+
   return (
     <main className="page home-page">
+      <JsonLd data={structuredData} id="home-structured-data" />
       <section className="section hero hero--immersive" aria-labelledby="hero-heading">
         <div className="hero__background" aria-hidden="true">
           <div className="hero__background-video">
-            <video aria-hidden="true" autoPlay loop muted playsInline preload="metadata">
+            <video
+              aria-hidden="true"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              poster="/image/models/10.jfif"
+              title="Proces szycia butów JK Handmade Footwear"
+            >
               <source src="/vid/1.mp4" type="video/mp4" />
               Twoja przeglądarka nie obsługuje elementu wideo.
             </video>
@@ -100,8 +272,11 @@ export default function Home() {
               rycerzy bitwy pod Grunwaldem.
             </p>
             <p>
-              Nasz katalog zawiera te same warianty, które wybierzesz w formularzu zamówienia
-              natywnego. Dobierz sylwetkę, skórę i akcesoria zanim wypełnisz zamówienie.
+              Nasz {" "}
+              <Link href="/catalog">katalog modeli</Link>
+              {" "}
+              zawiera te same warianty, które wybierzesz w formularzu zamówienia natywnego.
+              Dobierz sylwetkę, skórę i akcesoria zanim wypełnisz zamówienie.
             </p>
             <div className="hero__actions">
               <OrderModalTrigger
@@ -139,7 +314,10 @@ export default function Home() {
             </p>
             <p>
               Wybierając model w formularzu natywnym, dokładnie wiesz, jakie cechy i dodatki są w
-              nim dostępne — a kalkulator wyceny poniżej pokaże orientacyjną cenę końcową.
+              nim dostępne — a {" "}
+              <Link href="#calculator-heading">kalkulator wyceny</Link>
+              {" "}
+              poniżej pokaże orientacyjną cenę końcową.
             </p>
           </div>
           <div className="craft-overview__features">
@@ -216,6 +394,38 @@ export default function Home() {
       </section>
 
       <PricingCalculator />
+
+      <section className="section" aria-labelledby="faq-heading">
+        <div className="container faq">
+          <div className="section-header">
+            <h2 id="faq-heading">Najczęstsze pytania o buty na miarę</h2>
+            <p>
+              Zebraliśmy odpowiedzi, które najczęściej pojawiają się przed pierwszą wizytą w
+              pracowni JK Handmade Footwear.
+            </p>
+          </div>
+          <div className="faq__items">
+            {faqEntries.map((entry) => (
+              <article key={entry.question} className="faq-item">
+                <h3>{entry.question}</h3>
+                {entry.paragraphs.map((paragraph, paragraphIndex) => (
+                  <p key={`${entry.question}-${paragraphIndex}`}>
+                    {paragraph.map((segment, segmentIndex) =>
+                      typeof segment === "string" ? (
+                        segment
+                      ) : (
+                        <Link key={`${segment.href}-${segmentIndex}`} href={segment.href}>
+                          {segment.label}
+                        </Link>
+                      )
+                    )}
+                  </p>
+                ))}
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="section" aria-labelledby="cta-heading">
         <div className="container callout">

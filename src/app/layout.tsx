@@ -27,20 +27,40 @@ export const metadata: Metadata = {
     url: "https://jk-footwear.pl",
     siteName: "JK Handmade Footwear",
     locale: "pl_PL",
-    type: "website"
+    type: "website",
+    images: [
+      {
+        url: "https://jk-footwear.pl/image/models/10.jfif",
+        width: 1200,
+        height: 900,
+        alt: "Model Obieżyświat szyty w JK Handmade Footwear"
+      }
+    ]
   },
   twitter: {
     card: "summary_large_image",
     title: "JK Handmade Footwear — Buty miarowe z Warszawy",
     description:
       "Umów konsultację i poznaj proces zamówienia obuwia miarowego w JK Handmade Footwear.",
-    creator: "@jkfootwear"
+    creator: "@jkfootwear",
+    images: ["https://jk-footwear.pl/image/models/10.jfif"]
   },
   alternates: {
     canonical: "/"
   },
   icons: {
     icon: "/favicon.svg"
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      maxImagePreview: "large",
+      maxSnippet: -1,
+      maxVideoPreview: -1
+    }
   }
 };
 

@@ -32,12 +32,12 @@ Checklist dla każdego PR:
 | --- | --- | --- | --- | --- |
 | Nawigacja (`Header`, `NavLink`, skip link) | Unit | Render linków, stan aktywny, aria-current | Vitest + RTL | ✅ `layout.test.tsx` |
 | Katalog (`CatalogExplorer`) | Component | Filtry (style/leather), sortowanie, empty state | Vitest + RTL | ✅ (testy w `src/components/catalog/__tests__`) |
-| Strona produktu | Component/server | Render breadcrumb, galeria, CTA, 404 fallback | Vitest + RTL | 🔄 (do dopisania) |
-| SEO/Metadata | Unit | `generateMetadata` zwraca właściwe tytuły/opisy | Vitest | 🔄 (niezaimplementowane) |
+| Strona produktu | Component/server | Render breadcrumb, galeria, CTA, 404 fallback | Vitest + RTL | ✅ (testy w `src/app/catalog/__tests__`) |
+| SEO/Metadata | Unit | `generateMetadata` zwraca właściwe tytuły/opisy | Vitest | ✅ (pokryte w `product-page.test.tsx`) |
 | UI prymitywy (`button`, `badge`) | Snapshot/accessibility | Style/role, focus ring | Vitest + `@testing-library/react` | 🔄 |
-| Formularz kontaktowy | Component | Walidacja required fields, stany success/error | Vitest | 🔄 |
+| Formularz kontaktowy | Component | Walidacja required fields, stany success/error | Vitest | ✅ (testy w `src/components/contact/__tests__`) |
 | Pricing calculator | Unit | `calculateQuote`, integracja z UI | Vitest | ✅ (istniejące testy w `src/app/components/__tests__`) |
-| Order modal | Component | Otwarcie, focus trap, CTA linki | Vitest/e2e | 🔄 |
+| Order modal | Component | Otwarcie, focus trap, CTA linki | Vitest | ✅ (testy w `src/components/ui/order/__tests__`) |
 | E2E smoke | Flow | Home → Catalog → Product → Contact | Playwright (opcjonalnie) | ⏳ (future) |
 
 ## Konfiguracja GitHub Actions
@@ -62,28 +62,49 @@ jobs:
         node-version: [20.x, 22.x]
     env:
       CI: true
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10.18.3
           run_install: false
       - name: Approve pnpm builds
         if: hashFiles('.pnpm-builds.json') != ''
         run: pnpm run approve-builds
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm test:coverage
-      - run: pnpm depcheck
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Type check
+        run: pnpm typecheck
+      - name: Build
+        if: matrix.node-version == '20.x'
+        run: pnpm build
+      - name: Run unit tests
+        run: pnpm test
+      - name: Coverage
+        if: matrix.node-version == '20.x'
+        run: pnpm test:coverage
+      - name: Upload coverage report
+        if: always() && matrix.node-version == '20.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+      - name: Dependency check
+        if: matrix.node-version == '20.x'
+        run: pnpm depcheck
 ```
-- `pnpm build` wykonywać manualnie przed PR; można dodać krok warunkowy (np. na gałęzi `main` lub gdy zmieniono `src/app`).
-- Warto dodać artefakt z raportem coverage (`actions/upload-artifact`).
+- `pnpm build` odpalany jest na Node 20.x jako głównym środowisku referencyjnym.
+- Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
 
 ## Konwencje commitów i PR
 - Commity: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:`).
@@ -100,17 +121,18 @@ jobs:
 - [x] Opisano minimalny zakres testów (z aktualnym statusem).
 - [x] Przedstawiono aktualny workflow GitHub Actions.
 - [x] Określono konwencje commitów/PR.
-- [ ] Dodano brakujące testy (product page, contact form, modal, metadata).
-- [ ] Dodano template PR oraz upload coverage.
+- [x] Dodano brakujące testy (product page, contact form, modal, metadata).
+- [ ] Dodano template PR.
+- [x] Włączono upload coverage w CI.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak testów dla kluczowych komponentów (product page, contact form) może ukryć regresje.
+  - Pokrycie UI prymitywów nadal brakujące – potencjalne regresje wizualne.
   - Brak template PR utrudnia spójne raportowanie wyników.
 - **Decyzje do podjęcia**
   - Czy wymagamy raportu coverage (np. próg %) w CI?
   - Czy rozszerzamy pipeline o `pnpm build` / preview build na gałęziach feature?
 - **Następne kroki**
-  - Dodać testy dla `ProductPage`, `ContactForm`, `OrderModalTrigger`.
-  - Przygotować template PR i ewentualnie włączyć upload coverage.
+  - Dodać testy dla UI prymitywów (`button`, `badge`).
+  - Przygotować template PR (sekcje DoD + logi testów).
   - Rozważyć włączenie Playwright smoke testów po stabilizacji flow zamówień.

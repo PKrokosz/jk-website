@@ -1,0 +1,121 @@
+import { NextRequest } from "next/server";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it
+} from "vitest";
+
+import { catalogProductDetailResponseSchema, catalogProductListResponseSchema } from "@/lib/catalog/schemas";
+import { findActiveStyles } from "@/lib/catalog/repository";
+import {
+  closeIntegrationTestClient,
+  getIntegrationTestClient,
+  loadIntegrationTestEnv,
+  resetCachedNextDbClient
+} from "@/tests/integration/db";
+import { eq } from "@jk/db";
+import { leather, style } from "@jk/db/schema";
+
+import { GET } from "./route";
+
+const TEST_STYLE_ID = 2;
+const TEST_LEATHER_ID = 1;
+const TEST_PRODUCT_SLUG = "szpic";
+
+describe("GET /api/products (integration)", () => {
+  let originalBasePrice: number;
+  let originalActive: boolean;
+  let leatherPriceMod: number;
+
+  beforeAll(async () => {
+    loadIntegrationTestEnv();
+
+    const { db } = getIntegrationTestClient();
+    const [styleRow] = await db
+      .select()
+      .from(style)
+      .where(eq(style.id, TEST_STYLE_ID))
+      .limit(1);
+
+    if (!styleRow) {
+      throw new Error(`Style with id ${TEST_STYLE_ID} not found in integration database.`);
+    }
+
+    originalBasePrice = styleRow.basePriceGrosz;
+    originalActive = styleRow.active ?? true;
+
+    const [leatherRow] = await db
+      .select()
+      .from(leather)
+      .where(eq(leather.id, TEST_LEATHER_ID))
+      .limit(1);
+
+    leatherPriceMod = leatherRow?.priceModGrosz ?? 0;
+  });
+
+  beforeEach(async () => {
+    await resetCachedNextDbClient();
+  });
+
+  afterEach(async () => {
+    const { db } = getIntegrationTestClient();
+
+    await db
+      .update(style)
+      .set({ basePriceGrosz: originalBasePrice, active: originalActive })
+      .where(eq(style.id, TEST_STYLE_ID));
+
+    await resetCachedNextDbClient();
+  });
+
+  afterAll(async () => {
+    await closeIntegrationTestClient();
+    await resetCachedNextDbClient();
+  });
+
+  it("calculates product pricing using live database values", async () => {
+    const updatedBasePrice = originalBasePrice + 50_000;
+    const { db } = getIntegrationTestClient();
+
+    await db
+      .update(style)
+      .set({ basePriceGrosz: updatedBasePrice })
+      .where(eq(style.id, TEST_STYLE_ID));
+
+    const request = new NextRequest(
+      `https://jkhandmade.pl/api/products?slug=${TEST_PRODUCT_SLUG}`
+    );
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+
+    const detailPayload = catalogProductDetailResponseSchema.parse(await response.json());
+
+    expect(detailPayload.data.priceGrosz).toBe(updatedBasePrice + leatherPriceMod);
+
+    const listResponse = await GET(new NextRequest("https://jkhandmade.pl/api/products"));
+    expect(listResponse.status).toBe(200);
+
+    const listPayload = catalogProductListResponseSchema.parse(await listResponse.json());
+    const updatedProduct = listPayload.data.find((product) => product.slug === TEST_PRODUCT_SLUG);
+
+    expect(updatedProduct?.priceGrosz).toBe(updatedBasePrice + leatherPriceMod);
+  });
+
+  it("returns only active styles when querying repository with database client", async () => {
+    const { db } = getIntegrationTestClient();
+
+    await db
+      .update(style)
+      .set({ active: false })
+      .where(eq(style.id, TEST_STYLE_ID));
+
+    const styles = await findActiveStyles(db);
+
+    expect(styles.some((entry) => entry.id === TEST_STYLE_ID)).toBe(false);
+  });
+});

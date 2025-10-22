@@ -84,6 +84,15 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
   5. **Dlaczego przypadki brzegowe nie zostały opisane?** Brak obserwacji produkcyjnych oraz raportu z pętli QA.
 - **Ulepszenie:** Dopisać testy CLI (help/błędy), rozszerzyć przypadki symulatora (walidacja wag, brak pętli), dodać Playwright smoke dla głównych stron i API katalogu. _(Status 2025-10-24: wykonane – dodano testy jednostkowe dla `/api/styles`, `/api/leather`, rozszerzono `journey-simulation` i CLI, Playwright obejmuje nawigację + API. Kolejny krok: e2e dla flow zamówienia.)_
 
+## 10. Brak testów integracyjnych Drizzle (5xWhy)
+- **Problem:** Brakowało automatycznych testów integracyjnych potwierdzających, że API katalogu korzysta z realnej bazy Drizzle.
+  1. **Dlaczego?** Dotychczas skupiano się na testach jednostkowych z mockami oraz fallbacku danych.
+  2. **Dlaczego mocki wystarczały?** Zespół nie miał ustabilizowanej procedury uruchamiania bazy Postgres podczas QA.
+  3. **Dlaczego procedury nie było?** Dokumentacja nie opisywała dedykowanego środowiska `.env.test` ani helperów do pracy z `getNextDbClient`.
+  4. **Dlaczego brak helpera?** Cache klienta Next.js nie miał oficjalnego sposobu na kontrolowane zamykanie połączeń w testach.
+  5. **Dlaczego zamykanie połączeń nie było priorytetem?** W pipeline nie istniał krok wymuszający integracyjne testy bazy, więc problem nie ujawniał się jako blocker.
+- **Ulepszenie:** Przygotować `.env.test`, helper do zarządzania połączeniem (`src/tests/integration/db.ts`) oraz scenariusze Vitest (`route.integration.test.ts`) operujące na realnej bazie (zmiana cen/flag aktywności). Skrypt `pnpm test:integration` należy wpiąć do checklisty QA po migracjach/seeda.
+
 ## Raport agenta – 2025-10-24
 - **Co zrobiono:** Uzupełniono brakującą zależność `@testing-library/user-event`, dopisano testy jednostkowe dla API katalogu, rozszerzono scenariusze `OrderButton`, CLI i symulatora nawigacji, dodano smoke test e2e nawigacji/API, zaktualizowano dokumentację QA.
 - **Dlaczego:** Aby domknąć wskazane przez QA luki pokrycia i zapewnić, że krytyczne ścieżki (nawigacja, API katalogu, obsługa błędów CLI) są weryfikowane automatycznie.
@@ -107,6 +116,12 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
 - **Dlaczego:** Aby unifikować inicjalizację połączeń bazodanowych, zminimalizować ryzyko przekroczenia limitu połączeń w App Routerze i osłonić się przed błędami konfiguracji środowiska.
 - **Jakie przyjęto założenia:** Fallbackowe dane katalogu nadal pełnią rolę referencji, a testy jednostkowe będą izolować cache klienta przez helper; QA obejmuje uruchomienie `pnpm test src/app/api/products/route.test.ts src/app/api/styles/route.test.ts src/app/api/leather/route.test.ts`.
 - **Co dalej:** Zaplanować testy integracyjne z realnym Drizzle (np. dockerized Postgres w CI) i ujednolicić repozytorium katalogu tak, by korzystało z tych samych mapowań w ścieżkach SSR.
+
+## Raport agenta – 2025-10-28
+- **Co zrobiono:** Dodano `.env.test`, helper integracyjny `src/tests/integration/db.ts`, skrypt `pnpm test:integration` oraz test `route.integration.test.ts` aktualizujący ceny i aktywność stylu bezpośrednio w bazie Drizzle.
+- **Dlaczego:** Aby potwierdzić działanie zapytań Drizzle na realnej instancji Postgresa i włączyć je do standardowego przepływu QA.
+- **Jakie przyjęto założenia:** Lokalny Postgres `jkdb` jest dostępny przez Docker Compose, a migracje i seed danych zostały wykonane przed uruchomieniem testów integracyjnych.
+- **Co dalej:** Zautomatyzować krok `pnpm test:integration` w pipeline CI po migracjach oraz rozbudować scenariusze o testy logów wyceny (`/api/pricing/quote`).
 
 ---
 **Priorytety rekomendowane:**

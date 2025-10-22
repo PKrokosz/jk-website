@@ -73,14 +73,14 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 
 Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który raportuje brakujące wartości ze wszystkich powyższych kategorii i podpowiada, jak je uzupełnić.
 
-> **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d` i korzystać z `devuser/devpass@jkdb`.
+> **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d jkdb` i korzystać z `devuser/devpass@jkdb`.
 
 ### Uruchomienie Postgresa lokalnie
 
 Repozytorium zawiera konfigurację Docker Compose uruchamiającą Postgresa 16:
 
 ```bash
-docker compose up -d
+docker compose up -d jkdb
 ```
 
 Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi `devuser/devpass` i bazą `jkdb`.
@@ -98,6 +98,7 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
 | `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
 | `pnpm test:ci` | Uruchamia testy Vitest z reporterem `dot` oraz weryfikacją pokrycia (bramka CI). |
+| `pnpm test:integration` | Uruchamia testy Vitest korzystające z realnej bazy Drizzle (wymaga `.env.test` oraz działającego serwisu `jkdb`). |
 | `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 | `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). |
@@ -162,6 +163,7 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 - `pnpm test:coverage` generuje raport pokrycia (`coverage/`) na bazie `@vitest/coverage-v8`.
 - `pnpm test:ci` wykonuje ten sam zestaw testów w trybie bez interakcji i kończy się błędem, jeśli próg pokrycia nie zostanie spełniony.
 - `pnpm test:e2e` wykonuje scenariusze Playwright (pobranie dokumentów prawnych + smoke test nawigacji i API katalogu; przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
+- `pnpm test:integration` korzysta z `.env.test` oraz helpera Drizzle, aby wykonać zapytania na żywej bazie danych (uruchom wcześniej `docker compose up -d jkdb`, a następnie `pnpm db:migrate` i `pnpm db:seed`).
 - Linting (`pnpm lint`), statyczna analiza typów (`pnpm typecheck`) i kontrola zależności (`pnpm depcheck`) odtwarzają etapy pipeline CI.
 - Dla modułu nawigacji dostępne są dodatkowe symulacje (`pnpm simulate:*`) z testami snapshotowymi agregacji przejść.
 

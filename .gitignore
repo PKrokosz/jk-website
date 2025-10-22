@@ -16,6 +16,7 @@ out/
 # Env files
 .env*
 !.env.example
+!.env.test
 
 # Editor
 .DS_Store

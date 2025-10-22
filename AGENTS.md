@@ -46,6 +46,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
+- W testach modułu pricing korzystaj z helpera `createMockPricingDatabase` (`src/lib/pricing/__tests__/mock-db.ts`),
+  aby odtworzyć metody Drizzle (`select`, `insert`, `values`) i móc destrukturyzować mocki.
 - Utrzymuj próg pokrycia 85% (Statements/Lines). `pnpm test:ci` uruchamia Vitest z reporterem `dot` i zakończy się błędem przy spadku poniżej limitu.
 - Prymitywy UI (`OrderButton`, `.button`, `.badge`) posiadają testy RTL w `src/components/ui/__tests__`. Przy zmianach klas/tokens aktualizuj zarówno komponent jak i asercje aria/focus.
 - Testy `ContactForm` obejmują walidację, sanetyzację prefill produktu i obsługę limitów API — przy zmianach utrzymuj pokrycie w `src/components/contact/__tests__/ContactForm.test.tsx`.

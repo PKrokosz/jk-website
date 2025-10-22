@@ -1,5 +1,6 @@
 import "server-only";
 
+import { resolveCatalogCache } from "@/lib/catalog/cache";
 import { resolveApiUrl } from "@/lib/http/base-url";
 import type {
   CatalogLeather,
@@ -23,7 +24,58 @@ interface ApiResponse<T> {
   data: T;
 }
 
+const NEXT_PHASE_PRODUCTION_BUILD = "phase-production-build";
+
+function shouldMockCatalogFetch(): boolean {
+  return (
+    process.env.MOCK_CATALOG_FETCH === "1" ||
+    process.env.NEXT_PHASE === NEXT_PHASE_PRODUCTION_BUILD
+  );
+}
+
+let hasLoggedMockNotice = false;
+
+async function mockCatalogResource<T>(path: string): Promise<T> {
+  const cache = await resolveCatalogCache();
+
+  if (!hasLoggedMockNotice) {
+    console.info(
+      "Mockujemy fetch katalogu (build-time) — zwracamy dane z cache w pamięci"
+    );
+    hasLoggedMockNotice = true;
+  }
+
+  if (path === "/api/styles") {
+    return cache.styles as T;
+  }
+
+  if (path === "/api/leather") {
+    return cache.leathers as T;
+  }
+
+  if (path === "/api/products") {
+    return cache.summaries as T;
+  }
+
+  if (path.startsWith("/api/products/")) {
+    const slug = decodeURIComponent(path.replace("/api/products/", ""));
+    const detail = cache.detailsBySlug[slug];
+
+    if (!detail) {
+      throw new CatalogApiError(404, path, `Nie znaleziono produktu: ${slug}`);
+    }
+
+    return detail as T;
+  }
+
+  throw new Error(`Mock fetch nie obsługuje ścieżki: ${path}`);
+}
+
 async function fetchCatalogResource<T>(path: string): Promise<T> {
+  if (shouldMockCatalogFetch()) {
+    return mockCatalogResource<T>(path);
+  }
+
   const response = await fetch(resolveApiUrl(path), {
     next: { revalidate: 3600 }
   });

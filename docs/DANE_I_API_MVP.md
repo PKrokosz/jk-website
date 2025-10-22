@@ -12,6 +12,7 @@
   - Udokumentowano lokalny cache katalogu oraz healthcheck `/api/catalog/health` raportujący źródła danych i statystyki cache.
   - Zaktualizowano kontrakty API o dynamiczny endpoint `/api/products/[slug]` i nowy mechanizm fallbacku; strony katalogu wykorzystują teraz `fetchCatalogProducts`/`fetchCatalogProductDetail`.
   - 2025-11-04 — Ujednolicono degradację katalogu: wszystkie endpointy (`/api/products`, `/api/products/[slug]`, `/api/styles`, `/api/leather`) przełączają się na dane referencyjne `resolveCatalogCache` przy braku `DATABASE_URL`, co zostało pokryte testami jednostkowymi.
+  - 2025-11-09 — Dodano mockowanie `fetch` podczas `next build`, aby build-time korzystał z cache katalogu bez hałasu logów `fetch failed`.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -78,6 +79,12 @@
   - `fetchCatalogProductDetail(slug)` zasila SSR i metadane; 404 kończy się `notFound()`, a błędy zwracają fallback.
   - `generateStaticParams` próbuje zbudować listę slugów z `/api/products`, a w razie degradacji wraca do `listProductSlugs()`.
   - Metadane generowane są na podstawie danych z API z fallbackiem przy błędach.
+
+### Symulacja katalogu bez bazy
+- `next build` automatycznie ustawia `process.env.NEXT_PHASE=phase-production-build`, co przełącza fetchery katalogu w tryb mocka i każe im korzystać z `resolveCatalogCache()`.
+- W środowiskach bez bazy ustaw zmienną `MOCK_CATALOG_FETCH=1`, aby wymusić mock zarówno dla SSR, jak i podczas lokalnych testów/preview (`pnpm build`, `pnpm start`).
+- Mockowana odpowiedź odtwarza payload API: `/api/styles` i `/api/leather` zwracają listy referencyjne, `/api/products` zwraca `CatalogProductSummary[]`, a `/api/products/[slug]` korzysta z `cache.detailsBySlug` i sygnalizuje `CatalogApiError` 404 przy nieznanym slug.
+- Mechanizm loguje jednokrotne info (`Mockujemy fetch katalogu…`), dzięki czemu w logach builda łatwo rozpoznać, że działamy w trybie referencyjnym.
 - **Order/Contact**
   - `OrderModalTrigger` wykorzystuje `orderReference` do preselektowania parametrów (URL query) w `/order/native`.
   - Formularz kontaktowy przyjmuje `product` w query (`/contact?product=slug`) i automatycznie uzupełnia pole formularza, jeśli parametr jest obecny.

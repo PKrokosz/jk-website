@@ -80,6 +80,7 @@ jobs:
         with:
           version: 10.18.3
           run_install: false
+          standalone: true
       - name: Approve pnpm builds
         if: hashFiles('.pnpm-builds.json') != ''
         run: pnpm run approve-builds

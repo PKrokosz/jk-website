@@ -1,54 +1,60 @@
 # JK Handmade Footwear
 
-Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe oraz automatyzacjami n8n. Kod aplikacji znajduje się w katalogu głównym (App Router w `src/`), a pakiet Drizzle ORM w `packages/db`.
+Repozytorium sklepu MTO „JK Handmade Footwear” zbudowanego na Next.js 14 (App Router) i TypeScript. Monorepo pnpm obejmuje frontend, API App Routera, pakiet Drizzle ORM (`@jk/db`), narzędzia CLI oraz dokumentację discovery – wszystkie elementy korzystają z jednego procesu jakościowego.
 
-> CI/CD: workflow [`CI`](.github/workflows/ci.yml) uruchamiany na Node.js 20.x i 22.x z pnpm 10.18.x. Pipeline wykonuje lint, typecheck, testy jednostkowe, raport pokrycia i analizę zależności.
+> **CI/CD**: workflow [`CI`](.github/workflows/ci.yml) działa na Node.js 20.x i 22.x z `pnpm@10.18.3`. Pipeline instaluje zależności, uruchamia lint, typecheck, build, testy Vitest (wraz z raportem pokrycia), scenariusze Playwright, depcheck oraz – na macierzy 20.x – migracje i seed bazy Postgres.
 
 ## Stos technologiczny
 
 - **Framework**: Next.js (App Router) + React 18
-- **Język**: TypeScript (tryb `strict`)
+- **Język**: TypeScript (`strict`)
 - **Pakietowanie**: pnpm workspaces + `pnpm@10.18.x`
-- **Styling**: CSS Modules/SCSS-free custom styles + planowana integracja z Tailwind/shadcn/ui
-- **Baza danych**: PostgreSQL 16 + Drizzle ORM (`packages/db`)
-- **Warstwa backendowa**: API routes (Node.js 20 runtime)
-- **Testy**: Vitest + React Testing Library (`@vitest/coverage-v8` do raportów pokrycia)
-- **Jakość kodu**: ESLint (`eslint-config-next`) + `depcheck`
+- **Styling**: Custom CSS i design tokens w `src/app/globals.css` (docelowo eksportowane z `docs/UI_TOKENS.md`, planowana integracja z Tailwind/shadcn/ui)
+- **Baza danych**: PostgreSQL 16 (Docker Compose) + Drizzle ORM (`packages/db`)
+- **Warstwa backendowa**: API routes App Routera (runtime Node.js 20) + helper `getNextDbClient`
+- **Testy**: Vitest + React Testing Library (`@vitest/coverage-v8`), Playwright, testy integracyjne Drizzle
+- **Jakość kodu**: ESLint (`eslint-config-next`), `depcheck`, autorski CLI jakości (`pnpm qa`, `pnpm qa:ci`)
 
-## Status modułów (2025-10)
+## Status modułów (2025-11)
 
 | Moduł | Co zawiera | Stan |
 | --- | --- | --- |
-| `src/app` | App Router ze stronami `/`, `/catalog`, `/catalog/[slug]`, `/order`, `/order/native`, `/contact`, `/about`, `/account` oraz `/healthz`. | Strony produkcyjne są kompletne, a smoke test `pages.compile.test.ts` pilnuje możliwości importu każdej z nich. |
-| `src/components` | Współdzielone komponenty (`Header`, `CatalogExplorer`, formularze kontaktowe i zamówień, prymitywy UI). | Kluczowe komponenty mają testy RTL (np. `ContactForm`) obejmujące walidację, stany błędów oraz telemetrię. |
-| `src/lib/catalog` | Cache katalogu (styles/leathers/product templates), repozytorium Drizzle oraz fallback referencyjny. | API `/api/products` i `/api/products/[slug]` korzystają z cache `resolveCatalogCache`, a strony katalogu pobierają dane z tych endpointów. |
-| `src/lib/pricing` | Schematy Zod dla kalkulatora wyceny i repozytorium zapisu zapytań. | Kontrakty request/response są pokryte testami API (`/api/pricing/quote`). |
-| `src/lib/navigation` & `scripts/` | Symulacje ścieżek użytkowników + skrypty CLI do agregacji wyników. | Moduły posiadają testy Vitest oraz skrypty `simulate:user-journeys`/`simulate:navigation`. |
-| `packages/db` | Pakiet `@jk/db` z konfiguracją Drizzle, schematem tabel i seedem danych. | Migracja inicjalna i seed referencyjny dostępne; kolejne migracje wymagają osobnych tasków. |
-| `tools/cli` | Warstwa CLI spinająca kroki jakości (`quality`, `quality:ci`). | Entrypoint testowany unitowo (list/help/dry-run, obsługa błędów) z mockiem `process.exit` i logów. |
-| `docs/` | Artefakty discovery (audyt repo, roadmapa, UI tokens, plan sprintów, pętla zadań). | Dokumentacja utrzymywana w pętli – ostatni przegląd 2025-10-22. |
+| `src/app` | Landing (`/`), katalog (`/catalog`, `/catalog/[slug]`), koszyk (`/cart`), flow zamówień (`/order`, `/order/native`, `/order/cart`, `/order/thanks`), kontakt (`/contact`), B2B (`/group-orders`), konto (`/account`), health-check (`/healthz`), materiały prawne (`/privacy-policy`, `/terms`), sitemap/robots. | Test `src/app/__tests__/pages.compile.test.ts` pilnuje importowalności stron; Playwright smoke przechodzi najważniejsze widoki i endpointy. |
+| `src/components` | Współdzielone komponenty (nagłówek, stopka, katalog, formularze, CTA, prymitywy UI). | Kluczowe moduły (`ContactForm`, `OrderButton`, `CatalogExplorer`) mają testy RTL i są objęte bramką pokrycia 85%. |
+| `src/app/components` | Sekcje layoutu App Routera (hero, proces MTO, sekcje CTA, listingi). | Importowane w stronach landingowych, pokryte snapshotami/aria. |
+| `src/lib/catalog` | Repozytorium Drizzle, fallback danych, schematy Zod oraz helper `resolveCatalogCache`. | Endpointy katalogu degradują się do fallbacku przy braku `DATABASE_URL`; testy jednostkowe, kontraktowe i integracyjne (z realnym Drizzle) weryfikują flow. |
+| `src/lib/pricing` | Schematy zapytań/odpowiedzi, repozytorium logów wycen i helpery integracji. | Testy API `/api/pricing/quote` obejmują poprawne odpowiedzi i scenariusze błędnej konfiguracji środowiska. |
+| `src/lib/navigation` & `scripts/` | Symulator ścieżek użytkowników oraz CLI do agregacji wyników (`simulate:*`). | Vitest pokrywa brak cykli i walidację wag; snapshoty agregacji aktualizują się wraz z konfiguracją. |
+| `src/lib/legal` | Helpery do generowania treści prawnych i raportowania telemetryjnego. | Jednostkowe testy sprawdzają routingi oraz fallback linków. |
+| `packages/db` | Pakiet `@jk/db` z konfiguracją Drizzle, migracjami i seedem danych referencyjnych. | Migracja inicjalna i seed są zsynchronizowane; CI weryfikuje metadane Drizzle (`pnpm db:generate`). |
+| `tools/cli` | CLI (`quality`, `quality:ci`) spinające lint, typecheck, testy, build, Playwright, depcheck i sprzątanie bazy. | Testy mockują logi/`process.exit`, CLI ładuje `.env.local`/`.env`/`.env.example` przed walidacją środowiska. |
+| `docs/` | Artefakty discovery (audyt repo, roadmapa, tokeny UI, pętla zadań, checklisty QA/SEO). | Indeks `docs/README_DOCS.md` aktualny na 2025-10-29; każda aktualizacja dokumentu wymaga dopisku sekcji meta. |
 
 ## Wymagania wstępne
 
 - Node.js `>=20`
 - pnpm `>=10`
-- Docker + Docker Compose (dla lokalnej bazy danych)
+- Docker + Docker Compose (instancja Postgres `jkdb`)
 
 ## Struktura repozytorium
 
 ```
 .
-├── apps/                 # (placeholder) dodatkowe aplikacje workspace
-├── docs/                 # dokumentacja discovery (strategie, roadmapy, tokeny UI)
+├── apps/                   # (rezerwacja) dodatkowe aplikacje pnpm workspace
+├── config/                 # Konfiguracje narzędzi (np. wagi symulacji nawigacji)
+├── docs/                   # Dokumentacja discovery i checklisty
 ├── packages/
-│   └── db/              # współdzielony pakiet z klientem Drizzle ORM i schematem bazy
-├── public/              # pliki statyczne Next.js (video, fotografie modeli)
+│   └── db/                # Pakiet @jk/db z Drizzle ORM, migracjami i seedem
+├── public/                # Statyczne zasoby (wideo, fotografie modeli, ikonografia)
+├── scripts/               # Skrypty CLI/automation (`simulate-navigation`, helpery QA)
 ├── src/
-│   ├── app/             # routing i strony (Home, Catalog, Product, Order, Contact...)
-│   ├── components/      # komponenty współdzielone (ContactForm, Order modal, Header)
-│   └── lib/             # logika domenowa (katalog produktów, kalkulator wycen)
-├── docker-compose.yml   # lokalny Postgres 16
-└── vitest.config.ts     # konfiguracja testów jednostkowych
+│   ├── app/               # Routing, strony i komponenty layoutu App Routera
+│   ├── components/        # Współdzielone komponenty UI
+│   ├── lib/               # Logika domenowa (katalog, pricing, contact, legal, telemetry)
+│   └── tests/             # Helpery integracyjne (m.in. obsługa Drizzle w testach)
+├── tools/                 # CLI jakości (`tools/cli`) i skrypty środowiskowe
+├── docker-compose.yml     # Lokalny Postgres 16 (serwis `jkdb`)
+└── vitest.config.ts       # Konfiguracja testów jednostkowych
 ```
 
 ## Konfiguracja środowiska
@@ -57,36 +63,45 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
    ```bash
    pnpm install
    ```
-2. Zatwierdź instalację natywnych binariów wymaganych przez pnpm (lista w [`.pnpm-builds.json`](./.pnpm-builds.json)):
+2. Zatwierdź instalację natywnych binariów:
    ```bash
    pnpm approve-builds
    ```
-3. Utwórz plik `.env.local` na podstawie `.env.example`. Domyślne wartości są zgodne z walidatorem środowiska i pozwalają uruchomić aplikację lokalnie bez dodatkowej konfiguracji.
+3. Skopiuj konfiguracje środowiska:
+   ```bash
+   cp .env.example .env.local
+   cp .env.test.example .env.test   # opcjonalnie, jeśli uruchamiasz testy integracyjne
+   ```
+4. (Opcjonalnie) Uruchom walidację środowiska:
+   ```bash
+   pnpm exec tsx tools/verify-drizzle-env.ts
+   ```
 
 ### Zmienne środowiskowe
 
-- `DATABASE_URL` – connection string do instancji Postgresa; domyślna wartość w repo korzysta z `devuser/devpass@jkdb` zgodnie z Docker Compose.
-- Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który poinformuje o brakującej zmiennej `DATABASE_URL` i ostrzeże, gdy wpis z `.env.example` nie zgadza się z `docker-compose.yml` (serwis `jkdb`).
-- `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`). `.env.example` zawiera bezpieczną wersję demonstracyjną (`https://example.com/...`), którą możesz nadpisać w środowiskach staging/production.
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja serwera SMTP używanego do wysyłki wiadomości z formularza kontaktowego. Repo dostarcza lokalne placeholdery (`localhost`, `jkhandmade-dev`, `jkhandmade-dev-secret`), aby walidator przepuszczał środowisko developerskie.
-- `MAIL_FROM`, `MAIL_TO` – adres nadawcy i odbiorcy wiadomości wysyłanych przez `/api/contact/submit`.
-- `APP_BASE_URL` – adres aplikacji wykorzystywany do walidacji nagłówków `Origin`/`Referer` w API kontaktowym.
-- `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` – identyfikatory skryptów marketingowych. W `.env.example` znajdziesz placeholdery akceptowane przez walidator (np. `GTM-XXXXXXX`), które można zastąpić realnymi identyfikatorami przy wdrożeniu integracji.
+- `DATABASE_URL` – connection string do Postgresa (`postgres://devuser:devpass@localhost:5432/jkdb`).
+- `NEXT_PUBLIC_ORDER_FORM_URL` – adres natywnego formularza zamówień (`/order`, modal produktu).
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja wysyłki maili w `/api/contact/submit`.
+- `MAIL_FROM`, `MAIL_TO` – adresy nadawcy i odbiorcy formularza kontaktowego.
+- `APP_BASE_URL` – adres aplikacji używany do walidacji `Origin`/`Referer` i generowania absolutnych URL (sitemap, e-maile).
+- `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` – identyfikatory skryptów marketingowych.
+- `NAVIGATION_WEIGHTS_PATH` / `NAVIGATION_WEIGHTS_JSON` – opcjonalne źródło wag dla symulatora nawigacji (`pnpm simulate:navigation`).
 
-Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który raportuje brakujące wartości ze wszystkich powyższych kategorii, podpowiada jak je uzupełnić oraz porównuje `DATABASE_URL` z konfiguracją Dockera.
-
-> **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d jkdb` i korzystać z `devuser/devpass@jkdb`. Jeśli kiedyś pojawi się rozbieżność, `tools/verify-drizzle-env.ts` zgłosi ostrzeżenie.
+`tools/verify-drizzle-env.ts` raportuje brakujące wartości, podpowiada przykładowe wpisy i porównuje `DATABASE_URL` z konfiguracją Dockera. Skrypt działa jako pierwszy krok komend `pnpm qa` i `pnpm qa:ci`.
 
 ### Uruchomienie Postgresa lokalnie
-
-Repozytorium zawiera konfigurację Docker Compose uruchamiającą Postgresa 16:
 
 ```bash
 docker compose up -d jkdb
 ```
 
-Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi `devuser/devpass` i bazą `jkdb`.
-Po skończonej pracy zatrzymaj kontener i usuń wolumeny poleceniem `docker compose down --volumes jkdb`, aby zachować spójność z etapem sprzątania w CI.
+Po uruchomieniu baza jest dostępna na `localhost:5432` (`devuser/devpass`, baza `jkdb`). Po zakończeniu pracy zatrzymaj kontener i usuń wolumeny:
+
+```bash
+docker compose down --volumes jkdb
+```
+
+> **Tip:** Testy integracyjne oraz pipeline CI zakładają, że wykonano `pnpm db:migrate` i `pnpm db:seed` na działającym serwisie `jkdb`.
 
 ## Codzienna praca deweloperska
 
@@ -96,104 +111,102 @@ Po skończonej pracy zatrzymaj kontener i usuń wolumeny poleceniem `docker comp
 | `pnpm dev` | Start lokalnego serwera deweloperskiego Next.js. |
 | `pnpm build` | Buduje aplikację w trybie produkcyjnym. |
 | `pnpm start` | Uruchamia wcześniej zbudowaną aplikację. |
-| `pnpm lint` | Sprawdza jakość kodu przy użyciu `eslint-config-next`. |
-| `pnpm typecheck` | Weryfikuje typy TypeScript bez emitowania plików. |
-| `pnpm test` | Uruchamia testy jednostkowe Vitest. |
-| `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
-| `pnpm test:ci` | Uruchamia testy Vitest z reporterem `dot` oraz weryfikacją pokrycia (bramka CI). |
-| `pnpm test:integration` | Uruchamia testy Vitest korzystające z realnej bazy Drizzle (wymaga `.env.test` oraz działającego serwisu `jkdb`). |
-| `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
-| `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
-| `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) oraz sprawdza zgodność `DATABASE_URL` z `docker-compose.yml`. |
-| `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test). |
-| `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright, depcheck i sprzątaniem `docker compose down --volumes jkdb`). |
-| `pnpm simulate:user-journeys` | Uruchamia symulacje ścieżek użytkowników na podstawie modułu `src/lib/navigation`. |
-| `pnpm simulate:navigation` | Agreguje dane przejść na grafie nawigacji (obsługuje flagi `--config`, `--user-count`, `--summary`). |
-| `pnpm db:generate` | Generuje migrację Drizzle na podstawie zmian w schemacie. |
-| `pnpm db:migrate` | Stosuje migracje Drizzle na wskazanej bazie danych. |
+| `pnpm lint` | Uruchamia ESLint (`eslint-config-next`). |
+| `pnpm typecheck` | Sprawdza typy TypeScript bez emisji plików. |
+| `pnpm test` | Uruchamia testy Vitest (tryb jednorazowy). |
+| `pnpm test:watch` | Uruchamia Vitest w trybie watch dla szybkiego feedbacku. |
+| `pnpm test:coverage` | Generuje raport pokrycia (`coverage/`). |
+| `pnpm test:ci` | Vitest w trybie CI (reporter `dot`, próg pokrycia 85%). |
+| `pnpm test:integration` | Testy Drizzle na realnej bazie (`jkdb`, `.env.test`). |
+| `pnpm test:e2e` | Scenariusze Playwright (najpierw `pnpm exec playwright install --with-deps`). |
+| `pnpm depcheck` | Analiza nieużywanych zależności. |
+| `pnpm exec tsx tools/verify-drizzle-env.ts` | Walidacja konfiguracji środowiskowej i spójności z Docker Compose. |
+| `pnpm qa` | `pnpm run cli -- quality` – lint + typecheck + test. |
+| `pnpm qa:ci` | `pnpm run cli -- quality:ci` – pełen pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, sprzątanie DB). |
+| `pnpm run cli -- --list` | Lista dostępnych komend CLI i opis kroków. |
+| `pnpm simulate:user-journeys` | Symulacje ścieżek użytkowników (`src/lib/navigation`). |
+| `pnpm simulate:navigation` | Agregacja przejść na grafie nawigacji (obsługa `--config`, `--user-count`, `--summary`). |
+| `pnpm db:generate` | Generuje migrację Drizzle na podstawie zmian w schema. |
+| `pnpm db:migrate` | Stosuje migracje na bazie wskazanej przez `DATABASE_URL`. |
 | `pnpm db:seed` | Uruchamia seed danych z pakietu `@jk/db`. |
 
 ### CLI jakości
 
-Repozytorium udostępnia warstwę CLI (`pnpm run cli`), która orkiestruje kroki jakościowe i udostępnia flagi ułatwiające automatyzację:
-
-- `pnpm run cli -- --list` – lista dostępnych komend wraz z opisem.
-- `pnpm run cli -- quality` – pełny przebieg lint + typecheck + test (skrót dostępny jako `pnpm qa`).
-- `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck; skrót `pnpm qa:ci`).
-- Po scenariuszu Node 20 CLI automatycznie wywołuje `docker compose down --volumes jkdb`, aby zutylizować kontener bazy; w razie debugowania można pominąć krok flagą `--skip=cleanup-node20-db`.
-- `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
-
-Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts`, sprawdza komplet wymaganych zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) i ostrzega o ewentualnej rozbieżności między `.env.example` a `docker-compose.yml`. Dzięki temu brak konfiguracji bazy lub mailingu jest raportowany zanim wystartuje lint czy testy.
+- `pnpm run cli -- quality` – lint + typecheck + test (skrót `pnpm qa`).
+- `pnpm run cli -- quality:ci` – pełny pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck; skrót `pnpm qa:ci`).
+- CLI ładuje kolejno `.env.local`, `.env`, a następnie `.env.example` zanim wystartuje krok „Verify Drizzle env”.
+- `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, a `--skip=<id>` pozwala pominąć wskazane kroki (np. `--skip=build,e2e`).
+- Po scenariuszu Node 20 CLI wywołuje `docker compose down --volumes jkdb`; krok można pominąć flagą `--skip=cleanup-node20-db`.
 
 Testy CLI mockują `process.exit` i logi, dzięki czemu zachowania są weryfikowane bez kończenia procesu Node.js.
 
-> Przed wysłaniem PR uruchom lokalnie `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` i (opcjonalnie) `pnpm test:coverage`, aby odtworzyć pipeline CI.
-
 ### Symulacje nawigacji
 
-- W katalogu `config/` znajdziesz przykład `navigation-weights.example.json` z komentarzami `_comment` opisującymi format (klucz źródłowy → klucz docelowy → waga dodatnia).
-- Sklonuj plik do własnej konfiguracji, np. `cp config/navigation-weights.example.json config/navigation-weights.local.json`, a następnie dodaj do `.env.local` wpis `NAVIGATION_WEIGHTS_PATH=config/navigation-weights.local.json`.
-- Aby zweryfikować konfigurację bez modyfikowania `.env.local`, uruchom `pnpm simulate:navigation --config <ścieżka> [--user-count <liczba>] [--summary]`, który ładuje wskazany plik przez `buildNavigationGraph` i wypisuje wynik symulacji (opcja `--summary` dodaje zestawienie liczby przejść na każdej krawędzi).
+- W katalogu `config/` znajduje się `navigation-weights.example.json` z komentarzami `_comment` opisującymi format (źródło → cel → waga dodatnia).
+- Aby przygotować własną konfigurację, skopiuj przykład i ustaw `NAVIGATION_WEIGHTS_PATH` w `.env.local`.
+- `pnpm simulate:navigation --config <ścieżka> [--user-count <liczba>] [--summary]` pozwala testować konfiguracje bez modyfikacji `.env.local`.
 
 ## Pakiet `@jk/db`
 
-W katalogu `packages/db` znajduje się pakiet z konfiguracją Drizzle ORM. Biblioteka eksportuje:
+Pakiet `packages/db` dostarcza instancję Drizzle, pulę `pg` i definicje schematów. Wykorzystuje `dotenv`, więc brak `DATABASE_URL` powoduje błąd uruchomienia.
 
-- `db` – instancję klienta Drizzle powiązaną z pulą połączeń `pg`,
-- `pool` – pulę połączeń `pg` dla bardziej niskopoziomowych operacji,
-- `schema` – definicje tabel i modeli bazy (eksportowane z `src/schema.ts`).
-
-Pakiet korzysta z `dotenv`, aby wczytać zmienne środowiskowe. Brak zdefiniowanej zmiennej `DATABASE_URL` spowoduje błąd uruchomienia.
-
-Do generowania i stosowania migracji wykorzystaj `drizzle-kit` skonfigurowany w [`drizzle.config.ts`](./drizzle.config.ts):
+Migracje obsługiwane są przez `drizzle-kit` skonfigurowany w [`drizzle.config.ts`](./drizzle.config.ts):
 
 ```bash
 pnpm db:generate   # generuje migrację na podstawie zmian w schema
 pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DATABASE_URL
+pnpm db:seed       # zasila bazę danymi referencyjnymi
 ```
 
 ## Funkcjonalności aplikacji
 
-- **Strona główna (`/`)** – hero z wideo, sekcja procesu MTO, carousel selling points, portfolio modeli, kalkulator wyceny oraz CTA do formularza zamówień.
-- **Katalog (`/catalog`)** – lista produktów oparta o `/api/products` (cache Drizzle), filtry stylów/skór, sortowanie i stany pusty/loading.
-- **Strona produktu (`/catalog/[slug]`)** – breadcrumbs, galeria, warianty personalizacji, CTA do modala zamówienia i linków do `/order/native` oraz `/contact`.
-- **Kontakt (`/contact`)** – sekcja hero z danymi pracowni, formularz kontaktowy z walidacją oraz statusami sukces/błąd, linki do sociali.
-- **Zamówienie (`/order`, `/order/native`)** – osadzony formularz natywny (`NEXT_PUBLIC_ORDER_FORM_URL`) i fallback link do pełnej wersji.
-- **API** – mockowane endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/api/contact/submit` oraz health-check `/healthz`.
+- **Strona główna (`/`)** – hero z wideo, proces MTO, carousel selling points, portfolio modeli, kalkulator wyceny, CTA do zamówień i kontaktu.
+- **Katalog (`/catalog`)** – lista produktów z filtrami stylów/skór, sortowaniem, stanami loading/empty oraz fallbackiem danych.
+- **Strona produktu (`/catalog/[slug]`)** – breadcrumbs, galeria, warianty personalizacji, CTA do modala zamówień i linków do `/order/native` i `/contact`.
+- **Koszyk (`/cart`)** – podsumowanie zamówienia bespoke, CTA do formularza i sekcja FAQ.
+- **Zamówienia (`/order`, `/order/native`, `/order/cart`, `/order/thanks`)** – natywny formularz (`NEXT_PUBLIC_ORDER_FORM_URL`), fallbacki i potwierdzenia flow.
+- **Zamówienia grupowe (`/group-orders`)** – landing B2B z opisem procesu i CTA do kontaktu.
+- **Kontakt (`/contact`)** – sekcja hero, formularz kontaktowy z walidacją i statusami sukces/błąd, linki do social media.
+- **Konto (`/account`)** – placeholder panelu użytkownika z komponentami logowania i roadmapą funkcji.
+- **Materiały prawne (`/privacy-policy`, `/terms`)** – treści compliance dostępne z poziomu stopki i e-maili.
+- **API** – `/api/products`, `/api/products/[slug]`, `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/api/contact/submit`, `/healthz`. Endpointy katalogu korzystają z `getNextDbClient` i degradują się do fallbacku, jeśli brak `DATABASE_URL`.
 
 ## Testy i jakość kodu
 
-- `pnpm test` uruchamia pakiet testów Vitest obejmujący strony App Routera, komponenty kontaktu, prymitywy UI oraz warstwę CLI.
-- `pnpm test:coverage` generuje raport pokrycia (`coverage/`) na bazie `@vitest/coverage-v8`.
-- `pnpm test:ci` wykonuje ten sam zestaw testów w trybie bez interakcji i kończy się błędem, jeśli próg pokrycia nie zostanie spełniony.
-- `pnpm test:e2e` wykonuje scenariusze Playwright (pobranie dokumentów prawnych + smoke test nawigacji i API katalogu; przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
-- `pnpm test:integration` korzysta z `.env.test` oraz helpera Drizzle, aby wykonać zapytania na żywej bazie danych (uruchom wcześniej `docker compose up -d jkdb`, a następnie `pnpm db:migrate` i `pnpm db:seed`).
-- Linting (`pnpm lint`), statyczna analiza typów (`pnpm typecheck`) i kontrola zależności (`pnpm depcheck`) odtwarzają etapy pipeline CI.
-- Dla modułu nawigacji dostępne są dodatkowe symulacje (`pnpm simulate:*`) z testami snapshotowymi agregacji przejść.
+- `pnpm test` uruchamia scenariusze Vitest (strony, komponenty, katalog, CLI, helpery domenowe).
+- `pnpm test:watch` wspiera szybki feedback podczas pracy nad komponentami/API.
+- `pnpm test:coverage` generuje raport (`coverage/`) przy użyciu `@vitest/coverage-v8`.
+- `pnpm test:ci` (uruchamiane też w CI) wykorzystuje reporter `dot` i weryfikuje próg pokrycia 85% Statements/Lines.
+- `pnpm test:e2e` odpala Playwright (nawigacja po głównych stronach, health-checki API, dokumenty prawne). Przed pierwszym runem: `pnpm exec playwright install --with-deps`.
+- `pnpm test:integration` korzysta z `.env.test` i helpera `src/tests/integration/db.ts`, aby wykonać zapytania na realnej bazie (`docker compose up -d jkdb`, `pnpm db:migrate`, `pnpm db:seed`).
+- `pnpm depcheck`, `pnpm lint` i `pnpm typecheck` odtwarzają etapy pipeline CI.
+- Dodatkowe symulacje nawigacji (`pnpm simulate:*`) mają testy snapshotowe weryfikujące konfiguracje wag i brak cykli.
 
-### Jak uruchamiać testy & wymagania coverage
+### Jak uruchamiać testy i utrzymać pokrycie
 
-- Do szybkiego feedbacku używaj `pnpm test` (watch), a na pipeline CI `pnpm test:ci`, który emituje raport `dot` i kontroluje progi pokrycia.
-- Globalne pokrycie Statements/Lines musi utrzymywać minimum **85%**. Bramka w `pnpm test:ci` dodatkowo wymusza ten próg na kluczowych modułach – spadek poniżej limitu przerywa job.
-- `pnpm test:coverage` generuje raport V8 (`coverage/lcov-report/index.html`), który ułatwia analizę brakujących scenariuszy.
+- Do pracy lokalnej używaj `pnpm test:watch`; przed PR uruchom `pnpm lint`, `pnpm typecheck`, `pnpm test:ci`, `pnpm build` i – opcjonalnie – `pnpm test:coverage`.
+- Globalne pokrycie Statements/Lines utrzymujemy na poziomie **≥85%**. Spadek poniżej progu zatrzymuje job CI.
+- Raport Playwright jest zapisywany w `playwright-report/` i publikowany jako artefakt CI.
 
 ## Dokumentacja produktu i procesu
 
-Repozytorium zawiera katalog `docs/` z najważniejszymi artefaktami discovery. Kluczowe pliki:
+Najważniejsze pliki w katalogu `docs/`:
 
-- [`docs/README_DOCS.md`](./docs/README_DOCS.md) – indeks dokumentacji i wskazówki dotyczące aktualizacji.
-- [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md) – plan iteracji oraz status postępu.
-- [`docs/SITE_MAP.md`](./docs/SITE_MAP.md) – mapa ekranów wraz z przepływami użytkownika.
-- [`docs/UI_TOKENS.md`](./docs/UI_TOKENS.md) – aktualna paleta kolorów, typografia i komponenty UI.
-- [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md) – standardy jakości i konfiguracja CI.
+- [`docs/README_DOCS.md`](./docs/README_DOCS.md) – indeks dokumentacji i statusy aktualizacji.
+- [`docs/PLAN_MVP_SPRINTS.md`](./docs/PLAN_MVP_SPRINTS.md) – roadmapa iteracji.
+- [`docs/WYMAGANIA_MVP.md`](./docs/WYMAGANIA_MVP.md) – wymagania funkcjonalne MVP.
+- [`docs/SITE_MAP.md`](./docs/SITE_MAP.md) – mapa ekranów i ścieżek użytkowników.
+- [`docs/UI_TOKENS.md`](./docs/UI_TOKENS.md) – design tokens i plan migracji do custom properties.
+- [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md) – standardy jakości, próg pokrycia i checklisty PR.
+- [`docs/LOOP_TASKS.md`](./docs/LOOP_TASKS.md) – pętla zadań transformacyjnych (`x`, `-x`, `1/x`, `x²`, `xˣ`).
+- [`docs/DANE_I_API_MVP.md`](./docs/DANE_I_API_MVP.md) – modele danych, kontrakty API, fallback katalogu.
 
-Aktualizuj dokumenty wraz z każdą decyzją produktową lub zmianą w implementacji, aby zespół miał jedno źródło prawdy.
+Aktualizując kod lub proces, zsynchronizuj odpowiednie dokumenty i uzupełnij sekcje meta audytu.
 
 ## Kierunek rozwoju
 
-- Wyrównanie konfiguracji bazy (`DATABASE_URL` vs `docker-compose.yml`) i dodanie migracji `drizzle-kit` **(zrealizowane: migracja inicjalna + seed referencyjny).**
-- Poszerzenie katalogu mocków o nowe modele oraz dynamiczne assety.
-- Integracja z Stripe/n8n po ustabilizowaniu formularzy zamówień.
-- Podpięcie API Next.js do pakietu `@jk/db` (Style/Leather) i zastąpienie mocków zapytaniami do bazy.
-- Doprecyzowanie roadmapy testów end-to-end (Playwright).
-
+- Przenieść product templates do migracji i seedów Drizzle oraz utrzymać spójność z fallbackiem katalogu.
+- Zintegrować backend formularza zamówień i kontaktu (np. n8n/SMTP), uzupełnić materiały legal (RODO, polityka, regulamin).
+- Migrować design tokens do dedykowanych zmiennych i przygotować eksport do Tailwind/shadcn/ui.
+- Rozszerzyć testy e2e o pełne flow zamówienia (modal → koszyk → zamówienie → potwierdzenie) i metryki konwersji.
+- Zautomatyzować checklistę dokumentacyjną (`docs/README_DOCS.md`) oraz monitoring health-checków katalogu.

@@ -113,6 +113,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Test `src/lib/catalog/__tests__/repository.drizzle.test.ts` utrzymuje zgodność rekordów Drizzle ze słownikami fallback; przy zmianie seeda/migracji aktualizuj zarówno test, jak i dokumentację (`docs/DANE_I_API_MVP.md`, `docs/ARCHITEKTURA_I_LUKI.md`).
 - Test integracyjny `src/app/api/products/route.integration.test.ts` sprawdza dostępność bazy — przy braku połączenia testy zostaną pominięte z ostrzeżeniem w logach; uruchom `docker compose up -d jkdb`, aby aktywować środowisko.
 - Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku. Konfiguracja `drizzle.config.ts` ładuje zmienne z `.env.local` (fallback `.env`, a przy braku obu sięgnie po `.env.example`); pamiętaj o aktualizacji dokumentacji, jeśli zmienisz nazwy plików lub wymagane zmienne.
+- `drizzle-kit` 0.31+ wymaga, aby workspace root miał zależność `drizzle-orm` (devDependency), w przeciwnym wypadku check kompatybilności przerwie generowanie migracji. Nie usuwaj wpisu z `package.json`.
 
 ## Co robić w taskach
 - Dodawaj komponenty w `src/components/` lub `src/components/ui/` dla prymitywów.

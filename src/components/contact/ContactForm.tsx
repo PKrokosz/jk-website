@@ -78,7 +78,7 @@ export function ContactForm() {
     }
 
     if (!data.consent) {
-      setError("Zaznacz zgodę na kontakt, abyśmy mogli odpowiedzieć na wiadomość.");
+      setError("Zaznacz zgodę na przetwarzanie danych, abyśmy mogli odpowiedzieć na wiadomość.");
       setStatus("error");
       return;
     }
@@ -150,8 +150,13 @@ export function ContactForm() {
           required
         />
         <span className="checkbox__content">
-          <span className="checkbox__label">Zgadzam się na kontakt mailowy w sprawie projektu obuwia.</span>
-          <span className="field__hint">Twoje dane wykorzystamy jedynie do odpowiedzi na zapytanie.</span>
+          <span className="checkbox__label">
+            Wyrażam zgodę na przetwarzanie moich danych osobowych w celu udzielenia odpowiedzi na zapytanie wysłane przez formularz kontaktowy.
+          </span>
+          <span className="field__hint">
+            Administratorem danych jest <strong>JK Handmade Footwear</strong>. Dane nie będą przekazywane podmiotom trzecim i zostaną usunięte po zakończeniu korespondencji. Szczegóły znajdziesz w naszej {" "}
+            <a href="/privacy-policy">Polityce prywatności</a>.
+          </span>
         </span>
       </label>
 

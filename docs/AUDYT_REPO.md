@@ -36,7 +36,7 @@
   - `/order` – osadzony formularz natywny (iframe) z fallbackiem do pełnej wersji oraz metadata canonical.
   - `/order/native` – landing z listą modeli i CTA do zewnętrznego formularza.
   - `/contact` – rozbudowana strona kontaktowa z hero, danymi pracowni, formularzem i statusami.
-  - `/about` – sekcja o pracowni (placeholder copy do dopracowania).
+- `/about` – sekcja o pracowni z finalnym copy i CTA do kontaktu/zamówienia.
   - `/healthz` – endpoint statusowy (API route `route.ts`).
 - **Endpointy API**
   - `GET /api/styles` – zwraca mockowane style (`catalogStyles`).

@@ -3,6 +3,7 @@ import React, { type ReactNode } from "react";
 
 import { Header } from "../components/Header";
 import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
+import { Footer } from "../components/Footer";
 import { AppProviders } from "./providers";
 import "./globals.css";
 
@@ -72,15 +73,14 @@ export default function RootLayout({
     <html lang="pl">
       <body className="site-body">
         <AppProviders>
-          <AnalyticsConsentGate>
-            <a className="skip-link" href="#main-content">
-              Przejdź do głównej treści
-            </a>
-            <Header />
-            <div className="site-content" id="main-content">
-              {children}
-            </div>
-          </AnalyticsConsentGate>
+          <a className="skip-link" href="#main-content">
+            Przejdź do głównej treści
+          </a>
+          <Header />
+          <div className="site-content" id="main-content">
+            {children}
+          </div>
+          <Footer />
         </AppProviders>
       </body>
     </html>

@@ -44,8 +44,8 @@ describe("fetchCatalogResource build-time mock", () => {
     vi.stubGlobal("fetch", fetchSpy as unknown as typeof fetch);
     vi.spyOn(console, "info").mockImplementation(() => {});
 
-    const module = await import("../api");
-    const products = await module.fetchCatalogProducts();
+    const apiModule = await import("../api");
+    const products = await apiModule.fetchCatalogProducts();
 
     expect(products.length).toBeGreaterThan(0);
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -59,9 +59,9 @@ describe("fetchCatalogResource build-time mock", () => {
     vi.stubGlobal("fetch", fetchSpy as unknown as typeof fetch);
     vi.spyOn(console, "info").mockImplementation(() => {});
 
-    const module = await import("../api");
+    const apiModule = await import("../api");
 
-    await expect(module.fetchCatalogProductDetail("unknown"))
+    await expect(apiModule.fetchCatalogProductDetail("unknown"))
       .rejects.toMatchObject({ status: 404 });
     expect(fetchSpy).not.toHaveBeenCalled();
   });

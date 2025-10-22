@@ -6,6 +6,14 @@ export const COMMANDS: Record<string, CommandDefinition> = {
     summary: "Run lint, type checks and unit tests (local developer workflow).",
     steps: [
       {
+        id: "verify-drizzle-env",
+        title: "Verify Drizzle env",
+        command: "pnpm",
+        args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
+        description:
+          "Ensures DATABASE_URL is available before running quality checks."
+      },
+      {
         id: "lint",
         title: "ESLint",
         command: "pnpm",
@@ -33,6 +41,14 @@ export const COMMANDS: Record<string, CommandDefinition> = {
     summary:
       "Run the full CI gate including lint, type checks, build, coverage, e2e and depcheck.",
     steps: [
+      {
+        id: "verify-drizzle-env",
+        title: "Verify Drizzle env",
+        command: "pnpm",
+        args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
+        description:
+          "Ensures DATABASE_URL is available before running quality checks."
+      },
       {
         id: "lint",
         title: "ESLint",

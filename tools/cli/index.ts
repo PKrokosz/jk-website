@@ -16,7 +16,7 @@ const printUsage = (): void => {
   console.log("  -h, --help          Show this help message");
 };
 
-const main = async () => {
+export const main = async () => {
   const parsed = parseArguments(process.argv.slice(2));
 
   if (parsed.list) {
@@ -60,4 +60,6 @@ const main = async () => {
   }
 };
 
-void main();
+if (process.env.CLI_TEST_MODE !== "1") {
+  void main();
+}

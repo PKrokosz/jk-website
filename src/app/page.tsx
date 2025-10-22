@@ -292,9 +292,6 @@ export default function Home() {
               <a className="button button--ghost" href="mailto:pracownia@jk-footwear.pl">
                 Umów konsultację
               </a>
-              <Link className="button button--ghost" href="/api/pricing/quote">
-                Zobacz API wyceny
-              </Link>
               <Link className="button button--primary order-modal__mobile-link" href="/order/native">
                 Zamów buty
               </Link>

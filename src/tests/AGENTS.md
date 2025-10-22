@@ -7,3 +7,7 @@
 - Każdy scenariusz powinien asercjami potwierdzać kod statusu odpowiedzi (`response?.status()` albo `request.get`).
 - Dodawaj komentarze tylko, jeśli asercja wymaga kontekstu biznesowego; unikaj snapshotów w Playwright.
 - Scenariusze zamówień muszą potwierdzać walidację pól (`Imię i nazwisko`) i prefill danych na `/order/cart`, aby utrzymać spójność z lejem sprzedażowym.
+
+## Integracje z bazą danych
+- Przed wykonaniem testów integracyjnych korzystaj z helpera `ensureIntegrationTestMigrations`, który zastosuje migracje z katalogu `drizzle` do lokalnej bazy testowej.
+- Jeśli dodajesz nowe migracje, upewnij się, że testy integracyjne ładują środowisko `.env.test` i nie polegają na ręcznym uruchamianiu `pnpm db:migrate`.

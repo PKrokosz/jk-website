@@ -1,5 +1,7 @@
 # Audyt repozytorium
 
+> **Status aktualizacji**: 2025-10-22 — uwzględnia trasę `/account` oraz nowy dokument pętli `docs/LOOP_TASKS.md`.
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Struktura monorepo](#struktura-monorepo)
@@ -11,7 +13,7 @@
 
 ## Podsumowanie
 - Monorepo oparte o pnpm workspaces, z główną aplikacją Next.js 14 w katalogu `src/` i pakietem współdzielonym `@jk/db`.
-- Routing App Routera jest rozbudowany: Home, Catalog (z filtrami), Product (dynamiczne slug), About, Contact (formularz), Order (iframe + fallback) oraz API `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/healthz`.
+- Routing App Routera jest rozbudowany: Home, Catalog (z filtrami), Product (dynamiczne slug), About, Contact (formularz), Order (iframe + fallback), Account (mock panel klienta) oraz API `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/healthz`.
 - Mockowane dane katalogowe (`src/lib/catalog`) rozszerzono o slug, warianty, funnel stage i referencje do formularza natywnego.
 - Konfiguracja środowiska ujednolicono: `.env.example` i `docker-compose.yml` korzystają z tych samych poświadczeń, dostępna jest migracja inicjalna w katalogu `drizzle/` oraz skrypt seeda `pnpm db:seed`.
 
@@ -21,7 +23,7 @@
 - **Packages**
   - `packages/db/` – pakiet Drizzle ORM (schemat bazy, klient PG, własny `docker-compose.yml`).
 - **Kluczowe katalogi**
-  - `src/app/` – App Router, globalne style, komponenty page-level (`about`, `catalog`, `contact`, `order`, `api/*`).
+  - `src/app/` – App Router, globalne style, komponenty page-level (`about`, `account`, `catalog`, `contact`, `order`, `api/*`).
   - `src/app/catalog/[slug]/` – dynamiczna strona produktu z generowaniem metadata i breadcrumbs.
   - `src/components/` – komponenty współdzielone (`Header`, `NavLink`, `contact/ContactForm`, `ui/order/*`).
   - `src/lib/` – logika domenowa (`catalog`, `pricing`, konfiguracje order models/accessories).
@@ -36,6 +38,7 @@
   - `/order` – osadzony formularz natywny (iframe) z fallbackiem do pełnej wersji oraz metadata canonical.
   - `/order/native` – landing z listą modeli i CTA do zewnętrznego formularza.
   - `/contact` – rozbudowana strona kontaktowa z hero, danymi pracowni, formularzem i statusami.
+  - `/account` – mock panel klienta z rejestracją, logowaniem, historią zamówień i newsletterem.
 - `/about` – sekcja o pracowni z finalnym copy i CTA do kontaktu/zamówienia.
   - `/healthz` – endpoint statusowy (API route `route.ts`).
 - **Endpointy API**

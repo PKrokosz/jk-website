@@ -60,6 +60,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Przy użyciu TypeScriptowego operatora `satisfies` trzymaj go w tej samej linii, co domykający literał (`] satisfies Type`), aby uniknąć wstrzyknięcia średnika przez ASI. Przy wieloliniowych wyrażeniach (np. `.map(…)`) w razie potrzeby owiń całość w dodatkowe nawiasy, aby parser TS nie zgłaszał błędów składniowych.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
 - Testy repozytorium katalogu mockujące `@jk/db` muszą przed każdym scenariuszem wywołać `__catalogRepositoryInternals.resetDbModuleCache()` (lub `vi.resetModules()`), aby korzystać z świeżego mocka modułu.
+- Mockując `@jk/db` zwracaj jednocześnie eksporty `style`, `leather` oraz `productTemplate`, aby testy repozytorium katalogu odwzorowywały strukturę modułu.
 - W testach modułu pricing korzystaj z helpera `createMockPricingDatabase` (`src/lib/pricing/__tests__/mock-db.ts`),
   aby odtworzyć metody Drizzle (`select`, `insert`, `values`) i móc destrukturyzować mocki.
 - Utrzymuj próg pokrycia 85% (Statements/Lines). `pnpm test:ci` uruchamia Vitest z reporterem `dot` i zakończy się błędem przy spadku poniżej limitu.
@@ -108,6 +109,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Mocki (`src/lib/catalog`) z rozszerzonym modelem (slug, warianty, order reference) do czasu podłączenia Drizzle.
 - Repozytorium katalogu ma fallback do danych referencyjnych (`src/lib/catalog/data.ts`) w razie braku połączenia z bazą — nie usuwaj testów `repository.fallback.test.ts` i unikaj top-level importów `@jk/db` w modułach produkcyjnych.
 - Test `src/lib/catalog/__tests__/repository.drizzle.test.ts` utrzymuje zgodność rekordów Drizzle ze słownikami fallback; przy zmianie seeda/migracji aktualizuj zarówno test, jak i dokumentację (`docs/DANE_I_API_MVP.md`, `docs/ARCHITEKTURA_I_LUKI.md`).
+- Test integracyjny `src/app/api/products/route.integration.test.ts` sprawdza dostępność bazy — przy braku połączenia testy zostaną pominięte z ostrzeżeniem w logach; uruchom `docker compose up -d jkdb`, aby aktywować środowisko.
 - Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku. Konfiguracja `drizzle.config.ts` ładuje zmienne z `.env.local` (fallback `.env`, a przy braku obu sięgnie po `.env.example`); pamiętaj o aktualizacji dokumentacji, jeśli zmienisz nazwy plików lub wymagane zmienne.
 
 ## Co robić w taskach

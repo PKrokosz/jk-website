@@ -109,6 +109,16 @@ export const COMMANDS: Record<string, CommandDefinition> = {
         args: ["depcheck"],
         description: "Validates dependency usage to prevent unused packages."
       }
+    ],
+    cleanupSteps: [
+      {
+        id: "cleanup-node20-db",
+        title: "Cleanup Node 20 database",
+        command: "docker",
+        args: ["compose", "down", "--volumes", "jkdb"],
+        description:
+          "Stops the Node 20 Postgres container and removes the jkdb volumes after CI checks."
+      }
     ]
   }
 };

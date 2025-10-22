@@ -158,6 +158,7 @@ jobs:
   - `Verify Drizzle schema metadata` wymusza czysty diff po `pnpm db:generate`, dzięki czemu wychwycimy brakujące aktualizacje migracji/metadanych.
   - `pnpm test:integration` korzysta z helpera `ensureIntegrationTestMigrations`, aby upewnić się, że migracje zostały zastosowane i dane referencyjne są dostępne.
   - `docker compose down --volumes jkdb` gwarantuje zwolnienie wolumenów i kontenera `jkdb` po zakończeniu testów na Node 20.x.
+  - Komenda `pnpm qa:ci` wywołuje ten sam krok sprzątający lokalnie; w razie potrzeby debugowania można użyć `pnpm qa:ci -- --skip=cleanup-node20-db`.
   - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
   - Scenariusze Playwright uruchamiane są na Node 20.x, raport HTML dołączany jako artefakt `playwright-report`.
 

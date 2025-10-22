@@ -19,6 +19,7 @@
     "qa": "pnpm run cli -- quality",
     "qa:ci": "pnpm run cli -- quality:ci",
     "simulate:user-journeys": "tsx scripts/simulate-user-journeys.ts",
+    "simulate:navigation": "tsx scripts/simulate-navigation.ts",
     "db:generate": "drizzle-kit generate:pg",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "pnpm --filter @jk/db run seed",

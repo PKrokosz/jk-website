@@ -25,6 +25,7 @@ Ten katalog zawiera komplet artefaktów discovery & gap assessment dla MVP sklep
 | [`PLAN_MVP_SPRINTS.md`](./PLAN_MVP_SPRINTS.md) | 2025-10-22 | Aktualne (T0–T7 opisane) | Uzupełnić status po każdym zamkniętym sprincie. |
 | [`OPEN_QUESTIONS.md`](./OPEN_QUESTIONS.md) | 2025-09-18 | Wymaga odpowiedzi właściciela | Usunąć zamknięte pytania i dopisać nowe decyzje. |
 | [`SEO_CHECKLIST.md`](./SEO_CHECKLIST.md) | 2025-06-05 | W toku (brak `robots.txt`/`sitemap`) | Potwierdzić implementację generowanych plików i structured data. |
+| [`FRONTEND_INTERFACE_SPEC.md`](./FRONTEND_INTERFACE_SPEC.md) | 2025-10-22 | Nowy dokument | Synchronizować z aktualizacjami UI i zadaniami pętli `task_loop`. |
 | [`LOOP_TASKS.md`](./LOOP_TASKS.md) | 2025-10-22 | Nowy dokument | Aktualizować po każdej iteracji backlogu pętli. |
 
 > Dodatkowo w katalogu głównym repo znajdziesz [`RAPORT_AGENT.md`](../RAPORT_AGENT.md) z propozycjami kolejnych ulepszeń oraz raportami pętli retro.

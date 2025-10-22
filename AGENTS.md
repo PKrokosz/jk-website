@@ -28,6 +28,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## Dokumentacja discovery
 - Indeks: `docs/README_DOCS.md`.
 - Główne specyfikacje: `AUDYT_REPO.md`, `ARCHITEKTURA_I_LUKI.md`, `WYMAGANIA_MVP.md`, `UI_TOKENS.md`, `SITE_MAP.md`, `DANE_I_API_MVP.md`, `JAKOSC_TESTY_CI.md`, `PLAN_MVP_SPRINTS.md`, `OPEN_QUESTIONS.md`.
+- Specyfikacja UI i frontendu: `docs/FRONTEND_INTERFACE_SPEC.md` (paleta, animacje, responsywność, integracja z `task_loop`).
 - Aktualizuj dokumenty, gdy zmienia się zakres funkcjonalny lub decyzje produktowe.
 - Raport z pomysłami na usprawnienia znajdziesz w `RAPORT_AGENT.md`.
 
@@ -77,7 +78,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Responsywność: mobile-first, 3 breakpoints.
 - Uzupełniaj dokumentację w `docs/` przy każdej zmianie funkcjonalności.
 - Symulacje ścieżek użytkownika umieszczaj w `src/lib/navigation/`. Każda nowa symulacja musi posiadać testy Vitest i skrypt uruchomieniowy (np. `pnpm simulate:user-journeys`). Graf nawigacji nie może mieć martwych węzłów, a moduł powinien eksportować helper do formatowania wyników dla raportów.
-- Wagi tokenów dla symulacji nawigacji ładuj przez `NAVIGATION_WEIGHTS_JSON` (inline JSON) lub `NAVIGATION_WEIGHTS_PATH` (ścieżka do pliku). Konfiguracje muszą przechodzić testy `src/lib/navigation/__tests__/journey-simulation.test.ts`.
+- Skrypt `scripts/simulate-navigation.ts` wspiera flagi `--config`, `--user-count` oraz `--summary`; ostatnia z nich korzysta z agregatora przejść (`aggregateJourneyTransitions`) i ma dedykowany snapshot w `scripts/__tests__/simulate-navigation.test.ts`.
+- Wagi tokenów dla symulacji nawigacji ładuj przez `NAVIGATION_WEIGHTS_JSON` (inline JSON) lub `NAVIGATION_WEIGHTS_PATH` (ścieżka do pliku). Konfiguracje muszą przechodzić testy `src/lib/navigation/__tests__/journey-simulation.test.ts`. Pliki konfiguracji mogą zawierać wpisy `_comment`/`//` z opisem – parser je pomija.
 
 ## Warstwa CLI
 - Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.

@@ -49,6 +49,12 @@ export interface SimulationOptions {
   maxSteps?: number;
 }
 
+export interface TransitionAggregate {
+  from: NavigationNodeId;
+  to: NavigationNodeId;
+  count: number;
+}
+
 const DEFAULT_MAX_STEPS = 12;
 
 const BASE_NAVIGATION_GRAPH: NavigationGraph = {
@@ -223,6 +229,9 @@ const validateWeight = (node: NavigationNodeId, target: NavigationNodeId, weight
   return weight;
 };
 
+const isCommentKey = (key: string): boolean =>
+  key.startsWith("_") || key.startsWith("//") || key === "$comment" || key.startsWith("#");
+
 const parseNavigationWeights = (
   raw: unknown,
   graph: NavigationGraph,
@@ -234,6 +243,10 @@ const parseNavigationWeights = (
   const weights: NavigationWeightsConfig = {};
 
   for (const [nodeId, transitions] of Object.entries(raw)) {
+    if (isCommentKey(nodeId)) {
+      continue;
+    }
+
     assertIsNavigationNodeId(nodeId);
 
     if (transitions === null || typeof transitions !== "object" || Array.isArray(transitions)) {
@@ -244,6 +257,10 @@ const parseNavigationWeights = (
     const availableTargets = new Set(graph[nodeId].tokens.map((token) => token.target));
 
     for (const [targetId, weight] of Object.entries(transitions)) {
+      if (isCommentKey(targetId)) {
+        continue;
+      }
+
       assertIsNavigationNodeId(targetId);
 
       if (!availableTargets.has(targetId)) {
@@ -476,4 +493,43 @@ export const formatJourney = (journey: UserJourney): string => {
     .join(" \u2192 ");
 
   return `User ${journey.id}: ${stepsDescription} | loop at ${journey.loopAt}`;
+};
+
+const buildAggregateKey = (from: NavigationNodeId, to: NavigationNodeId): string =>
+  `${from}->${to}`;
+
+export const aggregateJourneyTransitions = (
+  journeys: UserJourney[],
+): TransitionAggregate[] => {
+  if (journeys.length === 0) {
+    return [];
+  }
+
+  const aggregates = new Map<string, TransitionAggregate>();
+
+  journeys.forEach((journey) => {
+    journey.steps.forEach((step) => {
+      const key = buildAggregateKey(step.from, step.to);
+      const current = aggregates.get(key);
+
+      if (current) {
+        aggregates.set(key, { ...current, count: current.count + 1 });
+        return;
+      }
+
+      aggregates.set(key, {
+        from: step.from,
+        to: step.to,
+        count: 1,
+      });
+    });
+  });
+
+  return Array.from(aggregates.values()).sort((left, right) => {
+    if (left.from === right.from) {
+      return left.to.localeCompare(right.to);
+    }
+
+    return left.from.localeCompare(right.from);
+  });
 };

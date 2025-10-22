@@ -1,7 +1,10 @@
+import { resolve as resolvePath } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
   buildNavigationGraph,
+  aggregateJourneyTransitions,
   formatJourney,
   loadNavigationWeights,
   navigationGraph,
@@ -98,6 +101,23 @@ describe("navigation weight configuration", () => {
     expect(homeToken?.weight).toBe(5);
   });
 
+  it("ignores comment keys in JSON configuration", () => {
+    const env = {
+      NAVIGATION_WEIGHTS_JSON: JSON.stringify({
+        _comment: "source -> target -> weight",
+        home: {
+          _comment: "home transitions",
+          contact: 4,
+        },
+      }),
+    } satisfies NodeJS.ProcessEnv;
+
+    const graph = buildNavigationGraph({ env });
+    const contactToken = graph.home.tokens.find((token) => token.target === "contact");
+
+    expect(contactToken?.weight).toBe(4);
+  });
+
   it("throws when the JSON configuration is invalid", () => {
     const env = {
       NODE_ENV: "test",
@@ -138,6 +158,27 @@ describe("navigation weight configuration", () => {
       /does not have a transition/,
     );
   });
+
+  it("loads overrides from JSON file referenced by NAVIGATION_WEIGHTS_PATH", () => {
+    const configPath = resolvePath(
+      process.cwd(),
+      "config/navigation-weights.example.json",
+    );
+
+    const env = {
+      NAVIGATION_WEIGHTS_PATH: configPath,
+    } satisfies NodeJS.ProcessEnv;
+
+    const graph = buildNavigationGraph({ env });
+
+    const catalogToken = graph.home.tokens.find((token) => token.target === "catalog");
+    const contactToken = graph.home.tokens.find((token) => token.target === "contact");
+    const groupOrdersToken = graph.catalog.tokens.find((token) => token.target === "groupOrders");
+
+    expect(catalogToken?.weight).toBe(6);
+    expect(contactToken?.weight).toBe(3);
+    expect(groupOrdersToken?.weight).toBe(4);
+  });
 });
 
 describe("formatJourney", () => {
@@ -152,5 +193,23 @@ describe("formatJourney", () => {
     expect(summary).toContain(`User ${journey.id}`);
     expect(summary).toContain("loop at");
     expect(summary).toContain("[");
+  });
+});
+
+describe("aggregateJourneyTransitions", () => {
+  it("counts transitions across all journeys", () => {
+    const journeys = simulateUserJourneys({
+      userCount: 3,
+      random: createSeededRandom(11),
+    });
+
+    const aggregates = aggregateJourneyTransitions(journeys);
+
+    const transition = aggregates.find(
+      (item) => item.from === "home" && item.to === "catalog",
+    );
+
+    expect(transition?.count).toBeGreaterThan(0);
+    expect(aggregates).toMatchSnapshot();
   });
 });

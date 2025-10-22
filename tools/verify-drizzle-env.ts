@@ -4,6 +4,11 @@ import { resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import {
+  DEFAULT_ENV_SEQUENCE,
+  loadCliEnvironment
+} from "./cli/load-env";
+
 type Logger = Pick<Console, "warn">;
 
 type ComposeDatabaseConfig = {
@@ -318,7 +323,26 @@ export const verifyEnvironment = (
   return { ok: true, missing: [] as EnvRequirement[] } as const;
 };
 
+type LoadVerifyEnvEnvironmentOptions = {
+  cwd?: string;
+  sequence?: readonly string[];
+  loader?: typeof loadCliEnvironment;
+};
+
+export const loadVerifyEnvEnvironment = (
+  options: LoadVerifyEnvEnvironmentOptions = {}
+) => {
+  const {
+    cwd = process.cwd(),
+    sequence = DEFAULT_ENV_SEQUENCE,
+    loader = loadCliEnvironment
+  } = options;
+
+  return loader({ cwd, files: sequence });
+};
+
 const run = () => {
+  loadVerifyEnvEnvironment();
   warnOnDatabaseUrlMismatch();
   const result = verifyEnvironment();
   if (!result.ok) {

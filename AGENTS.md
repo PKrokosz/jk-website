@@ -54,6 +54,10 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Telemetria błędów: korzystaj z helperów `reportClientError` i `reportServerError` z `src/lib/telemetry`. W testach mockuj moduł `@/lib/telemetry` i potwierdzaj wywołania.
 - Przy testowaniu formularza kontaktowego wstrzykuj zależność `submitRequest` (mock `fetch`) lub korzystaj z helperów ustawionych globalnie.
 
+## README
+- Utrzymuj tabelę „Status modułów” w `README.md` — dopisuj nowe moduły lub aktualizuj kolumnę „Stan” przy każdej znaczącej zmianie w kodzie lub dokumentacji.
+- Aktualizuj tabelę komend i sekcję „Testy i jakość kodu” w `README.md` za każdym razem, gdy dodajesz/usuwasz skrypt npm albo nowy typ testu.
+
 ## Zasady PR
 - Każdy task = osobny branch + PR.
 - Do PR dołącz: opis, lista zmian, screen/GIF, wynik `pnpm lint`, `pnpm typecheck`, `pnpm test`, (jeśli dotyczy) `pnpm build` i `pnpm test:coverage`.

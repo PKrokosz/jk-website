@@ -12,6 +12,7 @@
   - Dodano sekcję meta audytu i wskazano konieczność decyzji o progu coverage.
   - Zsynchronizowano status dokumentu z audytem (2025-10-29).
   - Uzupełniono opis pipeline o krok przygotowujący bazę oraz uruchomienie `pnpm test:integration`.
+  - Doprecyzowano etap sprzątania kontenerów (`docker compose down --volumes jkdb`) po testach integracyjnych.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -138,11 +139,15 @@ jobs:
         with:
           name: coverage-report
           path: coverage
+      - name: Tear down integration database
+        if: always() && matrix.node-version == '20.x'
+        run: docker compose down --volumes jkdb
   ```
   - `pnpm qa` uruchamia lokalną bramkę jakościową (lint, typecheck, test) – wykorzystywane na macierzy Node 22.x.
   - `pnpm qa:ci` odtwarza pełen pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck) – uruchamiane na Node 20.x.
   - Kroki `pnpm db:migrate`, `pnpm db:seed` przygotowują kontener Postgresa (`jkdb`) i synchronizują schemat przed testami integracyjnymi.
   - `pnpm test:integration` korzysta z helpera `ensureIntegrationTestMigrations`, aby upewnić się, że migracje zostały zastosowane i dane referencyjne są dostępne.
+  - `docker compose down --volumes jkdb` gwarantuje zwolnienie wolumenów i kontenera `jkdb` po zakończeniu testów na Node 20.x.
   - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
   - Scenariusze Playwright uruchamiane są na Node 20.x, raport HTML dołączany jako artefakt `playwright-report`.
 

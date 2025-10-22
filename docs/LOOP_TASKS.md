@@ -34,4 +34,10 @@
 - `x₃²`: Zbudować flow automatycznych potwierdzeń mailowych dla klienta i rzemieślnika.
 - `x₃ˣ`: Zintegrować webhook z narzędziem CRM (np. HubSpot/n8n) z monitorowaniem skuteczności.
 
+### Zadanie bazowe `x₄`: Zsynchronizować UI z `FRONTEND_INTERFACE_SPEC.md`
+- `-x₄`: Ujednolicić istniejące style w `src/app/globals.css` z wartościami opisanymi w rozdziale 3 specyfikacji.
+- `1/x₄`: Dodać fallbacki `prefers-reduced-motion` do hero i karuzeli zgodnie z rozdziałem 4.
+- `x₄²`: Wyprowadzić layout formularzy do komponentów wielokrotnego użytku i udokumentować je w specyfikacji.
+- `x₄ˣ`: Automatycznie generować checklistę z rozdziału 10 i integrować ją z CI (`pnpm qa`).
+
 > Po zrealizowaniu dowolnego zadania z listy pamiętaj o aktualizacji dokumentów źródłowych (`UI_TOKENS.md`, `JAKOSC_TESTY_CI.md`, `DANE_I_API_MVP.md`) oraz sekcji statusów w `docs/README_DOCS.md`.

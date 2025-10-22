@@ -9,6 +9,16 @@ import type {
   CatalogStyle
 } from "@/lib/catalog/types";
 
+const NEXT_PHASE_PRODUCTION_BUILD = "phase-production-build";
+
+function shouldUseBuildMock(): boolean {
+  if (process.env.FORCE_CATALOG_FROM_DB === "true") return false;
+  const isProductionBuild =
+    process.env.NEXT_PHASE === NEXT_PHASE_PRODUCTION_BUILD ||
+    process.env.IS_BUILD === "true";
+  return isProductionBuild;
+}
+
 export class CatalogApiError extends Error {
   constructor(
     public readonly status: number,
@@ -24,12 +34,10 @@ interface ApiResponse<T> {
   data: T;
 }
 
-const NEXT_PHASE_PRODUCTION_BUILD = "phase-production-build";
-
 function shouldMockCatalogFetch(): boolean {
   return (
     process.env.MOCK_CATALOG_FETCH === "1" ||
-    process.env.NEXT_PHASE === NEXT_PHASE_PRODUCTION_BUILD
+    shouldUseBuildMock()
   );
 }
 
@@ -38,7 +46,7 @@ let hasLoggedMockNotice = false;
 async function mockCatalogResource<T>(path: string): Promise<T> {
   const cache = await resolveCatalogCache();
 
-  if (!hasLoggedMockNotice) {
+  if (!hasLoggedMockNotice && shouldUseBuildMock()) {
     console.info(
       "Mockujemy fetch katalogu (build-time) — zwracamy dane z cache w pamięci"
     );
@@ -72,6 +80,10 @@ async function mockCatalogResource<T>(path: string): Promise<T> {
 }
 
 async function fetchCatalogResource<T>(path: string): Promise<T> {
+  if (shouldUseBuildMock()) {
+    return mockCatalogResource<T>(path);
+  }
+
   if (shouldMockCatalogFetch()) {
     return mockCatalogResource<T>(path);
   }

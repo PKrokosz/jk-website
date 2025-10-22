@@ -2,8 +2,8 @@
 
 > **Status audytu**: 2025-10-29 — scalono wyniki przeglądu wszystkich dokumentów w `docs/` i zsynchronizowano pętlę `LOOP_TASKS.md`.
 
-## Meta audytu 2025-10-29
-- **Status zagadnień**: Wszystkie dokumenty otrzymały sekcję meta i aktualny status. Główne luki techniczne (migracja Drizzle, adopcja tokens, structured data, automatyzacja audytu dokumentacji) pozostają otwarte i zostały powiązane z nowymi zadaniami `x₆`–`x₈`.
+## Meta audytu 2025-10-30
+- **Status zagadnień**: Wszystkie dokumenty otrzymały sekcję meta i aktualny status. Migracja Drizzle dla słowników katalogu została potwierdzona testami (`repository.drizzle.test.ts`), natomiast adopcja tokens, structured data i automatyzacja audytu dokumentacji pozostają otwarte (zadania `x₆`–`x₈`).
 - **Nowe ścieżki rozwoju**:
   - Uruchomić zadania `x₆`–`x₈` w `docs/LOOP_TASKS.md` (Drizzle fallback, SEO artefakty, automatyzacja audytu dokumentów).
   - Zaplanować T8/T9 w `PLAN_MVP_SPRINTS.md` (obsługa `/group-orders` i `/cart`) oraz odpowiadające im testy e2e.
@@ -13,7 +13,7 @@
 - **Aktualizacje wykonane**:
   - Zebrano statusy meta i zadania dla każdego dokumentu.
   - Uporządkowano backlog follow-upów (Drizzle, tokens, SEO, audyt dokumentacji).
-  - Wskazano kolejny krok „kontynuacja” (sekcja 5).
+  - Udokumentowano testy mapujące dane Drizzle na fallback katalogu oraz aktualizację `DANE_I_API_MVP.md`/`ARCHITEKTURA_I_LUKI.md`.
 
 ## 1. Statusy dokumentów
 | Dokument | Status po audycie | Kluczowe otwarte kwestie |
@@ -32,11 +32,11 @@
 | `LOOP_TASKS.md` | W toku | Uruchomić nowe zadania `x₆`–`x₈`. |
 
 ## 2. Najważniejsze luki i 5xWhy
-1. **Dlaczego** blokujemy migrację Drizzle? → Brak migracji utrzymuje dublowanie danych i utrudnia testy integracyjne.
-2. **Dlaczego** to problem? → Mocki i DB rozjeżdżają się, przez co UI i API wymagają ręcznej synchronizacji.
-3. **Dlaczego** synchronizacja manualna jest zła? → Zwiększa ryzyko regresji i wydłuża QA.
-4. **Dlaczego** QA jest krytyczny? → Pipeline (`pnpm qa:ci`) musi pozostać stabilny, by móc często releasować MVP.
-5. **Dlaczego** release musi być częsty? → MVP ma dowieźć wartość biznesową przed dostępnością produkcyjnej infrastruktury.
+1. **Dlaczego** wciąż duplikujemy dane katalogu? → Produkty bazują na `productTemplates`, podczas gdy baza zawiera tylko słowniki Drizzle.
+2. **Dlaczego** produkty nie zostały przeniesione do bazy? → Brakuje migracji i seeda opisującego warianty, galerie oraz powiązania `orderReference`.
+3. **Dlaczego** migracja produktów była odkładana? → Zespół potrzebował dowodu, że słowniki Drizzle i fallback są spójne zanim usunie mocki.
+4. **Dlaczego** wymagaliśmy dowodu spójności? → Bez automatycznego porównania regresje w danych katalogu są trudne do wykrycia podczas QA.
+5. **Dlaczego** wykrywanie regresji musi być automatyczne? → Pipeline (`pnpm qa:ci`) musi pozostać szybki i deterministyczny, aby MVP mogło często releasować nowe modele.
 
 > **Wniosek**: priorytetem jest domknięcie migracji Drizzle + fallbacku katalogu (`x₆`) oraz automatyzacja audytu dokumentacji (`x₈`), aby decyzje produktowe nie wyprzedzały implementacji.
 
@@ -46,14 +46,14 @@
 - `x₃` → połączyć `/api/order/submit` z realnym storage leadów i zsynchronizować z `DANE_I_API_MVP.md`.
 - `x₄` → wdrożyć `prefers-reduced-motion` oraz checklistę wizualną (spec frontendowa).
 - `x₅` → sfinalizować komponenty prymitywów i storybook/preview.
-- `x₆` → migracja Drizzle + healthcheck katalogu.
+- `x₆` → migracja Drizzle + healthcheck katalogu (słowniki pokryte testami; do wykonania przeniesienie `productTemplates`, cache i healthcheck).
 - `x₇` → structured data i Lighthouse.
 - `x₈` → automatyzacja audytu dokumentacji.
 
 ## 4. Rekomendacje dla kolejnego sprintu
-1. Wystartować zadanie `codex/drizzle-migration` (zamykające `x₆` i aktualizujące `DANE_I_API_MVP.md`).
+1. Wystartować zadanie `codex/drizzle-migration` (zamykające `x₆` – słowniki gotowe, kolejny krok: produkty i healthcheck, dokumentacja zsynchronizowana).
 2. Utworzyć `codex/ui-primitives` (domknięcie `x₅`, adopcja tokens i wstępne storybooki).
 3. Przygotować `codex/seo-foundation` (realizacja `x₇`: JSON-LD, rozszerzenie sitemap/robots, test Lighthouse).
 
 ## 5. Kontynuacja (zadanie do odpalania z czatu)
-- **Proponowane kolejne zadanie**: `codex/drizzle-migration` — przygotować migrację inicjalną Drizzle (tabela `quote_requests`, styles, leathers), zsynchronizować endpointy i uzupełnić dokumenty (`DANE_I_API_MVP.md`, `ARCHITEKTURA_I_LUKI.md`).
+- **Proponowane kolejne zadanie**: `codex/drizzle-migration` — przenieść `productTemplates` do Drizzle (migracja + seed), dostarczyć `/api/products/[slug]` oparte na bazie oraz opisać healthcheck/cache katalogu w dokumentacji (`DANE_I_API_MVP.md`, `ARCHITEKTURA_I_LUKI.md`).

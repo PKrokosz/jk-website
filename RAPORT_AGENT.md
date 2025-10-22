@@ -123,6 +123,12 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
 - **Jakie przyjęto założenia:** Lokalny Postgres `jkdb` jest dostępny przez Docker Compose, a migracje i seed danych zostały wykonane przed uruchomieniem testów integracyjnych.
 - **Co dalej:** Zautomatyzować krok `pnpm test:integration` w pipeline CI po migracjach oraz rozbudować scenariusze o testy logów wyceny (`/api/pricing/quote`).
 
+## Raport agenta – 2025-10-30
+- **Co zrobiono:** Dodano test `repository.drizzle.test.ts` weryfikujący mapowanie danych Drizzle na fallback katalogu oraz zsynchronizowano dokumentację (`DANE_I_API_MVP.md`, `ARCHITEKTURA_I_LUKI.md`, `AUDYT_REPO2.md`, `README_DOCS.md`, `LOOP_TASKS.md`) i wytyczne w `AGENTS.md` z aktualnym backendem danych.
+- **Dlaczego:** Aby domknąć pierwszy etap zadania `x₆` (spójność słowników DB ↔ fallback) i usunąć rozjazd między kodem a dokumentacją discovery.
+- **Jakie przyjęto założenia:** Referencyjne seedy `@jk/db` pozostają źródłem prawdy dla stylów/skór, a produktowe mocki zostają do czasu migracji do Drizzle.
+- **Co dalej:** Przenieść `productTemplates` do migracji/seeda Drizzle, dodać endpoint `/api/products/[slug]` oparty na bazie oraz przygotować healthcheck i cache katalogu (`x₆²`, `x₆ˣ`).
+
 ---
 **Priorytety rekomendowane:**
 1. Podpiąć API Next.js oraz mocki katalogu do bazy (Drizzle) na bazie gotowych migracji i seeda.

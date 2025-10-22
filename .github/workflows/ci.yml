@@ -94,3 +94,7 @@ jobs:
           name: coverage-report
           path: coverage
 
+      - name: Tear down integration database
+        if: always() && matrix.node-version == '20.x'
+        run: docker compose down --volumes jkdb
+

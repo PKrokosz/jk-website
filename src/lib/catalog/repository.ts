@@ -14,10 +14,12 @@ async function loadDbModule(): Promise<DbModule | null> {
   }
 
   try {
-    const module = await import("@jk/db");
+    const importedDbModule = await import("@jk/db");
+    const { style, leather } = importedDbModule;
+
     cachedDbModule = {
-      style: module.style,
-      leather: module.leather
+      style,
+      leather
     };
     return cachedDbModule;
   } catch (error) {

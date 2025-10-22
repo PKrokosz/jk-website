@@ -26,12 +26,12 @@ async function loadDbModule(): Promise<DbModule | null> {
 
   try {
     const importedDbModule = await import("@jk/db");
-    const { style, leather } = importedDbModule;
+    const { style, leather, productTemplate } = importedDbModule;
 
     cachedDbModule = {
-      style: module.style,
-      leather: module.leather,
-      productTemplate: module.productTemplate
+      style,
+      leather,
+      productTemplate
     };
     return cachedDbModule;
   } catch (error) {
@@ -76,12 +76,21 @@ export async function loadCatalogStyles(
 
   try {
     const rows = await database.select().from(dbModule.style);
+    const activeRows = rows.filter((entry) => entry.active !== false);
+
+    if (activeRows.length === 0) {
+      console.warn(
+        "Brak aktywnych stylów w bazie — korzystamy z danych referencyjnych"
+      );
+
+      return {
+        data: getFallbackStyles(),
+        source: "fallback"
+      } satisfies RepositoryResult<CatalogStyle[]>;
+    }
 
     return {
-      data: rows
-        .filter((entry) => entry.active !== false)
-        .sort((a, b) => a.id - b.id)
-        .map(mapStyleRowToCatalogStyle),
+      data: activeRows.sort((a, b) => a.id - b.id).map(mapStyleRowToCatalogStyle),
       source: "database"
     } satisfies RepositoryResult<CatalogStyle[]>;
   } catch (error) {
@@ -109,12 +118,21 @@ export async function loadCatalogLeathers(
 
   try {
     const rows = await database.select().from(dbModule.leather);
+    const activeRows = rows.filter((entry) => entry.active !== false);
+
+    if (activeRows.length === 0) {
+      console.warn(
+        "Brak aktywnych skór w bazie — korzystamy z danych referencyjnych"
+      );
+
+      return {
+        data: getFallbackLeathers(),
+        source: "fallback"
+      } satisfies RepositoryResult<CatalogLeather[]>;
+    }
 
     return {
-      data: rows
-        .filter((entry) => entry.active !== false)
-        .sort((a, b) => a.id - b.id)
-        .map(mapLeatherRowToCatalogLeather),
+      data: activeRows.sort((a, b) => a.id - b.id).map(mapLeatherRowToCatalogLeather),
       source: "database"
     } satisfies RepositoryResult<CatalogLeather[]>;
   } catch (error) {

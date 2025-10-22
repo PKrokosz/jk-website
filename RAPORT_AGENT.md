@@ -28,6 +28,7 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
   4. **Dlaczego brak checklisty?** T6 w planie MVP dopiero częściowo wdrożony.
   5. **Dlaczego T6 nie został domknięty?** Brak dedykowanego sprintu jakości.
 - **Ulepszenie:** Dodać testy RTL dla formularza (walidacja), snapshot/aria dla product page, test focus trap modala; włączyć je do DoD.
+  - **Status 2025-10-22:** Dodano testy komponentowe `ContactForm`, `ProductPage` oraz pokrycie katalogu (`NativeModelShowcase`). Pozostało zaplanować regresję dla modala i UI prymitywów.
 
 ## 4. Formularz kontaktowy bez backendu (5xWhy)
 - **Problem:** `ContactForm` resetuje dane lokalnie i nie wysyła realnych wiadomości.

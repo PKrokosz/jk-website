@@ -87,6 +87,7 @@ describe("navigation weight configuration", () => {
 
   it("loads overrides from JSON environment configuration", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: JSON.stringify({
         catalog: {
           home: 5,
@@ -119,6 +120,7 @@ describe("navigation weight configuration", () => {
 
   it("throws when the JSON configuration is invalid", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: "{not-valid",
     } satisfies NodeJS.ProcessEnv;
 
@@ -129,6 +131,7 @@ describe("navigation weight configuration", () => {
 
   it("throws when configuration references unknown nodes", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: JSON.stringify({
         unknown: {
           home: 3,
@@ -143,6 +146,7 @@ describe("navigation weight configuration", () => {
 
   it("throws when configuration references missing transitions", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: JSON.stringify({
         home: {
           order: 2,

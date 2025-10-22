@@ -57,4 +57,19 @@ describe("CatalogExplorer", () => {
     expect(screen.getByRole("heading", { name: "Wysokie Szpice" })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Szpic" })).not.toBeInTheDocument();
   });
+
+  it("buduje link do formularza natywnego z referencją zamówienia", () => {
+    render(
+      <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
+    );
+
+    const referenceProduct = products.find((product) => product.slug === "szpic");
+    expect(referenceProduct?.orderReference).toBeTruthy();
+
+    const funnelCta = screen.getByRole("link", {
+      name: `Skonfiguruj w formularzu dla produktu ${referenceProduct?.name} w formularzu zamówienia`
+    });
+
+    expect(funnelCta).toHaveAttribute("href", "/order/native?model=szpic");
+  });
 });

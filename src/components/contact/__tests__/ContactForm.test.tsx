@@ -1,14 +1,7 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-  type MockedFunction
-} from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/telemetry", () => ({
   reportClientError: vi.fn()
@@ -17,6 +10,10 @@ vi.mock("@/lib/telemetry", () => ({
 import { reportClientError } from "@/lib/telemetry";
 
 import { ContactForm } from "../ContactForm";
+
+function createResponse(status: number, statusText?: string) {
+  return new Response(null, { status, statusText });
+}
 
 describe("ContactForm", () => {
   const consentLabel = /wyrażam zgodę/i;
@@ -34,32 +31,40 @@ describe("ContactForm", () => {
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
     vi.unstubAllGlobals();
+  const submitLabel = /wyślij wiadomość/i;
+  let submitRequest: ReturnType<typeof vi.fn<typeof fetch>>;
+
+  const fillField = async (label: RegExp, value: string) => {
+    const field = screen.getByLabelText(label);
+    await userEvent.clear(field);
+    await userEvent.type(field, value);
+  };
+
+  const toggleConsent = async () => {
+    await userEvent.click(screen.getByLabelText(consentLabel));
+  };
+
+  beforeEach(() => {
+    submitRequest = vi.fn<typeof fetch>();
+  });
+
+  afterEach(() => {
     vi.clearAllMocks();
   });
 
-  const fillField = (label: RegExp, value: string) => {
-    const field = screen.getByLabelText(label);
-    fireEvent.change(field, { target: { value } });
-  };
-
-  const toggleConsent = () => {
-    const checkbox = screen.getByLabelText(consentLabel);
-    fireEvent.click(checkbox);
-  };
-
-  it("blokuje wysyłkę dopóki wymagane pola nie są uzupełnione", () => {
+  it("blokuje wysyłkę dopóki wymagane pola nie są uzupełnione", async () => {
     render(<ContactForm submitRequest={submitRequest} />);
 
-    const submitButton = screen.getByRole("button", { name: "Wyślij wiadomość" });
+    const submitButton = screen.getByRole("button", { name: submitLabel });
     expect(submitButton).toBeDisabled();
 
-    fillField(/imię/i, "Jan");
-    fillField(/adres e-mail/i, "jan@example.com");
-    fillField(/wiadomość/i, "Szukam butów do nowej postaci.");
+    await fillField(/imię/i, "Jan");
+    await fillField(/adres e-mail/i, "jan@example.com");
+    await fillField(/wiadomość/i, "Szukam butów do nowej postaci.");
 
     expect(submitButton).toBeDisabled();
 
-    toggleConsent();
+    await toggleConsent();
 
     expect(submitButton).toBeEnabled();
   });
@@ -67,158 +72,191 @@ describe("ContactForm", () => {
   it("pokazuje komunikat o błędzie dla niepoprawnego e-maila", async () => {
     render(<ContactForm submitRequest={submitRequest} />);
 
-    fillField(/imię/i, "Anna");
-    fillField(/adres e-mail/i, "niepoprawny");
-    fillField(/wiadomość/i, "Potrzebuję butów do wydarzenia.");
-    toggleConsent();
+    await fillField(/imię/i, "Anna");
+    await fillField(/adres e-mail/i, "niepoprawny");
+    await fillField(/wiadomość/i, "Potrzebuję butów do wydarzenia.");
+    await toggleConsent();
 
-    const submitButton = screen.getByRole("button", { name: "Wyślij wiadomość" });
-    fireEvent.click(submitButton);
+    await userEvent.click(screen.getByRole("button", { name: submitLabel }));
 
-    expect(screen.getByText(/adres e-mail wygląda niepoprawnie/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/adres e-mail wygląda niepoprawnie/i)
+    ).toBeInTheDocument();
   });
 
   it("resetuje formularz po udanej wysyłce", async () => {
+    submitRequest.mockResolvedValue(createResponse(200));
+
     render(<ContactForm submitRequest={submitRequest} />);
 
-    fillField(/imię/i, "Katarzyna");
-    fillField(/adres e-mail/i, "katarzyna@example.com");
-    fillField(/wiadomość/i, "Proszę o konsultację w przyszłym tygodniu.");
-    toggleConsent();
+    await fillField(/imię/i, "Katarzyna");
+    await fillField(/adres e-mail/i, "katarzyna@example.com");
+    await fillField(/wiadomość/i, "Proszę o konsultację w przyszłym tygodniu.");
+    await toggleConsent();
 
-    const submitButton = screen.getByRole("button", { name: "Wyślij wiadomość" });
-    fireEvent.click(submitButton);
+    await userEvent.click(screen.getByRole("button", { name: submitLabel }));
 
-    await act(async () => {
-      vi.runAllTimers();
-    });
+    expect(submitRequest).toHaveBeenCalledWith(
+      "/api/contact/submit",
+      expect.objectContaining({ method: "POST" })
+    );
 
-    expect(screen.getByText(/dziękujemy za wiadomość/i)).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByText(/dziękujemy za wiadomość/i)
+      ).toBeInTheDocument()
+    );
+
     expect(screen.getByLabelText(/imię/i)).toHaveValue("");
     expect(screen.getByLabelText(/adres e-mail/i)).toHaveValue("");
     expect(screen.getByLabelText(/wiadomość/i)).toHaveValue("");
     expect(screen.getByLabelText(consentLabel)).not.toBeChecked();
-    expect(screen.getByRole("button", { name: "Wyślij wiadomość" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: submitLabel })).toBeDisabled();
   });
 
   it("pokazuje komunikat walidacji API", async () => {
-    const fetchMock = fetch as unknown as vi.Mock;
-    fetchMock.mockResolvedValueOnce(
-      new Response(null, {
-        status: 422,
-        statusText: "Unprocessable Entity"
-      })
+    submitRequest.mockResolvedValue(createResponse(422, "Unprocessable Entity"));
+
+    render(<ContactForm submitRequest={submitRequest} />);
+
+    await fillField(/imię/i, "Jan");
+    await fillField(/adres e-mail/i, "jan@example.com");
+    await fillField(/wiadomość/i, "Proszę o wycenę projektu.");
+    await toggleConsent();
+
+    await userEvent.click(screen.getByRole("button", { name: submitLabel }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Sprawdź poprawność pól. Niektóre wymagają uzupełnienia./i)
+      ).toBeInTheDocument()
     );
 
-    render(<ContactForm />);
-
-    fillField(/imię/i, "Jan");
-    fillField(/adres e-mail/i, "jan@example.com");
-    fillField(/wiadomość/i, "Proszę o wycenę projektu.");
-    toggleConsent();
-
-    const submitButton = screen.getByRole("button", { name: "Wyślij wiadomość" });
-    fireEvent.click(submitButton);
-
-    await act(async () => {
-      vi.runAllTimers();
-    });
-
-    expect(
-      screen.getByText(/Sprawdź poprawność pól. Niektóre wymagają uzupełnienia./i)
-    ).toBeInTheDocument();
     expect(reportClientError).toHaveBeenCalledWith(
       "contact-form:response",
       expect.any(Error),
-      expect.objectContaining({ status: 422 })
+      expect.objectContaining({ status: 422, statusText: "Unprocessable Entity" })
     );
   });
 
   it("informuje o limicie zapytań", async () => {
-    const fetchMock = fetch as unknown as vi.Mock;
-    fetchMock.mockResolvedValueOnce(
-      new Response(null, {
-        status: 429,
-        statusText: "Too Many Requests"
-      })
+    submitRequest.mockResolvedValue(createResponse(429, "Too Many Requests"));
+
+    render(<ContactForm submitRequest={submitRequest} />);
+
+    await fillField(/imię/i, "Jan");
+    await fillField(/adres e-mail/i, "jan@example.com");
+    await fillField(/wiadomość/i, "Proszę o wycenę projektu.");
+    await toggleConsent();
+
+    await userEvent.click(screen.getByRole("button", { name: submitLabel }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Za dużo prób. Spróbuj ponownie za minutę./i)
+      ).toBeInTheDocument()
     );
 
-    render(<ContactForm />);
-
-    fillField(/imię/i, "Jan");
-    fillField(/adres e-mail/i, "jan@example.com");
-    fillField(/wiadomość/i, "Proszę o wycenę projektu.");
-    toggleConsent();
-
-    fireEvent.click(screen.getByRole("button", { name: "Wyślij wiadomość" }));
-
-    await act(async () => {
-      vi.runAllTimers();
-    });
-
-    expect(screen.getByText(/Za dużo prób. Spróbuj ponownie za minutę./i)).toBeInTheDocument();
     expect(reportClientError).toHaveBeenCalledWith(
       "contact-form:response",
       expect.any(Error),
-      expect.objectContaining({ status: 429 })
+      expect.objectContaining({ status: 429, statusText: "Too Many Requests" })
     );
   });
 
   it("informuje o niedostępnej usłudze pocztowej", async () => {
-    const fetchMock = fetch as unknown as vi.Mock;
-    fetchMock.mockResolvedValueOnce(
-      new Response(null, {
-        status: 502,
-        statusText: "Bad Gateway"
-      })
+    submitRequest.mockResolvedValue(createResponse(502, "Bad Gateway"));
+
+    render(<ContactForm submitRequest={submitRequest} />);
+
+    await fillField(/imię/i, "Jan");
+    await fillField(/adres e-mail/i, "jan@example.com");
+    await fillField(/wiadomość/i, "Proszę o wycenę projektu.");
+    await toggleConsent();
+
+    await userEvent.click(screen.getByRole("button", { name: submitLabel }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          /Usługa poczty chwilowo niedostępna. Wyślij maila bezpośrednio: kontakt@jkhandmade.pl./i
+        )
+      ).toBeInTheDocument()
     );
 
-    render(<ContactForm />);
-
-    fillField(/imię/i, "Jan");
-    fillField(/adres e-mail/i, "jan@example.com");
-    fillField(/wiadomość/i, "Proszę o wycenę projektu.");
-    toggleConsent();
-
-    fireEvent.click(screen.getByRole("button", { name: "Wyślij wiadomość" }));
-
-    await act(async () => {
-      vi.runAllTimers();
-    });
-
-    expect(
-      screen.getByText(
-        /Usługa poczty chwilowo niedostępna. Wyślij maila bezpośrednio: kontakt@jkhandmade.pl./i
-      )
-    ).toBeInTheDocument();
     expect(reportClientError).toHaveBeenCalledWith(
       "contact-form:response",
       expect.any(Error),
-      expect.objectContaining({ status: 502 })
+      expect.objectContaining({ status: 502, statusText: "Bad Gateway" })
     );
   });
 
   it("raportuje błąd transportu", async () => {
-    const fetchMock = fetch as unknown as vi.Mock;
-    const error = new Error("Network Error");
-    fetchMock.mockRejectedValueOnce(error);
+    const networkError = new Error("Network Error");
+    submitRequest.mockRejectedValue(networkError);
 
-    render(<ContactForm />);
+    render(<ContactForm submitRequest={submitRequest} />);
 
-    fillField(/imię/i, "Jan");
-    fillField(/adres e-mail/i, "jan@example.com");
-    fillField(/wiadomość/i, "Proszę o wycenę projektu.");
-    toggleConsent();
+    await fillField(/imię/i, "Jan");
+    await fillField(/adres e-mail/i, "jan@example.com");
+    await fillField(/wiadomość/i, "Proszę o wycenę projektu.");
+    await toggleConsent();
 
-    fireEvent.click(screen.getByRole("button", { name: "Wyślij wiadomość" }));
+    await userEvent.click(screen.getByRole("button", { name: submitLabel }));
 
-    await act(async () => {
-      vi.runAllTimers();
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Nie udało się wysłać formularza. Sprawdź połączenie i spróbuj ponownie./i)
+      ).toBeInTheDocument()
+    );
+
+    expect(reportClientError).toHaveBeenCalledWith("contact-form:transport", networkError);
+  });
+
+  it("prefilluje i sanituje parametr produktu oraz reaguje na zmianę propsów", async () => {
+    const { rerender } = render(
+      <ContactForm submitRequest={submitRequest} initialProduct={"  \u0000Szpic   "} />
+    );
+
+    const productField = screen.getByLabelText(/Model lub referencja/i);
+    expect(productField).toHaveValue("Szpic");
+
+    await userEvent.clear(productField);
+    await userEvent.type(productField, "Własny projekt");
+    expect(productField).toHaveValue("Własny projekt");
+
+    rerender(
+      <ContactForm submitRequest={submitRequest} initialProduct={"   Dragonki   "} />
+    );
+
+    expect(productField).toHaveValue("Dragonki");
+  });
+
+  it("wysyła odsanitowany payload z trimowaniem pól opcjonalnych", async () => {
+    submitRequest.mockResolvedValue(createResponse(200));
+
+    render(<ContactForm submitRequest={submitRequest} initialProduct={"  Szpic  "} />);
+
+    await fillField(/imię/i, "  Jan ");
+    await fillField(/adres e-mail/i, " jan@example.com ");
+    await fillField(/telefon/i, " 123-456-789 ");
+    await fillField(/Model lub referencja/i, "  Szpic  \u0000  ");
+    await fillField(/wiadomość/i, "  Potrzebuję dopasowania.  ");
+    await toggleConsent();
+
+    await userEvent.click(screen.getByRole("button", { name: submitLabel }));
+
+    await waitFor(() => expect(submitRequest).toHaveBeenCalled());
+
+    const payload = JSON.parse(submitRequest.mock.calls[0][1]?.body as string);
+
+    expect(payload).toMatchObject({
+      name: "Jan",
+      email: "jan@example.com",
+      phone: "123-456-789",
+      message: "Potrzebuję dopasowania.",
+      product: "Szpic",
+      website: ""
     });
-
-    expect(
-      screen.getByText(/Nie udało się wysłać formularza. Sprawdź połączenie i spróbuj ponownie./i)
-    ).toBeInTheDocument();
-    expect(reportClientError).toHaveBeenCalledWith("contact-form:transport", error);
   });
 });

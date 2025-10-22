@@ -123,5 +123,5 @@
   - Priorytet: dokończyć T0/T1/T6 czy rozszerzać katalog? (wymaga akceptacji właściciela).
   - Czy T5 wymaga integracji z backendem przed startem kampanii marketingowej?
 - **Następne kroki**
-  - Przygotować zadania follow-up dla: `drizzle-kit`, CSS tokens, testy `ContactForm`/`ProductPage`, template PR.
+  - Przygotować zadania follow-up dla: integracji API z Drizzle (styles/leather), CSS tokens, testy `ContactForm`/`ProductPage`, template PR.
   - Uzyskać akceptację planu od właściciela i zaktualizować timeline.

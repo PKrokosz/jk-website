@@ -129,8 +129,9 @@ Aktualizuj dokumenty wraz z każdą decyzją produktową lub zmianą w implement
 
 ## Kierunek rozwoju
 
-- Wyrównanie konfiguracji bazy (`DATABASE_URL` vs `docker-compose.yml`) i dodanie migracji `drizzle-kit`.
+- Wyrównanie konfiguracji bazy (`DATABASE_URL` vs `docker-compose.yml`) i dodanie migracji `drizzle-kit` **(zrealizowane: migracja inicjalna + seed referencyjny).**
 - Poszerzenie katalogu mocków o nowe modele oraz dynamiczne assety.
 - Integracja z Stripe/n8n po ustabilizowaniu formularzy zamówień.
+- Podpięcie API Next.js do pakietu `@jk/db` (Style/Leather) i zastąpienie mocków zapytaniami do bazy.
 - Doprecyzowanie roadmapy testów end-to-end (Playwright).
 

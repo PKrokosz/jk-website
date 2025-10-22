@@ -12,8 +12,8 @@
 ## Podsumowanie
 - Routing App Routera obejmuje Home, Catalog (statyczny), Product (dynamiczny slug), Order (iframe + natywny landing), Contact (formularz) i About.
 - Globalny layout (`src/app/layout.tsx`) dostarcza metadata SEO, skip link, sticky header oraz wrapper `main-content` dla dostępności.
-- Mocki katalogowe (`src/lib/catalog`) generują produkty z kategoriami, funnel stage, wariantami oraz referencjami do formularza zamówień; integracja z Drizzle pozostaje do wykonania.
-- Krytyczne luki: brak migracji `drizzle-kit`, niespójny `DATABASE_URL`, brak konfiguracji design tokens w CSS (obecne wartości hard-coded) i brak backendu dla formularza kontaktowego.
+- Mocki katalogowe (`src/lib/catalog`) generują produkty z kategoriami, funnel stage, wariantami oraz referencjami do formularza zamówień; integracja z Drizzle (API → baza) pozostaje do wykonania.
+- Krytyczne luki: brak podpięcia App Routera pod Drizzle (mimo dostępnych migracji i seeda), brak konfiguracji design tokens w CSS (obecne wartości hard-coded) i brak backendu dla formularza kontaktowego.
 
 ## Routing App Routera
 ```
@@ -84,12 +84,12 @@ src/app
 - [x] Zmapowano istniejące route'y App Routera.
 - [x] Zidentyfikowano obecne metadane i layout.
 - [x] Opisano aktualne wykorzystanie mocków katalogu i CTA zamówień.
-- [ ] Dodano proces migracji (`drizzle-kit`).
+- [x] Dodano proces migracji (`drizzle-kit`).
 - [ ] Zrefaktoryzowano style globalne na bazie tokens.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak migracji utrudni integrację zamówień i przyszłe endpointy.
+  - Brak integracji Next.js ↔ Drizzle utrzymuje dublowanie danych (mocki vs DB).
   - Hard-coded kolory w `globals.css` mogą rozjechać się z design tokens (kontrast, brand).
   - Formularz kontaktowy bez backendu = ryzyko utraty leadów.
 - **Decyzje do podjęcia**

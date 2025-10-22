@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Regulamin",
   description:
-    "Regulamin serwisu JK Handmade Footwear dotyczący zamówień na obuwie wykonywane na zamówienie (MTO)."
-  title: "Regulamin sklepu"
+    "Regulamin serwisu JK Handmade Footwear dotyczący zamówień na obuwie wykonywane na zamówienie (MTO).",
 };
 
 export default function TermsPage() {
@@ -17,6 +16,11 @@ export default function TermsPage() {
             Dokument określa zasady korzystania z serwisu jkhandmade.pl oraz warunki składania zamówień na obuwie
             wykonywane na zamówienie.
           </p>
+          <div className="legal-page__actions">
+            <a className="button button--ghost" href="/api/legal/terms" download>
+              Pobierz wersję PDF
+            </a>
+          </div>
         </header>
 
         <section className="legal-page__section" aria-labelledby="terms-general">
@@ -144,6 +148,7 @@ export default function TermsPage() {
           <p>
             Teksty przygotowano zgodnie z polskim prawem konsumenckim i RODO na dzień publikacji. Rekomendujemy krótką konsultację
             prawną przed finalnym wdrożeniem.
+          </p>
           <h1 id="terms-heading">Regulamin sklepu JK Handmade Footwear</h1>
           <p>
             Niniejszy regulamin określa zasady korzystania z serwisu internetowego prowadzonego pod adresem{" "}
@@ -159,7 +164,7 @@ export default function TermsPage() {
             </a>{" "}
             lub telefonicznie pod numer +48 600 000 000.
           </p>
-        </header>
+        </section>
 
         <section className="legal-page__section" aria-labelledby="terms-general-heading">
           <h2 id="terms-general-heading">1. Postanowienia ogólne</h2>

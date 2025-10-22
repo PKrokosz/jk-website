@@ -22,6 +22,7 @@ Checklist dla każdego PR:
 - [x] `pnpm typecheck` – brak błędów TS.
 - [x] `pnpm test` – wszystkie testy przechodzą.
 - [ ] `pnpm test:coverage` – wymagane dla zmian w logice domenowej/komponentach (raport w `coverage/`).
+- [ ] `pnpm test:e2e` – scenariusze Playwright dla kluczowych flow (obecnie: pobieranie PDF na stronach prawnych).
 - [x] `pnpm build` – uruchamiane przy zmianach w konfiguracji/routingu.
 - [ ] `pnpm depcheck` – min. raz na sprint (monitoring zależności).
 - [ ] `pnpm db:seed` – opcjonalnie przed testami, aby odświeżyć referencyjne dane w lokalnej bazie (CI korzysta z tej samej komendy).
@@ -39,6 +40,7 @@ Checklist dla każdego PR:
 | Formularz kontaktowy | Component | Walidacja required fields, stany success/error | Vitest | ✅ (testy w `src/components/contact/__tests__`) |
 | Pricing calculator | Unit | `calculateQuote`, integracja z UI | Vitest | ✅ (istniejące testy w `src/app/components/__tests__`) |
 | Order modal | Component | Otwarcie, focus trap, CTA linki | Vitest | ✅ (testy w `src/components/ui/order/__tests__`) |
+| Strony prawne | E2E | Pobranie PDF + nagłówki odpowiedzi | Playwright | ✅ (`src/tests/e2e/legal-download.spec.ts`) |
 | E2E smoke | Flow | Home → Catalog → Product → Contact | Playwright (opcjonalnie) | ⏳ (future) |
 
 ## Konfiguracja GitHub Actions
@@ -106,6 +108,7 @@ jobs:
 ```
 - `pnpm build` odpalany jest na Node 20.x jako głównym środowisku referencyjnym.
 - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
+- Scenariusze Playwright uruchamiane są na Node 20.x po `pnpm build`; raport HTML dołączany jako artefakt `playwright-report`.
 - Seedy katalogu uruchamiane są skryptem `pnpm db:seed` (wykorzystuje pakiet `@jk/db`); CI może go wywołać w jobie przygotowującym bazę.
 
 ## Konwencje commitów i PR

@@ -1,6 +1,19 @@
 # Audyt repozytorium
 
-> **Status aktualizacji**: 2025-10-22 — uwzględnia trasę `/account` oraz nowy dokument pętli `docs/LOOP_TASKS.md`.
+> **Status aktualizacji**: 2025-10-29 — uzupełniono o strony `group-orders`, `cart`, dokumenty prawne oraz nowy audyt meta dokumentów.
+
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Najważniejsze luki z poprzedniej iteracji pozostają otwarte (migracje Drizzle, adopcja tokens, backend leadów). Dodano potwierdzenie, że nowe strony (`group-orders`, `cart`, `privacy-policy`, `terms`) i pliki SEO (`sitemap.ts`, `robots.ts`) są w repo i wymagają utrzymania. Audyt środowiska i komend jest aktualny.
+- **Nowe ścieżki rozwoju**:
+  - Przygotować zadanie na migrację inicjalną Drizzle + seed (`docs/LOOP_TASKS.md` → `x₃` follow-up) oraz zsynchronizować z `DANE_I_API_MVP.md`.
+  - Uprawomocnić istnienie katalogu `apps/web` (usunąć lub wypełnić) i opisać decyzję w README/planie.
+  - Dopisać do pętli zadanie monitorujące spójność nowych stron prawnych/marketingowych z sitemapą.
+- **Rekomendacja archiwizacji**: Nie — dokument to główna mapa repozytorium.
+- **Sens dokumentu**: Dostarcza snapshot struktury monorepo, listy stron/API oraz środowiska uruchomieniowego. Służy jako punkt startowy dla nowych agentów i podczas audytów.
+- **Aktualizacje wykonane**:
+  - Zaktualizowano listę stron, komponentów i endpointów o `group-orders`, `cart`, `privacy-policy`, `terms`, `robots.ts`, `sitemap.ts`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]`.
+  - Wskazano otwarte decyzje (Drizzle, workspace) jako follow-upy w `docs/LOOP_TASKS.md`.
+  - Zsynchronizowano status z dokumentem zbiorczym `docs/README_DOCS.md`.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -12,10 +25,10 @@
 - [7. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- Monorepo oparte o pnpm workspaces, z główną aplikacją Next.js 14 w katalogu `src/` i pakietem współdzielonym `@jk/db`.
-- Routing App Routera jest rozbudowany: Home, Catalog (z filtrami), Product (dynamiczne slug), About, Contact (formularz), Order (iframe + fallback), Account (mock panel klienta) oraz API `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/healthz`.
-- Mockowane dane katalogowe (`src/lib/catalog`) rozszerzono o slug, warianty, funnel stage i referencje do formularza natywnego.
-- Konfiguracja środowiska ujednolicono: `.env.example` i `docker-compose.yml` korzystają z tych samych poświadczeń, dostępna jest migracja inicjalna w katalogu `drizzle/` oraz skrypt seeda `pnpm db:seed`.
+- Monorepo oparte o pnpm workspaces, z główną aplikacją Next.js 14 w katalogu głównym (`src/app`) i pakietem współdzielonym `@jk/db`.
+- Routing App Routera obejmuje Home, Catalog (z filtrami), Product (dynamiczny slug), About, Contact (formularz), Order (iframe + fallback), Group Orders, Cart (prefill koszyka), Account (mock panel klienta), strony prawne (`/privacy-policy`, `/terms`) oraz healthcheck `/healthz`.
+- Mockowane dane katalogowe (`src/lib/catalog`) rozszerzono o slug, warianty, funnel stage i referencje do formularza natywnego; nadal czekają na migrację do Drizzle.
+- Konfiguracja środowiska ujednolicono: `.env.example` i `docker-compose.yml` korzystają z tych samych poświadczeń, dostępne są migracje startowe w `drizzle/` oraz skrypt seeda `pnpm db:seed`.
 
 ## Struktura monorepo
 - **Apps**
@@ -35,16 +48,23 @@
   - `/` – strona główna z hero video, procesem MTO, portfolio, kalkulatorem i CTA do zamówień.
   - `/catalog` – katalog z filtrami styl/skóra, sortowaniem, stanem pustym i skeletonem.
   - `/catalog/[slug]` – strona produktu (galeria, warianty personalizacji, CTA do modala zamówienia i linków `/order/native` `/contact`).
-  - `/order` – osadzony formularz natywny (iframe) z fallbackiem do pełnej wersji oraz metadata canonical.
-  - `/order/native` – landing z listą modeli i CTA do zewnętrznego formularza.
-  - `/contact` – rozbudowana strona kontaktowa z hero, danymi pracowni, formularzem i statusami.
-  - `/account` – mock panel klienta z rejestracją, logowaniem, historią zamówień i newsletterem.
+-  - `/order` – osadzony formularz natywny (iframe) z fallbackiem do pełnej wersji oraz metadata canonical.
+-  - `/order/native` – landing z listą modeli i CTA do zewnętrznego formularza.
+-  - `/cart` – wizualizacja zamówienia z możliwością edycji parametrów i CTA do kontaktu.
+-  - `/contact` – rozbudowana strona kontaktowa z hero, danymi pracowni, formularzem i statusami.
+-  - `/group-orders` – landing B2B dla zamówień grupowych.
+-  - `/account` – mock panel klienta z rejestracją, logowaniem, historią zamówień i newsletterem.
 - `/about` – sekcja o pracowni z finalnym copy i CTA do kontaktu/zamówienia.
-  - `/healthz` – endpoint statusowy (API route `route.ts`).
+- `/privacy-policy`, `/terms` – strony prawne z finalnymi tekstami.
+- `/healthz` – endpoint statusowy (API route `route.ts`).
 - **Endpointy API**
   - `GET /api/styles` – zwraca mockowane style (`catalogStyles`).
   - `GET /api/leather` – zwraca mockowane skóry (`catalogLeathers`).
-  - `POST /api/pricing/quote` – kalkulator wyceny wykorzystujący `calculateQuote`.
+  - `GET /api/products` – lista produktów katalogu (mock + Drizzle fallback).
+  - `POST /api/pricing/quote` – kalkulator wyceny wykorzystujący `calculateQuote` i zapisujący logi do `quote_requests`.
+  - `POST /api/contact/submit` – obsługa leadów z formularza kontaktowego (walidacja Zod, rate-limit, SMTP mock).
+  - `POST /api/order/submit` – obsługa leadów ze strony zamówienia natywnego.
+  - `GET /api/legal/[document]` – serwuje dokumenty prawne w formacie PDF/HTML.
 - **Komponenty kluczowe**
   - `Header` + `NavLink` – globalna nawigacja sticky ze skip linkiem (`layout.tsx`).
   - `CatalogExplorer` – klientowy komponent katalogu (filtry, sortowanie, aria-live, skeletony).

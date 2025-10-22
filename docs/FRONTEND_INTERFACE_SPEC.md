@@ -1,6 +1,19 @@
 # Specyfikacja interfejsu i frontendu JK Handmade Footwear
 
-> **Status**: 2025-10-22 — pierwsza wersja na podstawie stron App Routera (`/`, `/catalog`, `/contact`, `/order/native`, `/about`).
+> **Status**: 2025-10-29 — audyt meta zaktualizowany o `/group-orders`, `/cart`, sekcje prawne i wymagania dostępności ruchowej.
+
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Specyfikacja pozostaje aktualna, ale wymaga rozszerzenia o nowe widoki (`/group-orders`, `/cart`, sekcje prawne) i fallbacki ruchu. 5xWhy nadal obowiązuje.
+- **Nowe ścieżki rozwoju**:
+  - Dopisać sekcję stylu i animacji dla `/cart` oraz `/group-orders` (layouty CTA, moduły formularzy B2B).
+  - Przygotować checklistę `prefers-reduced-motion` z konkretnymi klasami i hookami do wdrożenia.
+  - Zaktualizować `docs/LOOP_TASKS.md` (`x₄`) o konkretny zakres implementacyjny (np. dedykowane stories/testy wizualne).
+- **Rekomendacja archiwizacji**: Nie — dokument jest nadrzędnym źródłem prawdy dla UI.
+- **Sens dokumentu**: Koordynuje design tokens, animacje, responsywność i integrację z task loop; gwarantuje spójny wygląd całego frontendu.
+- **Aktualizacje wykonane**:
+  - Zmieniono status i wprowadzono meta audyt.
+  - Uzupełniono wprowadzenie o nowe widoki.
+  - Wskazano follow-upy dla preferencji ruchu i nowych stron.
 >
 > **Cel**: Skoncentrowane źródło prawdy dla warstwy UI, animacji i zachowań responsywnych. Dokument wiąże decyzje projektowe z pętlą `docs/LOOP_TASKS.md` oraz wymaga, by kolejne iteracje (`Agents.md` + task loop) korzystały z tej specyfikacji przy planowaniu grafiki i implementacji.
 

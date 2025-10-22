@@ -1,5 +1,18 @@
 # Site map i mapa ekranów
 
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Sitemapa zawiera wszystkie główne strony poza `/cart`, `/privacy-policy`, `/terms`, `robots.ts` i `sitemap.ts` – uzupełniono je w tej iteracji. Stany systemowe wymagają dopisania skeletonów dla nowych widoków.
+- **Nowe ścieżki rozwoju**:
+  - Dodać mapę ekranów dla `/cart` (prefill, walidacja) oraz `/group-orders` (formularz leadów B2B).
+  - Przygotować sekcję dla stron prawnych (layout `LegalSections`, CTA do PDF).
+  - Dopisać do pętli zadanie na testy e2e ścieżki B2B (`Home → Group Orders → Contact`).
+- **Rekomendacja archiwizacji**: Nie — dokument jest podstawą nawigacji i planowania flow.
+- **Sens dokumentu**: Mapuje strukturę informacji, stany ekranów i zależności między stronami, wspierając planowanie UX/testów.
+- **Aktualizacje wykonane**:
+  - Dodano `/cart`, `/privacy-policy`, `/terms`, `robots.ts`, `sitemap.ts` do drzewa nawigacji.
+  - Wskazano brak skeletonów dla nowych stron jako follow-up.
+  - Zaktualizowano opis przepływów i stany systemowe.
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Drzewo nawigacji](#drzewo-nawigacji)
@@ -47,9 +60,19 @@
 │   ├── Hero kontaktu (dane, CTA)
 │   ├── Sekcja warsztatu (adres, godziny, powody wizyty)
 │   └── Formularz
-└── Order (/order)
-    ├── Osadzony formularz (iframe)
-    └── Order native (/order/native) – lista modeli + CTA do pełnego formularza
+├── Order (/order)
+│   ├── Osadzony formularz (iframe)
+│   └── Order native (/order/native) – lista modeli + CTA do pełnego formularza
+├── Cart (/cart)
+│   └── Panel konfiguracji zamówienia (podsumowanie + CTA do kontaktu)
+├── Privacy Policy (/privacy-policy)
+│   └── Sekcje prawne + CTA do pobrania PDF (`/api/legal/privacy-policy`)
+├── Terms (/terms)
+│   └── Sekcje regulaminu + CTA do pobrania PDF (`/api/legal/terms`)
+├── robots.ts / sitemap.ts
+│   └── Generowane pliki SEO (lista tras, zasady indeksacji)
+└── API legal (/api/legal/[document])
+    └── Serwowanie dokumentów prawnych w PDF/HTML
 ```
 
 ### Konfiguracja wag tokenów nawigacji

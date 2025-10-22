@@ -1,5 +1,18 @@
 # Otwarte pytania do właściciela produktu
 
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Pytania o legal (polityka/regulamin) zostały rozwiązane; nadal otwarte są decyzje dot. rozmiarówki, assetów wizualnych, docelowego funnelu i analityki. Dokument wymaga aktywnego prowadzenia po każdej rozmowie z właścicielem.
+- **Nowe ścieżki rozwoju**:
+  - Ustalić termin warsztatu discovery dotyczącego oferty (`/group-orders`, szerokość rozmiarów, lead time).
+  - Przygotować ankietę zbierającą materiały brandingowe (zdjęcia, fonty) i przypisać odpowiedzialność.
+  - Dopisać do `docs/LOOP_TASKS.md` zadanie na weryfikację integracji analityki po potwierdzeniu narzędzia.
+- **Rekomendacja archiwizacji**: Nie — dokument nadal oczekuje na odpowiedzi właściciela.
+- **Sens dokumentu**: Spisuje pytania blokujące decyzje produktowe, prawne i techniczne; dzięki niemu wiemy, jakie informacje pozyskać zanim zamkniemy MVP.
+- **Aktualizacje wykonane**:
+  - Zmieniono status pytań o politykę prywatności/regulamin na ✅ (wdrożone strony i API PDF).
+  - Usunięto zduplikowany wpis w tabeli treści.
+  - Dodano meta audyt i powiązano zadania z pętlą backlogową.
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Pytania produktowe](#pytania-produktowe)
@@ -28,7 +41,6 @@
 | 2 | Czy dostępne są logotypy, zdjęcia warsztatu, grafiki brandowe? W jakim formacie? | ⏳ | Aktualnie wykorzystujemy zdjęcia modeli z katalogu + wideo w hero. Potrzebne materiały finalne. |
 | 3 | Czy preferowane fonty (np. EB Garamond) są zatwierdzone/licencjonowane? | ⏳ | W projekcie działa fallback `Inter`; brak decyzji dot. serif. |
 | 4 | Jakie kanały social (Instagram, Facebook, LinkedIn) mają być linkowane w stopce? | ✅ | Kontakt posiada linki do Instagram + Facebook (placeholders). Potwierdzić czy dodać inne kanały. |
-| 5 | Czy istnieje polityka prywatności/regulamin do podlinkowania (nawet w formie placeholdera PDF)? | 🔄 | Strony placeholder `/privacy-policy` i `/terms` dodane; czekamy na finalne dokumenty prawne. |
 | 5 | Czy istnieje polityka prywatności/regulamin do podlinkowania (nawet w formie placeholdera PDF)? | ✅ | Pełna polityka prywatności wdrożona na `/privacy-policy`; finalny regulamin dostępny na `/terms`. |
 
 ## Pytania techniczne i operacyjne

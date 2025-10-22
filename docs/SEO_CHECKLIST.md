@@ -1,5 +1,17 @@
 # SEO Checklist — JK Handmade Footwear
 
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Priorytety krytyczne pozostają aktualne; `robots.ts` i `sitemap.ts` istnieją w repo, lecz wymagają przeglądu przed wdrożeniem. Structured data (`JSON-LD`) jeszcze nie zostało w pełni opisane w dokumentacji.
+- **Nowe ścieżki rozwoju**:
+  - Dopisać sekcję z konkretnymi snippetami `JSON-LD` oraz odnośnikami do plików w repo.
+  - Przygotować checklistę weryfikacji `robots.txt`/`sitemap` (np. test manualny `pnpm lint:seo` do uruchomienia przed release).
+  - Ująć w `docs/LOOP_TASKS.md` zadanie na cykliczne audyty Lighthouse (cel > 90 pkt) i monitorowanie CWV.
+- **Rekomendacja archiwizacji**: Nie — dokument jest wymagany przed publikacją strony.
+- **Sens dokumentu**: Konsoliduje wymagania SEO (meta, structured data, wydajność, E-E-A-T) i zapewnia checklistę wdrożeniową.
+- **Aktualizacje wykonane**:
+  - Dodano meta audyt oraz wskazano istnienie `robots.ts`/`sitemap.ts` w repo.
+  - Wprowadzono zadania follow-up dla structured data i testów Lighthouse.
+
 ## Priorytety krytyczne
 1. **Strategiczne metadane i strukturacja tytułów**  
    - Zdefiniuj unikatowy `title` oraz `description` dla każdej kluczowej podstrony (home, katalog, produkt, kontakt).  

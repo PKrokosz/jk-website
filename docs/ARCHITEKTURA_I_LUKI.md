@@ -1,5 +1,18 @@
 # Architektura i luki
 
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Kluczowe luki pozostają otwarte: migracja Drizzle dla katalogu i pricingu, adopcja design tokens oraz pełna automatyzacja formularzy zamówień. Backend formularza kontaktowego jest już wdrożony, więc wcześniejsze ostrzeżenie o jego braku zostało zaktualizowane.
+- **Nowe ścieżki rozwoju**:
+  - Przygotować diagram przepływu danych katalogu po migracji do Drizzle (mapowanie API → DB → UI) i dopisać go w sekcji 4.
+  - Zaplanować zadanie na obsługę `prefers-reduced-motion` i modularyzację animacji (powiązane z `FRONTEND_INTERFACE_SPEC.md`).
+  - Dopisać do pętli zadań iterację `x₆`: integracja `/cart` i `/group-orders` z backendem leadów.
+- **Rekomendacja archiwizacji**: Nie — dokument nadal identyfikuje kluczowe ryzyka architektoniczne.
+- **Sens dokumentu**: Prezentuje strukturę App Routera, layouty, warstwę danych i najważniejsze black-boxy. Stanowi podstawę do planowania refaktoryzacji i priorytetyzacji długu technicznego.
+- **Aktualizacje wykonane**:
+  - Rozszerzono drzewo routingu o `/cart`, `/group-orders`, `/privacy-policy`, `/terms`, `robots.ts`, `sitemap.ts`.
+  - Zaktualizowano sekcję warstwy danych o backend formularza kontaktowego oraz istniejące endpointy.
+  - Uściślono luki dotyczące migracji Drizzle i adopcji tokens.
+
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
 - [2. Routing App Routera](#routing-app-routera)
@@ -23,6 +36,8 @@ src/app
 ├── page.tsx (Home)
 ├── about/
 │   └── page.tsx
+├── group-orders/
+│   └── page.tsx
 ├── catalog/
 │   ├── page.tsx
 │   └── [slug]/
@@ -33,18 +48,37 @@ src/app
 │   ├── page.tsx (iframe embed)
 │   └── native/
 │       └── page.tsx (lista modeli + CTA)
+├── cart/
+│   └── page.tsx (prefill zamówienia)
 ├── components/
 │   └── PricingCalculator.tsx
 ├── healthz/
 │   └── route.ts (GET)
+├── privacy-policy/
+│   └── page.tsx
+├── terms/
+│   └── page.tsx
+├── robots.ts
+├── sitemap.ts
 └── api/
     ├── styles/
     │   └── route.ts (GET)
     ├── leather/
     │   └── route.ts (GET)
-    └── pricing/
-        └── quote/
-            └── route.ts (POST)
+    ├── products/
+    │   └── route.ts (GET)
+    ├── pricing/
+    │   └── quote/
+    │       └── route.ts (POST)
+    ├── contact/
+    │   └── submit/
+    │       └── route.ts (POST)
+    ├── order/
+    │   └── submit/
+    │       └── route.ts (POST)
+    └── legal/
+        └── [document]/
+            └── route.ts (GET)
 ```
 - Dynamiczna strona produktu korzysta z `generateStaticParams` i `generateMetadata` opartych na mockach.
 - Order posiada dwa warianty: `/order` (iframe) oraz `/order/native` (fallback + CTA), co wymaga spójnych linków w CTA i modalu.
@@ -68,8 +102,8 @@ src/app
   - `data.ts` – `catalogStyles`, `catalogLeathers` (rozszerzone o `slug`, `description`, `priceModGrosz`).
   - `products.ts` – `listProductSlugs`, `getProductBySlug`, generacja `CatalogProductSummary`/`Detail` z kategoriami, funnel stage, orderReference.
   - `types.ts` – definicje `CatalogProductDetail` (gallery, craftProcess, variants, `orderReference`).
-- Formularz kontaktowy działa client-side (`ContactForm`), brak backendu – na MVP symuluje wysyłkę `setTimeout`.
-- Kalkulator wycen (`src/lib/pricing`) operuje na mockowanych cennikach (`ORDER_MODELS`, `ORDER_ACCESSORIES`).
+- Formularz kontaktowy posiada backend (`/api/contact/submit`) z walidacją Zod, rate-limitami i integracją SMTP (transport konfigurowany przez env).
+- Kalkulator wycen (`src/lib/pricing`) operuje na mockowanych cennikach (`ORDER_MODELS`, `ORDER_ACCESSORIES`) z możliwością zapisu logów wycen w tabeli `quote_requests`.
 
 ## Black-boxy i warianty rozwiązania
 | Luka / pytanie | Opis | Wariant A | Plusy | Minusy | Wariant B | Plusy | Minusy |

@@ -1,6 +1,19 @@
 # Plan wdrożenia MVP (ticketing)
 
-> **Status aktualizacji**: 2025-10-22 — rozszerzono harmonogram o zadanie T7 (panel klienta) i wpięto pętlę dokumentacyjną.
+> **Status aktualizacji**: 2025-10-29 — zrewidowano status DoD, dopisano follow-upy dla `/group-orders` i `/cart`.
+
+## Meta audytu 2025-10-29
+- **Status zagadnień**: Większość zadań T0–T7 jest skończona; T1 (tokens) i T6 (quality) pozostają częściowo otwarte. Nie ma planu na kolejne iteracje (np. T8 dla `/group-orders`).
+- **Nowe ścieżki rozwoju**:
+  - Dodać zadanie T8 dotyczące wdrożenia `/group-orders` (copy, lead capture, e2e flow B2B).
+  - Dopisać T9 dla `/cart` (prefill, walidacja, integracja z `order/submit`).
+  - Zaktualizować `docs/LOOP_TASKS.md` o follow-upy zadań zakończonych (np. `x₁`, `x₂`, `x₃`), aby nie ginęły w planie sprintów.
+- **Rekomendacja archiwizacji**: Nie — plan prowadzi iterację MVP.
+- **Sens dokumentu**: Harmonogramuje prace i definiuje DoD dla kolejnych kamieni milowych. Ułatwia onboarding nowych kontrybutorów.
+- **Aktualizacje wykonane**:
+  - Zmieniono status T5 (testy kontaktu) na zakończony i doprecyzowano otwarte elementy T1/T6.
+  - Dodano meta audyt oraz rekomendacje T8/T9.
+  - Zsynchronizowano status z `docs/README_DOCS.md`.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -91,7 +104,7 @@
 - **Zakres**: Formularz z walidacją client-side, CTA `mailto`, potwierdzenie wysyłki.
 - **DoD**:
   - [x] Formularz z polami wymaganymi i walidacją.
-  - [ ] Testy komponentu (do dopisania – brak coverage dla `ContactForm`).
+  - [x] Testy komponentu (`ContactForm.test.tsx` pokrywa walidację, statusy i prefill produktu).
   - [x] Aktualizacja metadata + copy.
   - [x] `pnpm lint`, `pnpm test`.
 - **Ryzyka**: brak backendu do obsługi leadów.
@@ -141,3 +154,4 @@
 - **Następne kroki**
   - Przygotować zadania follow-up dla: integracji API z Drizzle (styles/leather), CSS tokens, testy `ContactForm`/`ProductPage`.
   - Uzyskać akceptację planu od właściciela i zaktualizować timeline.
+  - Zaprojektować rozszerzenie planu o T8 (`/group-orders`) i T9 (`/cart` + lead capture).

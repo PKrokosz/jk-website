@@ -10,9 +10,9 @@
 - [7. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu.
+- DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`.
 - Testy: Vitest + React Testing Library (layout, katalog, kalkulator, docelowo formularz kontaktowy i product page).
-- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck.
+- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck, orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
 - Commity: Conventional Commits, PR zawiera opis, listę zmian, wyniki komend, screeny dla UI.
 
 ## Definition of Done
@@ -20,7 +20,7 @@ Checklist dla każdego PR:
 - [ ] `pnpm install` (gdy zmieniono zależności).
 - [x] `pnpm lint` – brak ostrzeżeń/błędów.
 - [x] `pnpm typecheck` – brak błędów TS.
-- [x] `pnpm test` – wszystkie testy przechodzą.
+- [x] `pnpm test` – wszystkie testy przechodzą (lokalnie dostępne w pakiecie `pnpm qa`).
 - [ ] `pnpm test:coverage` – wymagane dla zmian w logice domenowej/komponentach (raport w `coverage/`).
 - [ ] `pnpm test:e2e` – scenariusze Playwright dla kluczowych flow (obecnie: pobieranie PDF na stronach prawnych).
 - [x] `pnpm build` – uruchamiane przy zmianach w konfiguracji/routingu.
@@ -84,32 +84,24 @@ jobs:
         run: pnpm run approve-builds
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm lint
-      - name: Type check
-        run: pnpm typecheck
-      - name: Build
+      - name: Quality gate
+        if: matrix.node-version == '22.x'
+        run: pnpm qa
+      - name: Full CI gate
         if: matrix.node-version == '20.x'
-        run: pnpm build
-      - name: Run unit tests
-        run: pnpm test
-      - name: Coverage
-        if: matrix.node-version == '20.x'
-        run: pnpm test:coverage
+        run: pnpm qa:ci
       - name: Upload coverage report
         if: always() && matrix.node-version == '20.x'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage
-      - name: Dependency check
-        if: matrix.node-version == '20.x'
-        run: pnpm depcheck
-```
-- `pnpm build` odpalany jest na Node 20.x jako głównym środowisku referencyjnym.
-- Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
-- Scenariusze Playwright uruchamiane są na Node 20.x po `pnpm build`; raport HTML dołączany jako artefakt `playwright-report`.
-- Seedy katalogu uruchamiane są skryptem `pnpm db:seed` (wykorzystuje pakiet `@jk/db`); CI może go wywołać w jobie przygotowującym bazę.
+  ```
+  - `pnpm qa` uruchamia lokalną bramkę jakościową (lint, typecheck, test) – wykorzystywane na macierzy Node 22.x.
+  - `pnpm qa:ci` odtwarza pełen pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck) – uruchamiane na Node 20.x.
+  - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
+  - Scenariusze Playwright uruchamiane są na Node 20.x, raport HTML dołączany jako artefakt `playwright-report`.
+  - Seedy katalogu uruchamiane są skryptem `pnpm db:seed` (wykorzystuje pakiet `@jk/db`); CI może go wywołać w jobie przygotowującym bazę.
 
 ## Konwencje commitów i PR
 - Commity: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:`).

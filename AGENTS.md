@@ -14,6 +14,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `pnpm test:coverage`               # raport pokrycia (opcjonalnie na PR)
 - `pnpm test:e2e`                    # scenariusze Playwright (najpierw `pnpm exec playwright install --with-deps`)
 - `pnpm depcheck`                    # higiena zależności
+- `pnpm qa`                          # lokalna bramka jakości (lint, typecheck, test)
+- `pnpm qa:ci`                       # pełny zestaw CI (lint, typecheck, build, test, coverage, e2e, depcheck)
 
 ## Runbook (MVP workflow)
 1. Przeczytaj `docs/README_DOCS.md`, aby zrozumieć artefakty discovery.
@@ -71,6 +73,11 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Dla stron: `app/<route>/page.tsx` + test + metadata.
 - Responsywność: mobile-first, 3 breakpoints.
 - Uzupełniaj dokumentację w `docs/` przy każdej zmianie funkcjonalności.
+
+## Warstwa CLI
+- Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.
+- Używaj `pnpm qa` do lokalnych kontroli jakości oraz `pnpm qa:ci` do pełnego przebiegu przed PR.
+- Flagi CLI: `--dry-run` (podgląd kroków) oraz `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`).
 
 ## Czego NIE robić
 - Nie wprowadzaj zewnętrznych UI kitów bez uzasadnienia.

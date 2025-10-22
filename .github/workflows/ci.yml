@@ -45,28 +45,13 @@ jobs:
         if: matrix.node-version == '20.x'
         run: pnpm exec playwright install --with-deps
 
-      - name: Lint
-        run: pnpm lint
+      - name: Quality gate
+        if: matrix.node-version == '22.x'
+        run: pnpm qa
 
-      - name: Type check
-        run: pnpm typecheck
-
-      - name: Build
+      - name: Full CI gate
         if: matrix.node-version == '20.x'
-        run: pnpm build
-
-      - name: Run unit tests
-        run: pnpm test
-
-      - name: Coverage
-        if: matrix.node-version == '20.x'
-        run: pnpm test:coverage
-
-      - name: Run e2e tests
-        if: matrix.node-version == '20.x'
-        env:
-          PLAYWRIGHT_WEB_SERVER_COMMAND: "pnpm start -- --hostname 0.0.0.0 --port 3000"
-        run: pnpm test:e2e
+        run: pnpm qa:ci
 
       - name: Upload Playwright report
         if: always() && matrix.node-version == '20.x'
@@ -82,6 +67,3 @@ jobs:
           name: coverage-report
           path: coverage
 
-      - name: Dependency check
-        if: matrix.node-version == '20.x'
-        run: pnpm depcheck

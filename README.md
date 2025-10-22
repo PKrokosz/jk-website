@@ -82,6 +82,19 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
 | `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
+| `pnpm qa` | Uruchamia lokalny zestaw jakościowy (`lint`, `typecheck`, `test`). |
+| `pnpm qa:ci` | Uruchamia pełny zestaw CI (`lint`, `typecheck`, `build`, `test`, `test:coverage`, `test:e2e`, `depcheck`). |
+
+### CLI jakości
+
+Repozytorium udostępnia prostą warstwę CLI (`pnpm run cli`), która orkiestruje kroki jakościowe:
+
+- `pnpm run cli -- --list` – lista dostępnych komend wraz z opisem.
+- `pnpm qa` – skrót do `pnpm run cli -- quality` (lint + typecheck + test).
+- `pnpm qa:ci` – skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright).
+- Flaga `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
+
+Warstwa CLI zapewnia spójność między lokalnymi kontrolami jakości a pipeline GitHub Actions.
 
 > Przed wysłaniem PR uruchom lokalnie `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` i (opcjonalnie) `pnpm test:coverage`, aby odtworzyć pipeline CI.
 

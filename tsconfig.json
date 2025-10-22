@@ -49,6 +49,7 @@
     "src/**/*.d.ts",
     "packages/**/*.ts",
     "packages/**/*.tsx",
+    "tools/**/*.ts",
     ".next/types/**/*.ts",
     "types/**/*.d.ts"
   ],

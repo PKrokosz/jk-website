@@ -29,14 +29,22 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Aktualizuj dokumenty, gdy zmienia się zakres funkcjonalny lub decyzje produktowe.
 - Raport z pomysłami na usprawnienia znajdziesz w `RAPORT_AGENT.md`.
 
+## Dokumentacja operacyjna `/docs`
+- Statusy dokumentacji są prowadzone w `docs/README_DOCS.md` → sekcja „Status aktualizacji dokumentów”. Zanim rozpoczniesz zadanie, sprawdź kolumnę „Kolejny krok w pętli” i po zakończeniu prac zaktualizuj wpis.
+- Pętlę backlogową prowadź w `docs/LOOP_TASKS.md`. Dla każdej obserwacji `x` twórz zadania `-x`, `1/x`, `x²`, `xˣ`. Po domknięciu pętli usuń wykonane pozycje i dopisz kolejną iterację.
+- Upewnij się, że zmiany w kodzie mają odzwierciedlenie w dedykowanych dokumentach tematycznych (`UI_TOKENS.md`, `JAKOSC_TESTY_CI.md`, `DANE_I_API_MVP.md`, `SEO_CHECKLIST.md`).
+- Kończąc zadanie, dopisz follow-up w `docs/LOOP_TASKS.md` oraz uzupełnij checklisty w dokumentach, których dotyczyła praca.
+
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
+- Testy API kontaktu: w `src/app/api/contact/submit/route.test.ts` mockuj `nodemailer` przez `vi.hoisted`, aby uniknąć importu natywnego transportu.
 - Dodano smoke test kompilacji modułów stron (`src/app/__tests__/pages.compile.test.ts`) korzystający z `import.meta.glob` – przy dodawaniu nowych stron upewnij się, że przechodzą import bez błędów runtime.
 - Commity: Conventional Commits.
 - Strony w App Router pod `app/`: home, catalog, product, order/native, contact, about.
 - Stosuj design tokens z `docs/UI_TOKENS.md`; obecnie wartości zakodowane w `globals.css` – kolejne zadania powinny je przenieść do CSS variables.
 - Telemetria błędów: korzystaj z helperów `reportClientError` i `reportServerError` z `src/lib/telemetry`. W testach mockuj moduł `@/lib/telemetry` i potwierdzaj wywołania.
+- Przy testowaniu formularza kontaktowego wstrzykuj zależność `submitRequest` (mock `fetch`) lub korzystaj z helperów ustawionych globalnie.
 
 ## Zasady PR
 - Każdy task = osobny branch + PR.

@@ -1,6 +1,14 @@
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockedFunction
+} from "vitest";
 
 vi.mock("@/lib/telemetry", () => ({
   reportClientError: vi.fn()
@@ -12,17 +20,13 @@ import { ContactForm } from "../ContactForm";
 
 describe("ContactForm", () => {
   const consentLabel = /wyrażam zgodę/i;
+  let submitRequest: MockedFunction<typeof fetch>;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(null, {
-          status: 200
-        })
-      )
-    );
+    submitRequest = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response(null, { status: 200 }));
   });
 
   afterEach(() => {
@@ -43,7 +47,7 @@ describe("ContactForm", () => {
   };
 
   it("blokuje wysyłkę dopóki wymagane pola nie są uzupełnione", () => {
-    render(<ContactForm />);
+    render(<ContactForm submitRequest={submitRequest} />);
 
     const submitButton = screen.getByRole("button", { name: "Wyślij wiadomość" });
     expect(submitButton).toBeDisabled();
@@ -60,7 +64,7 @@ describe("ContactForm", () => {
   });
 
   it("pokazuje komunikat o błędzie dla niepoprawnego e-maila", async () => {
-    render(<ContactForm />);
+    render(<ContactForm submitRequest={submitRequest} />);
 
     fillField(/imię/i, "Anna");
     fillField(/adres e-mail/i, "niepoprawny");
@@ -74,7 +78,7 @@ describe("ContactForm", () => {
   });
 
   it("resetuje formularz po udanej wysyłce", async () => {
-    render(<ContactForm />);
+    render(<ContactForm submitRequest={submitRequest} />);
 
     fillField(/imię/i, "Katarzyna");
     fillField(/adres e-mail/i, "katarzyna@example.com");
@@ -92,7 +96,6 @@ describe("ContactForm", () => {
     expect(screen.getByLabelText(/imię/i)).toHaveValue("");
     expect(screen.getByLabelText(/adres e-mail/i)).toHaveValue("");
     expect(screen.getByLabelText(/wiadomość/i)).toHaveValue("");
-    expect(screen.getByLabelText(/wyrażam zgodę/i)).not.toBeChecked();
     expect(screen.getByLabelText(consentLabel)).not.toBeChecked();
     expect(screen.getByRole("button", { name: "Wyślij wiadomość" })).toBeDisabled();
   });

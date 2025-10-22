@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 
 import { ContactForm } from "@/components/contact/ContactForm";
+import { sanitizeProductQuery } from "@/lib/contact/sanitizeProduct";
 
 export const metadata: Metadata = {
   title: "Kontakt",
@@ -9,7 +10,13 @@ export const metadata: Metadata = {
     "Umów konsultację w pracowni JK Handmade Footwear. Skontaktuj się z nami telefonicznie, mailowo lub przez formularz."
 };
 
-export default function ContactPage() {
+type ContactPageProps = {
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default function ContactPage({ searchParams }: ContactPageProps) {
+  const productHint = sanitizeProductQuery(searchParams?.product ?? null);
+
   return (
     <main className="page contact-page" aria-labelledby="contact-heading">
       <section className="section hero hero--immersive contact-hero" aria-labelledby="contact-heading">
@@ -39,7 +46,7 @@ export default function ContactPage() {
               <div>
                 <dt>Email</dt>
                 <dd>
-                  <a href="mailto:pracownia@jk-footwear.pl">pracownia@jk-footwear.pl</a>
+                  <a href="mailto:kontakt@jkhandmade.pl">kontakt@jkhandmade.pl</a>
                 </dd>
               </div>
               <div>
@@ -132,7 +139,7 @@ export default function ContactPage() {
             <p className="lead">
               Opisz wydarzenie, styl ubioru i preferowany termin odbioru. Odezwiesz się – my zaproponujemy rozwiązanie.
             </p>
-            <ContactForm />
+            <ContactForm initialProduct={productHint} />
           </div>
         </div>
       </section>

@@ -96,7 +96,7 @@
 ### 3.6 Group Orders
 | Sekcja | Elementy | CTA | Stany |
 | --- | --- | --- | --- |
-| Hero współpracy | Eyebrow, H1, lead, opis, CTA `mailto` i anchor do `/contact#contact-form` | `mailto:pracownia@jk-footwear.pl`, `/contact#contact-form` | Stały |
+| Hero współpracy | Eyebrow, H1, lead, opis, CTA `mailto` i anchor do `/contact#contact-form` | `mailto:kontakt@jkhandmade.pl`, `/contact#contact-form` | Stały |
 | Korzyści partnerstwa | Karta benefitów (lista 3 pozycji) | Linki w tekście (brak dodatkowych CTA) | Stały |
 | Proces w 3 krokach | Lista numerowana (counter), lead | Brak – informacyjna | Stały |
 | CTA konsultacji | Panel CTA z przyciskami kontaktu | `mailto`, `tel` | Stały |
@@ -116,7 +116,7 @@
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
   - Brak skeletonów na stronie produktu może skutkować migotaniem przy wczytywaniu (zwł. w ISR/SSR).
-  - Formularz kontaktowy bez backendu może powodować niespójność flow.
+  - Backend formularza kontaktowego (SMTP) wymaga konfiguracji środowiskowej i monitoringu błędów.
 - **Decyzje do podjęcia**
   - Czy dodajemy sekcję powiązanych modeli lub FAQ w `/catalog/[slug]` i `/order/native`?
   - Czy `/order/native` ma zastąpić modal w przyszłości (spójność flow)?

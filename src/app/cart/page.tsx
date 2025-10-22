@@ -152,7 +152,7 @@ export default function CartPage() {
                       <span>Suma brutto</span>
                       <strong>{currencyFormatter.format(item.totalGrossGrosz / 100)}</strong>
                     </div>
-                    <Link className="cart-card__cta" href="mailto:pracownia@jk-footwear.pl">
+                    <Link className="cart-card__cta" href="mailto:kontakt@jkhandmade.pl">
                       Wyślij konfigurację do pracowni
                     </Link>
                   </footer>
@@ -181,7 +181,7 @@ export default function CartPage() {
                 finalną wycenę i terminy realizacji.
               </p>
               <div className="cart-summary__actions">
-                <Link className="button button--primary" href="mailto:pracownia@jk-footwear.pl">
+                <Link className="button button--primary" href="mailto:kontakt@jkhandmade.pl">
                   Wyślij zamówienie e-mailem
                 </Link>
                 <button type="button" className="button button--ghost" onClick={clear}>

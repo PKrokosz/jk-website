@@ -18,7 +18,8 @@
 
 ### Zadanie bazowe `x₁`: Wdrożyć design tokens z `docs/UI_TOKENS.md` do kodu (T1)
 - `-x₁`: Usunąć duplikujące się style w `src/app/globals.css` po migracji tokens.
-- `1/x₁`: Zdefiniować minimalny zestaw `:root` custom properties odpowiadających tabeli w `UI_TOKENS.md` i opisać je w README.
+- `1/x₁`: Zdefiniować minimalny zestaw `:root` custom properties odpowiadających tabeli w `UI_TOKENS.md` i opisać je w README. ✅ 2025-10-24 — Dodano bazowe custom properties w `globals.css` oraz uzupełniono dokumentację.
+- ⏭️ 2025-10-24 — Rozszerzyć użycie zmiennych na sekcje hero/catalog (gradienty, CTA) i przygotować checklistę adopcji.
 - `x₁²`: Rozbudować tokens o wariant motywu ciemnego oraz responsywne typografie sterowane zmiennymi.
 - `x₁ˣ`: Przygotować skrypt eksportujący tokens z pliku źródłowego (np. Figma) do JSON i synchronizujący je z projektem.
 

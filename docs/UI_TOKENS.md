@@ -14,6 +14,7 @@
 - Motyw produkcyjny wykorzystuje jasne tło pergaminu (`#f8f5f2`) z ciemnymi akcentami (`#1b1b1b`) oraz złotą poświatą (`rgba(255, 226, 166, ...)`).
 - Style są zdefiniowane w `src/app/globals.css` jako klasy utility (brak Tailwind). Design tokens opisane niżej służą do dalszej standaryzacji i przeniesienia do CSS custom properties/Tailwind.
 - Prymitywy UI w kodzie to: `button` (`--primary`, `--ghost`), `badge` (`--category`, `--funnel`), formularz kontaktowy (`ContactForm`), checkbox z label i hint, karty portfolio/katalogu.
+- Od iteracji 2025-10-24 w `src/app/globals.css` dostępne są bazowe custom properties (`--color-*`, `--space-*`, `--radius-*`) odzwierciedlające tabelę tokens.
 
 ## Paleta kolorów
 | Token | Wartość | Opis | Zastosowanie |
@@ -67,6 +68,10 @@
 | `button` | `.button`, `--primary`, `--ghost` | Primary czarny, ghost outline + warianty home |
 | `checkbox` | `.checkbox` | Styl zgody RODO z custom label/hint |
 
+### Implementacja w kodzie
+- Plik `src/app/globals.css` definiuje `:root` z custom properties (`--color-bg-body`, `--color-text-primary`, `--color-focus-light`, itp.) oraz wykorzystuje je w globalnych selektorach (`body`, focus states, `.container`).
+- W kolejnych iteracjach należy rozszerzyć zastosowanie zmiennych na komponenty/sekcje wykorzystujące gradienty i specyficzne warianty CTA.
+
 ## Prymitywy UI i API komponentów
 | Komponent/Klasa | API | Opis |
 | --- | --- | --- |
@@ -81,7 +86,7 @@
 - [x] Zdefiniowano aktualne kolory używane w `globals.css`.
 - [x] Opisano typografię i spacing na podstawie implementacji.
 - [x] Wypisano dostępne prymitywy UI.
-- [ ] Wprowadzono design tokens do CSS (custom properties / Tailwind) – do implementacji.
+- [x] Wprowadzono bazowe design tokens do CSS (custom properties w `globals.css`).
 - [ ] Zastąpiono powtarzalne karty dedykowanym komponentem (`Card`).
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
@@ -92,6 +97,6 @@
   - Czy wprowadzamy Tailwind / CSS custom properties w najbliższym sprincie?
   - Czy hero gradient pozostaje implementowany ręcznie czy przenosimy go do design tokens?
 - **Następne kroki**
-  - Dodać `:root` z custom properties zgodnymi z tabelą powyżej.
+  - Rozszerzyć użycie custom properties na komponenty sekcyjne i CTA (gradienty, overlaye katalogu).
   - Rozważyć utworzenie komponentu `Card` i `Typography` bazujących na tokens.
   - Przygotować checklistę kontrastu (WCAG) po wdrożeniu tokens.

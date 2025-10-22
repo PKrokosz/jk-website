@@ -1,10 +1,38 @@
 :root {
   color-scheme: light;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background-color: #f8f5f2;
-  color: #1b1b1b;
   line-height: 1.6;
   letter-spacing: 0.015em;
+
+  /* Color tokens */
+  --color-bg-body: #f8f5f2;
+  --color-bg-dark: #090808;
+  --color-bg-muted: #efe9e1;
+  --color-text-primary: #1b1b1b;
+  --color-text-invert: #f8f5f2;
+  --color-text-muted: #3d3d3d;
+  --color-text-muted-on-dark: rgba(248, 245, 242, 0.68);
+  --color-accent-gold: #c6a46e;
+  --color-accent-gold-soft: rgba(255, 226, 166, 0.65);
+  --color-accent-gold-strong: rgba(255, 226, 166, 0.95);
+  --color-accent-gold-muted: rgba(198, 164, 110, 0.18);
+  --color-accent-gold-border: rgba(198, 164, 110, 0.4);
+  --color-border-dark: #1b1b1b;
+  --color-border-light: rgba(255, 226, 166, 0.35);
+  --color-focus-light: #1b4dff;
+  --color-focus-dark: rgba(255, 226, 166, 0.7);
+  --color-badge-category-bg: rgba(198, 164, 110, 0.22);
+  --color-badge-category-text: #3a2a1f;
+  --color-badge-funnel-bg: #111111;
+  --color-badge-funnel-text: rgba(255, 226, 166, 0.85);
+
+  /* Layout tokens */
+  --space-container-inline: 1.5rem;
+  --space-section-block: clamp(4rem, 6vw, 6rem);
+  --radius-pill: 999px;
+
+  background-color: var(--color-bg-body);
+  color: var(--color-text-primary);
 }
 
 * {
@@ -14,7 +42,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #f8f5f2;
+  background: var(--color-bg-body);
+  color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
 }
@@ -25,8 +54,8 @@ body {
   top: 1rem;
   transform: translateY(-200%);
   padding: 0.5rem 1rem;
-  border-radius: 999px;
-  background: rgba(255, 226, 166, 0.95);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-gold-strong);
   color: #111;
   text-decoration: none;
   font-weight: 600;
@@ -42,7 +71,7 @@ body {
 
 .site-body {
   min-height: 100vh;
-  background: #f8f5f2;
+  background: var(--color-bg-body);
 }
 
 .site-content {
@@ -58,7 +87,7 @@ body {
   z-index: 100;
   backdrop-filter: blur(12px);
   background: rgba(17, 17, 17, 0.72);
-  border-bottom: 1px solid rgba(198, 164, 110, 0.4);
+  border-bottom: 1px solid var(--color-accent-gold-border);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
@@ -108,7 +137,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.95rem;
   color: rgba(248, 245, 242, 0.8);
   text-decoration: none;
@@ -133,7 +162,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   padding: 0.45rem 0.9rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 226, 166, 0.3);
   background: rgba(18, 18, 18, 0.6);
   color: rgba(255, 226, 166, 0.85);
@@ -158,7 +187,7 @@ body {
   justify-content: center;
   min-width: 1.6rem;
   height: 1.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 226, 166, 0.2);
   color: #ffe2a6;
   font-size: 0.85rem;
@@ -200,7 +229,7 @@ button:focus-visible,
 select:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid #1b4dff;
+  outline: 3px solid var(--color-focus-light);
   outline-offset: 2px;
 }
 
@@ -209,7 +238,7 @@ textarea:focus-visible {
 .home-page select:focus-visible,
 .home-page input:focus-visible,
 .home-page textarea:focus-visible {
-  outline-color: rgba(255, 226, 166, 0.7);
+  outline-color: var(--color-focus-dark);
   box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.65);
 }
 
@@ -283,7 +312,7 @@ ul {
 .container {
   width: min(960px, 100%);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 var(--space-container-inline);
 }
 
 .section {
@@ -435,7 +464,7 @@ ul {
 
 .cookie-banner__button {
   padding: 0.6rem 1.2rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 226, 166, 0.4);
   background: rgba(255, 226, 166, 0.18);
   color: #111;
@@ -485,7 +514,7 @@ ul {
   bottom: clamp(1rem, 5vw, 2.5rem);
   inset-inline-start: clamp(1rem, 4vw, 2rem);
   padding: 0.5rem 1.1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 226, 166, 0.35);
   background: rgba(17, 17, 17, 0.7);
   color: rgba(255, 226, 166, 0.9);
@@ -690,7 +719,7 @@ ul {
 .hero-frame__control {
   width: 0.85rem;
   height: 0.85rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 226, 166, 0.25);
   background: rgba(255, 226, 166, 0.2);
   transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
@@ -771,7 +800,7 @@ ul {
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 600;
   border: 2px solid transparent;
   background: transparent;
@@ -862,7 +891,7 @@ ul {
   justify-content: center;
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 226, 166, 0.3);
   background: rgba(12, 12, 12, 0.85);
   color: rgba(255, 226, 166, 0.85);
@@ -1032,12 +1061,12 @@ ul {
 
 .selling-points::-webkit-scrollbar-track {
   background: rgba(255, 226, 166, 0.08);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .selling-points::-webkit-scrollbar-thumb {
   background: rgba(255, 226, 166, 0.28);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .selling-points--carousel {
@@ -1105,12 +1134,12 @@ ul {
 
 .portfolio-showcase::-webkit-scrollbar-track {
   background: rgba(255, 226, 166, 0.08);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .portfolio-showcase::-webkit-scrollbar-thumb {
   background: rgba(255, 226, 166, 0.28);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 @media (min-width: 640px) {
@@ -1262,7 +1291,7 @@ ul {
   width: 1.75rem;
   height: 1.75rem;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid currentColor;
   display: grid;
   place-items: center;
@@ -1275,7 +1304,7 @@ ul {
   content: "";
   position: absolute;
   background: currentColor;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: transform 0.3s ease;
 }
 
@@ -2154,7 +2183,7 @@ ul {
   background: rgba(255, 226, 166, 0.08);
   color: #ffe2a6;
   border: 1px solid rgba(255, 226, 166, 0.45);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.35rem 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -2470,7 +2499,7 @@ ul {
   align-items: center;
   justify-content: center;
   padding: 0.6rem 1.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 226, 166, 0.32);
   color: rgba(255, 226, 166, 0.88);
   text-decoration: none;
@@ -2667,7 +2696,7 @@ ul {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(198, 164, 110, 0.12);
   color: rgba(23, 24, 40, 0.7);
   font-size: 0.85rem;
@@ -2691,14 +2720,14 @@ ul {
   flex-wrap: wrap;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 249, 241, 0.8);
   border: 1px solid rgba(198, 164, 110, 0.3);
 }
 
 .catalog-category-nav__button {
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.45rem 1.25rem;
   background: transparent;
   font-weight: 600;
@@ -2802,7 +2831,7 @@ ul {
 }
 
 .catalog-toolbar select {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.4rem 1.5rem 0.4rem 0.85rem;
   border: 1px solid #d5ccc2;
   background: #ffffff;
@@ -2935,7 +2964,7 @@ ul {
 
 .catalog-card__cta {
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.5rem 1.5rem;
   background: #1b1b1b;
   color: #f8f5f2;
@@ -3388,7 +3417,7 @@ ul {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(198, 164, 110, 0.55);
   background: linear-gradient(135deg, rgba(198, 164, 110, 0.92), rgba(255, 226, 166, 0.82));
   color: #111111;
@@ -3466,7 +3495,7 @@ ul {
   background: transparent;
   border: 1px solid rgba(198, 164, 110, 0.45);
   color: #111111;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.35rem 0.9rem;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -3964,7 +3993,7 @@ ul {
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(198, 164, 110, 0.15);
   color: #4a381d;
   font-size: 0.85rem;
@@ -4577,7 +4606,7 @@ ul {
   display: inline-flex;
   align-items: center;
   padding: 0.3rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -4928,7 +4957,7 @@ ul {
   background: rgba(10, 10, 10, 0.6);
   color: rgba(255, 244, 232, 0.95);
   padding: 0.75rem 1.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;

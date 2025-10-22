@@ -1767,6 +1767,7 @@ ul {
 .order-native__navigation .button--ghost:hover,
 .order-native__navigation .button--ghost:focus-visible {
   background: rgba(255, 226, 166, 0.12);
+}
 .order-native__actions--start {
   justify-content: flex-start;
 }

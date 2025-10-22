@@ -12,6 +12,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `pnpm lint && pnpm test`           # smoke test
 - `pnpm typecheck`                   # TS strict
 - `pnpm test:coverage`               # raport pokrycia (opcjonalnie na PR)
+- `pnpm test:e2e`                    # scenariusze Playwright (najpierw `pnpm exec playwright install --with-deps`)
 - `pnpm depcheck`                    # higiena zależności
 
 ## Runbook (MVP workflow)

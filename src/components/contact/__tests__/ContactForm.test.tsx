@@ -9,11 +9,20 @@ describe("ContactForm", () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(null, {
+          status: 200
+        })
+      )
+    );
   });
 
   afterEach(() => {
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   const fillField = (label: RegExp, value: string) => {

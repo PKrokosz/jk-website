@@ -123,6 +123,64 @@ describe("OrderButton", () => {
     expect(closeButton).toHaveFocus();
   });
 
+  it("merges custom class names and toggles active state with the modal lifecycle", async () => {
+    const user = userEvent.setup();
+    render(
+      <OrderButton className="extra-class" mode="modal">
+        Zamów teraz
+      </OrderButton>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Zamów teraz" });
+    expect(trigger).toHaveClass("order-button", "extra-class");
+    expect(trigger).not.toHaveClass("order-button--active");
+
+    await user.click(trigger);
+
+    expect(trigger).toHaveClass("order-button", "order-button--active", "extra-class");
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => {
+      expect(trigger).not.toHaveClass("order-button--active");
+    });
+  });
+
+  it("forwards additional button props while managing body scroll locking", async () => {
+    const user = userEvent.setup();
+    render(
+      <OrderButton
+        mode="modal"
+        buttonProps={{
+          "data-testid": "order-trigger",
+          "data-variant": "primary",
+          "aria-label": "Uruchom modal zamówienia"
+        }}
+      >
+        Zamów teraz
+      </OrderButton>
+    );
+
+    const trigger = screen.getByTestId("order-trigger");
+    expect(trigger).toHaveAttribute("aria-label", "Uruchom modal zamówienia");
+    expect(trigger).toHaveAttribute("data-variant", "primary");
+
+    await user.click(trigger);
+
+    const dialog = await screen.findByRole("dialog", { name: /formularz zamówienia/i });
+    expect(dialog).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(document.body.style.overflow).toBe("hidden");
+    });
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => {
+      expect(document.body.style.overflow).toBe("");
+    });
+  });
+
   it("supports switching between link and modal modes responsywnie", async () => {
     const user = userEvent.setup();
     render(<OrderButton mode="auto">Zamów teraz</OrderButton>);

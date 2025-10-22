@@ -143,6 +143,19 @@ describe("CLI entrypoint", () => {
     expect(exitCode).toBe(1);
   });
 
+  it("prints usage and exits successfully when only help flag is provided", async () => {
+    mockParseArguments.mockReturnValue({
+      ...baseArgs(),
+      help: true
+    });
+
+    const exitCode = await invokeMain();
+
+    expect(logSpy.mock.calls[0]?.[0]).toContain("Usage: pnpm run cli");
+    expect(exitSpy).toHaveBeenCalledWith(0);
+    expect(exitCode).toBe(0);
+  });
+
   it("stops execution when parsing errors occur for a known command", async () => {
     mockParseArguments.mockReturnValue({
       ...baseArgs(),
@@ -203,6 +216,27 @@ describe("CLI entrypoint", () => {
       skip?: Set<string>;
     };
     expect(Array.from(options.skip ?? [])).toEqual(["lint"]);
+  });
+
+  it("logs generic errors from the runner and exits with status 1", async () => {
+    const definition: CommandDefinition = {
+      name: "quality",
+      summary: "Run quality checks",
+      steps: []
+    };
+
+    mockParseArguments.mockReturnValue({
+      ...baseArgs(),
+      commandName: "quality"
+    });
+    mockGetCommandDefinition.mockReturnValue(definition);
+    mockRunCommandDefinition.mockRejectedValue(new Error("unexpected failure"));
+
+    const exitCode = await invokeMain();
+
+    expect(errorSpy).toHaveBeenCalledWith("unexpected failure");
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(exitCode).toBe(1);
   });
 
   it("handles step execution failures", async () => {

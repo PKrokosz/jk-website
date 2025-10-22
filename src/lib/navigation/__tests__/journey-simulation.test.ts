@@ -179,6 +179,43 @@ describe("navigation weight configuration", () => {
     expect(contactToken?.weight).toBe(3);
     expect(groupOrdersToken?.weight).toBe(4);
   });
+
+  it("returns an empty configuration when overrides are not provided", () => {
+    expect(loadNavigationWeights({ env: {} as NodeJS.ProcessEnv })).toEqual({});
+  });
+
+  it("throws when both JSON and file based overrides are defined", () => {
+    const env = {
+      NAVIGATION_WEIGHTS_JSON: JSON.stringify({}),
+      NAVIGATION_WEIGHTS_PATH: "config/navigation-weights.example.json",
+    } satisfies NodeJS.ProcessEnv;
+
+    expect(() => loadNavigationWeights({ env })).toThrowError(/choose only one source/);
+  });
+
+  it("throws when weights are not positive numbers", () => {
+    const env = {
+      NAVIGATION_WEIGHTS_JSON: JSON.stringify({
+        home: {
+          contact: 0,
+        },
+      }),
+    } satisfies NodeJS.ProcessEnv;
+
+    expect(() => buildNavigationGraph({ env })).toThrowError(/greater than 0/);
+  });
+
+  it("throws when weights are not numeric", () => {
+    const env = {
+      NAVIGATION_WEIGHTS_JSON: JSON.stringify({
+        home: {
+          contact: "wysokie" as unknown as number,
+        },
+      }),
+    } satisfies NodeJS.ProcessEnv;
+
+    expect(() => buildNavigationGraph({ env })).toThrowError(/must be a finite number/);
+  });
 });
 
 describe("formatJourney", () => {
@@ -211,5 +248,28 @@ describe("aggregateJourneyTransitions", () => {
 
     expect(transition?.count).toBeGreaterThan(0);
     expect(aggregates).toMatchSnapshot();
+  });
+
+  it("returns an empty array when no journeys are provided", () => {
+    expect(aggregateJourneyTransitions([])).toEqual([]);
+  });
+});
+
+describe("validateJourneysHaveLoops", () => {
+  it("throws when the journey list is empty", () => {
+    expect(() => validateJourneysHaveLoops([])).toThrowError(/No journeys provided/);
+  });
+
+  it("throws when a journey finishes in a dead end", () => {
+    const journey = simulateUserJourneys({ userCount: 1, random: createSeededRandom(3) })[0];
+    const deadEndGraph: NavigationGraph = {
+      ...navigationGraph,
+      [journey.loopAt]: {
+        ...navigationGraph[journey.loopAt],
+        tokens: [],
+      },
+    };
+
+    expect(() => validateJourneysHaveLoops([journey], deadEndGraph)).toThrowError(/dead end/);
   });
 });

@@ -21,7 +21,7 @@ Ten katalog zawiera komplet artefaktów discovery & gap assessment dla MVP sklep
 | [`UI_TOKENS.md`](./UI_TOKENS.md) | 2025-10-24 | W toku (bazowe custom properties wdrożone) | Rozszerzyć adopcję zmiennych na sekcje i CTA, raportować postęp. |
 | [`SITE_MAP.md`](./SITE_MAP.md) | 2025-07-15 | Aktualne | Uaktualnić po dodaniu nowych route'ów (np. blog, FAQ). |
 | [`DANE_I_API_MVP.md`](./DANE_I_API_MVP.md) | 2025-09-18 | Częściowo aktualne | Dodać tabelę `quote_requests` po wdrożeniu migracji. |
-| [`JAKOSC_TESTY_CI.md`](./JAKOSC_TESTY_CI.md) | 2025-10-22 | Aktualne (uzupełnione testy ContactForm/ProductPage/NativeModelShowcase) | Monitorować pokrycie UI prymitywów i E2E. |
+| [`JAKOSC_TESTY_CI.md`](./JAKOSC_TESTY_CI.md) | 2025-10-24 | Aktualne (Playwright pokrywa legal + smoke nawigacji/API) | Zaplanować rozszerzenie e2e o flow zamówienia. |
 | [`PLAN_MVP_SPRINTS.md`](./PLAN_MVP_SPRINTS.md) | 2025-10-22 | Aktualne (T0–T7 opisane) | Uzupełnić status po każdym zamkniętym sprincie. |
 | [`OPEN_QUESTIONS.md`](./OPEN_QUESTIONS.md) | 2025-09-18 | Wymaga odpowiedzi właściciela | Usunąć zamknięte pytania i dopisać nowe decyzje. |
 | [`SEO_CHECKLIST.md`](./SEO_CHECKLIST.md) | 2025-06-05 | W toku (brak `robots.txt`/`sitemap`) | Potwierdzić implementację generowanych plików i structured data. |

@@ -29,6 +29,10 @@ export const main = async () => {
       parsed.errors.forEach((error) => console.error(error));
     }
     printUsage();
+    if (parsed.help) {
+      process.exit(0);
+    }
+
     process.exit(parsed.commandName ? 0 : 1);
   }
 

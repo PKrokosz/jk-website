@@ -25,7 +25,7 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 | `src/lib/pricing` | Schematy Zod dla kalkulatora wyceny i repozytorium zapisu zapytań. | Kontrakty request/response są pokryte testami API (`/api/pricing/quote`). |
 | `src/lib/navigation` & `scripts/` | Symulacje ścieżek użytkowników + skrypty CLI do agregacji wyników. | Moduły posiadają testy Vitest oraz skrypty `simulate:user-journeys`/`simulate:navigation`. |
 | `packages/db` | Pakiet `@jk/db` z konfiguracją Drizzle, schematem tabel i seedem danych. | Migracja inicjalna i seed referencyjny dostępne; kolejne migracje wymagają osobnych tasków. |
-| `tools/cli` | Warstwa CLI spinająca kroki jakości (`quality`, `quality:ci`). | Entrypoint testowany unitowo z mockiem `process.exit` i logów. |
+| `tools/cli` | Warstwa CLI spinająca kroki jakości (`quality`, `quality:ci`). | Entrypoint testowany unitowo (list/help/dry-run, obsługa błędów) z mockiem `process.exit` i logów. |
 | `docs/` | Artefakty discovery (audyt repo, roadmapa, UI tokens, plan sprintów, pętla zadań). | Dokumentacja utrzymywana w pętli – ostatni przegląd 2025-10-22. |
 
 ## Wymagania wstępne
@@ -154,7 +154,7 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 
 - `pnpm test` uruchamia pakiet testów Vitest obejmujący strony App Routera, komponenty kontaktu, prymitywy UI oraz warstwę CLI.
 - `pnpm test:coverage` generuje raport pokrycia (`coverage/`) na bazie `@vitest/coverage-v8`.
-- `pnpm test:e2e` wykonuje scenariusze Playwright (przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
+- `pnpm test:e2e` wykonuje scenariusze Playwright (pobranie dokumentów prawnych + smoke test nawigacji i API katalogu; przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
 - Linting (`pnpm lint`), statyczna analiza typów (`pnpm typecheck`) i kontrola zależności (`pnpm depcheck`) odtwarzają etapy pipeline CI.
 - Dla modułu nawigacji dostępne są dodatkowe symulacje (`pnpm simulate:*`) z testami snapshotowymi agregacji przejść.
 

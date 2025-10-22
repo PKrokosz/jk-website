@@ -75,6 +75,21 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
   5. **Dlaczego brak setupu?** Priorytet był na UI i copy, nie na infrastrukturę testową.
 - **Ulepszenie:** Wstrzykiwać `submitRequest` w komponentach/formach, trzymać shim `types/nodemailer.d.ts` i dopisać scenariusze testowe z kontrolą odpowiedzi backendu.
 
+## 9. Niedokładne pokrycie testami E2E i modułów pomocniczych (5xWhy)
+- **Problem:** Testy Playwright obejmowały jedynie dwa endpointy legal, a moduły jak CLI czy symulator nawigacji miały luki pokrycia.
+  1. **Dlaczego?** Początkowy smoke test e2e skupiał się na priorytetowych wymaganiach prawnych.
+  2. **Dlaczego nie rozszerzono go od razu?** Brakowało checklisty scenariuszy w DoD oraz danych o krytycznych ścieżkach.
+  3. **Dlaczego checklisty brak?** Pętla T6 była w trakcie – skupiono się na komponentach UI.
+  4. **Dlaczego CLI i symulacje pominięto?** Zakładano, że testy jednostkowe wystarczą i nie zdefiniowano przypadków brzegowych.
+  5. **Dlaczego przypadki brzegowe nie zostały opisane?** Brak obserwacji produkcyjnych oraz raportu z pętli QA.
+- **Ulepszenie:** Dopisać testy CLI (help/błędy), rozszerzyć przypadki symulatora (walidacja wag, brak pętli), dodać Playwright smoke dla głównych stron i API katalogu. _(Status 2025-10-24: wykonane – dodano testy jednostkowe dla `/api/styles`, `/api/leather`, rozszerzono `journey-simulation` i CLI, Playwright obejmuje nawigację + API. Kolejny krok: e2e dla flow zamówienia.)_
+
+## Raport agenta – 2025-10-24
+- **Co zrobiono:** Uzupełniono brakującą zależność `@testing-library/user-event`, dopisano testy jednostkowe dla API katalogu, rozszerzono scenariusze `OrderButton`, CLI i symulatora nawigacji, dodano smoke test e2e nawigacji/API, zaktualizowano dokumentację QA.
+- **Dlaczego:** Aby domknąć wskazane przez QA luki pokrycia i zapewnić, że krytyczne ścieżki (nawigacja, API katalogu, obsługa błędów CLI) są weryfikowane automatycznie.
+- **Jakie przyjęto założenia:** Backend katalogu zwraca dane referencyjne dostępne lokalnie; Playwright korzysta z uruchomionego dev servera, a testy mogą wykonywać żądania GET do endpointów mockowanych.
+- **Co dalej:** Przygotować pełny flow e2e zamówienia (modal → `/order/native`), dopisać testy integracyjne `/catalog/[slug]` i `/account`, kontynuować migrację design tokens.
+
 ---
 **Priorytety rekomendowane:**
 1. Podpiąć API Next.js oraz mocki katalogu do bazy (Drizzle) na bazie gotowych migracji i seeda.

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import React, { ChangeEvent, FormEvent, useMemo, useState } from "react";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 

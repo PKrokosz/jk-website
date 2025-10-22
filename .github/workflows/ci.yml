@@ -17,6 +17,7 @@ jobs:
         node-version: [20.x, 22.x]
     env:
       CI: true
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,11 +47,24 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      - name: Build
+        if: matrix.node-version == '20.x'
+        run: pnpm build
+
       - name: Run unit tests
         run: pnpm test
 
       - name: Coverage
+        if: matrix.node-version == '20.x'
         run: pnpm test:coverage
 
+      - name: Upload coverage report
+        if: always() && matrix.node-version == '20.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+
       - name: Dependency check
+        if: matrix.node-version == '20.x'
         run: pnpm depcheck

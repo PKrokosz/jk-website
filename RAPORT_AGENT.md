@@ -9,7 +9,7 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
   3. **Dlaczego dokumentacja nie została zaktualizowana?** Priorytet przeniesiono na implementację katalogu i formularza, odkładając stabilizację środowiska.
   4. **Dlaczego backlog T0 nie został domknięty?** Brak dedykowanego ownera konfiguracji infra.
   5. **Dlaczego brak ownera?** Zadanie nie przypisane w `PLAN_MVP_SPRINTS.md` do konkretnej roli.
-- **Ulepszenie:** Wybrać docelowe poświadczenia (`devuser/devpass@jkdb`), zaktualizować `.env.example`, README, dodać `drizzle.config.ts` oraz job seeda w CI.
+- **Ulepszenie:** Wybrać docelowe poświadczenia (`devuser/devpass@jkdb`), zaktualizować `.env.example`, README, dodać `drizzle.config.ts`, wygenerować migrację inicjalną i skrypt seeda. _(Status: zrealizowane lokalnie; follow-up: zintegrować API Next.js i CI z nowymi migracjami/seeds oraz zaktualizować secrets.)_
 
 ## 2. Brak design tokens w kodzie (5xWhy)
 - **Problem:** Kolory i spacing są hard-coded w `globals.css`.
@@ -67,7 +67,7 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
 
 ---
 **Priorytety rekomendowane:**
-1. Ujednolicić konfigurację DB + przygotować migracje (`drizzle-kit`).
+1. Podpiąć API Next.js oraz mocki katalogu do bazy (Drizzle) na bazie gotowych migracji i seeda.
 2. Wprowadzić design tokens (custom properties) i testy brakujących komponentów.
 3. Zaprojektować backend formularza kontaktowego wraz z materiałami legal.
 4. Zdecydować o docelowym flow zamówień (modal vs `/order/native`) po zebraniu metryk.

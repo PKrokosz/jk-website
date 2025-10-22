@@ -3920,6 +3920,165 @@ ul {
   text-decoration-thickness: 1px;
 }
 
+.group-orders-page {
+  position: relative;
+  color: rgba(248, 245, 242, 0.9);
+  background: radial-gradient(circle at 18% 22%, rgba(45, 35, 24, 0.5), rgba(8, 8, 8, 0.96)), #090808;
+}
+
+.group-orders-page .hero__intro h1 {
+  color: #f8f5f2;
+}
+
+.group-orders-page .hero__intro p {
+  color: rgba(248, 245, 242, 0.76);
+}
+
+.group-orders-page .hero__intro .lead {
+  color: rgba(255, 226, 166, 0.92);
+}
+
+.group-orders-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1.35rem;
+  width: min(100%, 26rem);
+  padding: clamp(1.75rem, 3vw, 2.25rem);
+  border-radius: 1.75rem;
+  background: rgba(18, 18, 18, 0.78);
+  border: 1px solid rgba(255, 226, 166, 0.2);
+  box-shadow: 0 24px 48px rgba(9, 9, 9, 0.4);
+  backdrop-filter: blur(16px);
+}
+
+.group-orders-card h2 {
+  font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+  color: rgba(255, 226, 166, 0.95);
+}
+
+.group-orders-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.group-orders-card__list li {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.group-orders-card__list h3 {
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 226, 166, 0.9);
+}
+
+.group-orders-card__list p {
+  color: rgba(248, 245, 242, 0.8);
+  font-size: 0.95rem;
+}
+
+.group-orders-process {
+  background: #f7f1e8;
+  color: #1b1b1b;
+  padding-block: clamp(4rem, 6vw, 5.5rem);
+}
+
+.group-orders-process .section__header .lead {
+  color: #3d3d3d;
+}
+
+.group-orders-step-list {
+  counter-reset: group-orders-step;
+  list-style: none;
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.75rem;
+}
+
+.group-orders-step-list li {
+  position: relative;
+  padding-left: 3.25rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.group-orders-step-list li::before {
+  counter-increment: group-orders-step;
+  content: counter(group-orders-step, decimal-leading-zero);
+  position: absolute;
+  top: 0.1rem;
+  left: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: rgba(198, 164, 110, 0.2);
+  color: #1b1b1b;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.group-orders-step-list h3 {
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.group-orders-step-list p {
+  color: #3d3d3d;
+  max-width: 60ch;
+}
+
+.group-orders-cta {
+  background: linear-gradient(140deg, rgba(20, 20, 20, 0.9), rgba(20, 20, 20, 0.76));
+  color: rgba(248, 245, 242, 0.92);
+  padding-block: clamp(3.5rem, 6vw, 5rem);
+}
+
+.group-orders-cta-panel {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(2rem, 3vw, 2.5rem);
+  border-radius: 1.75rem;
+  border: 1px solid rgba(255, 226, 166, 0.22);
+  background: rgba(18, 18, 18, 0.72);
+  box-shadow: 0 24px 46px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(14px);
+}
+
+.group-orders-cta-panel h2 {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  color: rgba(255, 226, 166, 0.95);
+}
+
+.group-orders-cta-panel p {
+  color: rgba(248, 245, 242, 0.8);
+}
+
+.group-orders-cta-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .group-orders-step-list li {
+    padding-left: 2.75rem;
+  }
+
+  .group-orders-step-list li::before {
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 0.85rem;
+  }
+}
+
 .contact-layout {
   display: grid;
   gap: 3rem;

@@ -9,6 +9,7 @@ const navigationItems = [
   { href: "/", label: "Home", exact: true },
   { href: "/catalog", label: "Catalog" },
   { href: "/about", label: "About" },
+  { href: "/group-orders", label: "Group Orders" },
   { href: "/contact", label: "Contact" }
 ] satisfies ReadonlyArray<{
   href: Route;

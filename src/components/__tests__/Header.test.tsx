@@ -43,6 +43,7 @@ describe("Header", () => {
     expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Catalog" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Group Orders" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Przejdź do koszyka" })).toBeInTheDocument();
   });
@@ -69,5 +70,16 @@ describe("Header", () => {
 
     expect(contactLink).toHaveAttribute("aria-current", "page");
     expect(contactLink).toHaveClass("site-header__link--active");
+  });
+
+  it("marks the group orders link as active on the matching route", () => {
+    usePathnameMock.mockReturnValue("/group-orders");
+
+    render(<Header />);
+
+    const groupOrdersLink = screen.getByRole("link", { name: "Group Orders" });
+
+    expect(groupOrdersLink).toHaveAttribute("aria-current", "page");
+    expect(groupOrdersLink).toHaveClass("site-header__link--active");
   });
 });

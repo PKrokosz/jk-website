@@ -75,4 +75,31 @@ describe("CLI environment verification", () => {
     expect(qualityVerifyStep?.description).toContain(summaryList);
     expect(qualityCiVerifyStep?.description).toContain(summaryList);
   });
+
+  it("dodaje krok kontroli migracji Drizzle do obu bramek jakości", () => {
+    const qualityDrizzleStep = COMMANDS.quality.steps.find(
+      (step) => step.id === "drizzle-generate-dry-run"
+    );
+    const qualityCiDrizzleStep = COMMANDS["quality:ci"].steps.find(
+      (step) => step.id === "drizzle-generate-dry-run"
+    );
+
+    expect(qualityDrizzleStep).toBeDefined();
+    expect(qualityCiDrizzleStep).toBeDefined();
+
+    expect(qualityDrizzleStep?.command).toBe("pnpm");
+    expect(qualityDrizzleStep?.args).toEqual([
+      "exec",
+      "tsx",
+      "tools/cli/drizzle-generate-check.ts"
+    ]);
+
+    expect(qualityCiDrizzleStep?.args).toEqual([
+      "exec",
+      "tsx",
+      "tools/cli/drizzle-generate-check.ts"
+    ]);
+    expect(qualityDrizzleStep?.description).toContain("drizzle/");
+    expect(qualityCiDrizzleStep?.description).toContain("drizzle/");
+  });
 });

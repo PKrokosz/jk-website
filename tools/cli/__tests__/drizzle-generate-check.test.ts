@@ -1,16 +1,6 @@
 import { execFile, spawn, type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-const mkdtempMock = vi.fn<(prefix: string) => Promise<string>>();
-const readdirMock = vi.fn<(path: string) => Promise<string[]>>();
-const rmMock = vi.fn<(path: string, options?: { recursive?: boolean; force?: boolean }) => Promise<void>>();
-
-vi.mock("node:fs/promises", () => ({
-  mkdtemp: mkdtempMock,
-  readdir: readdirMock,
-  rm: rmMock
-}));
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const {
   DrizzleMigrationsOutOfSyncError,
@@ -48,7 +38,8 @@ const createSpawnMock = () => {
   };
 };
 
-const createExecFileMock = (stdout: string) => {
+const createExecFileMock = (stdoutSequence: string[]) => {
+  const outputs = [...stdoutSequence];
   const mock = vi.fn(
     (
       command: Parameters<typeof execFile>[0],
@@ -61,7 +52,8 @@ const createExecFileMock = (stdout: string) => {
         | undefined;
 
       if (cb) {
-        cb(null, stdout, "");
+        const next = outputs.shift() ?? "";
+        cb(null, next, "");
       }
 
       return new EventEmitter() as unknown as ReturnType<typeof execFile>;
@@ -76,37 +68,34 @@ const createExecFileMock = (stdout: string) => {
 };
 
 describe("ensureDrizzleMigrationsAreClean", () => {
-  beforeEach(() => {
-    mkdtempMock.mockResolvedValue("/tmp/drizzle-check-abc123");
-    readdirMock.mockResolvedValue([]);
-    rmMock.mockResolvedValue();
-  });
-
   afterEach(() => {
-    mkdtempMock.mockReset();
-    readdirMock.mockReset();
-    rmMock.mockReset();
+    vi.restoreAllMocks();
   });
 
-  it("uruchamia pnpm db:generate w trybie dry-run i przechodzi, gdy brak zmian", async () => {
+  it("uruchamia pnpm db:generate i przechodzi, gdy brak zmian", async () => {
     const { mock: spawnMock, impl: spawnImpl } = createSpawnMock();
-    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock("");
+    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock(["", ""]);
 
     await expect(
       ensureDrizzleMigrationsAreClean({ spawnImpl, execFileImpl })
     ).resolves.toBeUndefined();
 
-    expect(mkdtempMock).toHaveBeenCalledWith(expect.stringContaining("drizzle-generate-check-"));
     expect(spawnMock).toHaveBeenCalledWith(
       "pnpm",
       ["db:generate"],
       expect.objectContaining({
-        stdio: "inherit",
-        env: expect.objectContaining({ DRIZZLE_OUT: "/tmp/drizzle-check-abc123" })
+        stdio: "inherit"
       })
     );
-    expect(rmMock).toHaveBeenCalledWith("/tmp/drizzle-check-abc123", { force: true, recursive: true });
-    expect(execFileMock).toHaveBeenCalledWith(
+    expect(execFileMock).toHaveBeenNthCalledWith(
+      1,
+      "git",
+      ["status", "--short", "drizzle"],
+      { encoding: "utf8" },
+      expect.any(Function)
+    );
+    expect(execFileMock).toHaveBeenNthCalledWith(
+      2,
       "git",
       ["status", "--short", "drizzle"],
       { encoding: "utf8" },
@@ -116,15 +105,17 @@ describe("ensureDrizzleMigrationsAreClean", () => {
 
   it("wyrzuca błąd, gdy katalog drizzle/ zawiera zmiany", async () => {
     const { mock: spawnMock, impl: spawnImpl } = createSpawnMock();
-    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock(" M drizzle/0001_pending.sql\n");
+    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock([" M drizzle/0001_pending.sql\n"]);
 
     await expect(
       ensureDrizzleMigrationsAreClean({ spawnImpl, execFileImpl })
     ).rejects.toBeInstanceOf(DrizzleMigrationsOutOfSyncError);
 
+    expect(spawnMock).not.toHaveBeenCalled();
+
     const error = await ensureDrizzleMigrationsAreClean({
       spawnImpl,
-      execFileImpl: createExecFileMock("M drizzle/0001.sql\n").impl
+      execFileImpl: createExecFileMock(["M drizzle/0001.sql\n"]).impl
     }).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(DrizzleMigrationsOutOfSyncError);
@@ -134,16 +125,17 @@ describe("ensureDrizzleMigrationsAreClean", () => {
   });
 
   it("informuje o brakujących migracjach, gdy generacja tworzy nowe pliki", async () => {
-    readdirMock.mockResolvedValue(["0001_new.sql"]);
-
     const { impl: spawnImpl } = createSpawnMock();
-    const { impl: execFileImpl } = createExecFileMock("");
+    const { impl: execFileImpl } = createExecFileMock([
+      "",
+      "?? drizzle/0001_new.sql\n M drizzle/meta/_journal.json\n"
+    ]);
 
     const error = await ensureDrizzleMigrationsAreClean({ spawnImpl, execFileImpl }).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(DrizzleMigrationsPendingGenerationError);
     expect(
       (error as DrizzleMigrationsPendingGenerationErrorInstance).generatedArtifacts
-    ).toEqual(["0001_new.sql"]);
+    ).toEqual(["drizzle/0001_new.sql", "drizzle/meta/_journal.json"]);
   });
 });

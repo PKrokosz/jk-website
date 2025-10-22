@@ -9,57 +9,52 @@ import { catalogLeathers, catalogStyles } from "@/lib/catalog/data";
 const products = createMockProducts(catalogStyles, catalogLeathers);
 
 describe("CatalogExplorer", () => {
-  it("renders the full product list", () => {
+  it("renders segmented catalog with native data", () => {
     render(
       <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
     );
 
-    expect(screen.getAllByRole("listitem")).toHaveLength(15);
-    expect(screen.getByRole("heading", { name: "Szpic" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Buty" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 2, name: "Akcesoria" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 2, name: "Dodatki" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Poznaj szczegóły modelu Szpic" })).toHaveAttribute(
       "href",
       "/catalog/szpic"
     );
   });
 
-  it("filters products by selected style and leather", () => {
+  it("sorts footwear by price in descending order", () => {
     render(
       <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
     );
 
-    fireEvent.click(screen.getByLabelText("Guild Monk Shoe"));
-    fireEvent.click(screen.getByLabelText(/Amber Pull-Up/));
+    fireEvent.click(screen.getByLabelText("Od najwyższej"));
 
-    const items = screen.getAllByRole("listitem");
-    expect(items).toHaveLength(1);
-    expect(screen.getByRole("heading", { level: 3, name: "Klamry" })).toBeVisible();
+    const highTierHeading = screen.getByRole("heading", { name: "Dragonki" });
+    const lowTierHeading = screen.getByRole("heading", { name: "Szpic" });
+
+    expect(highTierHeading.compareDocumentPosition(lowTierHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("sorts products by name in descending order", () => {
+  it("filters products by price tier", () => {
     render(
       <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
     );
 
-    fireEvent.change(screen.getByLabelText("Sortuj listę produktów"), {
-      target: { value: "name-desc" }
-    });
+    fireEvent.click(screen.getByLabelText("Wysoki"));
 
-    const headings = screen
-      .getAllByRole("heading", { level: 3 })
-      .map((heading) => heading.textContent ?? "");
-
-    expect(headings[0]).toBe("Wysokie Szpice");
+    expect(screen.getByRole("heading", { name: "Dragonki" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Szpic" })).not.toBeInTheDocument();
   });
 
-  it("filters products by category", () => {
+  it("filters products by leather color", () => {
     render(
       <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Akcesoria" }));
+    fireEvent.click(screen.getByLabelText("Ebony"));
 
-    const items = screen.getAllByRole("listitem");
-    expect(items).toHaveLength(3);
-    expect(screen.getByRole("heading", { name: "Dedykowany wosk pielęgnacyjny" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Wysokie Szpice" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Szpic" })).not.toBeInTheDocument();
   });
 });

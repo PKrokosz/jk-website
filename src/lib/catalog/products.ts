@@ -10,6 +10,7 @@ import {
 } from "./types";
 import { ORDER_ACCESSORIES } from "@/config/orderAccessories";
 import { ORDER_MODELS } from "@/config/orderModels";
+import { ORDER_EXTRA_MAP } from "@/config/orderExtras";
 
 const CATEGORY_LABELS: Record<CatalogProductCategory, string> = {
   footwear: "Buty",
@@ -543,11 +544,46 @@ function createPlaceholderImage(name: string, caption: string) {
   };
 }
 
+function resolveOrderPriceGrosz(template: ProductTemplate) {
+  const reference = template.orderReference;
+  if (!reference) {
+    return undefined;
+  }
+
+  if (reference.type === "model") {
+    const model = ORDER_MODEL_MAP.get(reference.id);
+    if (model) {
+      return Math.round(model.price * 100);
+    }
+  }
+
+  if (reference.type === "accessory") {
+    const accessory = ORDER_ACCESSORY_MAP.get(reference.id);
+    if (accessory) {
+      return Math.round(accessory.price * 100);
+    }
+  }
+
+  if (reference.type === "service" && reference.id in ORDER_EXTRA_MAP) {
+    const extra = ORDER_EXTRA_MAP[reference.id as keyof typeof ORDER_EXTRA_MAP];
+    if (extra) {
+      return Math.round(extra.price * 100);
+    }
+  }
+
+  return undefined;
+}
+
 function computePrice(
   template: ProductTemplate,
   style: CatalogStyle | undefined,
   leather: CatalogLeather | undefined
 ) {
+  const orderPriceGrosz = resolveOrderPriceGrosz(template);
+  if (typeof orderPriceGrosz === "number") {
+    return Math.max(0, orderPriceGrosz);
+  }
+
   if (typeof template.priceOverrideGrosz === "number") {
     return Math.max(0, template.priceOverrideGrosz);
   }

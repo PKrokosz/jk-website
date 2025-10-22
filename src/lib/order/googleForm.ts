@@ -1,6 +1,7 @@
 import { ORDER_ACCESSORY_MAP } from "@/config/orderAccessories";
 import { GOOGLE_FORM_CONSTANTS, ORDER_FORM_ENTRIES } from "@/config/orderFormEntries";
 import { ORDER_MODEL_MAP } from "@/config/orderModels";
+import { ORDER_EXTRA_MAP } from "@/config/orderExtras";
 
 import { ORDER_COLORS_BY_ID, ORDER_SIZES_BY_ID, type OrderFormValues } from "./schema";
 
@@ -58,7 +59,10 @@ export function buildGoogleFormPayload(values: OrderFormValues) {
   });
 
   if (values.waterskin.selected) {
-    params.append(ORDER_FORM_ENTRIES.waterskin, "Bukłak - 250 zł");
+    const extra = ORDER_EXTRA_MAP.waterskin;
+    if (extra) {
+      params.append(ORDER_FORM_ENTRIES.waterskin, extra.googleValue);
+    }
   }
 
   const waterskinSymbol = values.waterskin.symbol?.trim();
@@ -68,7 +72,10 @@ export function buildGoogleFormPayload(values: OrderFormValues) {
   }
 
   if (values.bracer.selected) {
-    params.append(ORDER_FORM_ENTRIES.bracer, "Dodaj karwasz - 280 zł");
+    const extra = ORDER_EXTRA_MAP.bracer;
+    if (extra) {
+      params.append(ORDER_FORM_ENTRIES.bracer, extra.googleValue);
+    }
   }
 
   const bracerColor = values.bracer.color?.trim();
@@ -78,7 +85,10 @@ export function buildGoogleFormPayload(values: OrderFormValues) {
   }
 
   if (values.shoeTrees) {
-    params.append(ORDER_FORM_ENTRIES.shoeTrees, "Dokup prawidła sosnowe do swoich butów - 150 zł");
+    const extra = ORDER_EXTRA_MAP.shoeTrees;
+    if (extra) {
+      params.append(ORDER_FORM_ENTRIES.shoeTrees, extra.googleValue);
+    }
   }
 
   if (values.discountCode && values.discountCode.trim().length > 0) {

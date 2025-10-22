@@ -70,6 +70,7 @@ describe("GET /api/products/[slug]", () => {
     }
   };
   const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
     resetNextDbClient();
@@ -101,6 +102,7 @@ describe("GET /api/products/[slug]", () => {
     resetNextDbClient();
     restoreDatabaseUrl();
     consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   it("zwraca szczegóły produktu dla poprawnego slugu", async () => {
@@ -138,14 +140,17 @@ describe("GET /api/products/[slug]", () => {
     expect(response.status).toBe(500);
   });
 
-  it("zwraca 500 gdy brakuje konfiguracji bazy danych", async () => {
+  it("korzysta z danych referencyjnych gdy brakuje konfiguracji bazy danych", async () => {
     delete process.env.DATABASE_URL;
     const [request, context] = makeRequest(sampleDetail.slug);
 
     const response = await GET(request, context);
 
-    expect(response.status).toBe(500);
-    expect(resolveCatalogCacheMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body).toEqual({ data: sampleDetail });
+    expect(resolveCatalogCacheMock).toHaveBeenCalledWith(undefined);
     expect(mockedCreateDbClient).not.toHaveBeenCalled();
   });
 });

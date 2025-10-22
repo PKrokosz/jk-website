@@ -2,6 +2,7 @@
 import { getCommandDefinition, listCommandDefinitions } from "./commands";
 import { parseArguments } from "./args";
 import { runCommandDefinition, StepExecutionError } from "./runner";
+import { loadCliEnvironment } from "./load-env";
 
 const printUsage = (): void => {
   console.log(`Usage: pnpm run cli <command> [options]\n`);
@@ -17,6 +18,8 @@ const printUsage = (): void => {
 };
 
 export const main = async () => {
+  loadCliEnvironment();
+
   const parsed = parseArguments(process.argv.slice(2));
 
   if (parsed.list) {

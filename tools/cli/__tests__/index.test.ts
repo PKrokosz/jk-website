@@ -7,6 +7,7 @@ const mockParseArguments = vi.fn<() => ParsedArguments>();
 const mockListCommandDefinitions = vi.fn<() => CommandDefinition[]>();
 const mockGetCommandDefinition = vi.fn<(name: string) => CommandDefinition | undefined>();
 const mockRunCommandDefinition = vi.fn();
+const mockLoadCliEnvironment = vi.fn();
 
 vi.mock("../args", () => ({
   parseArguments: mockParseArguments
@@ -25,6 +26,10 @@ vi.mock("../runner", async () => {
     runCommandDefinition: mockRunCommandDefinition
   };
 });
+
+vi.mock("../load-env", () => ({
+  loadCliEnvironment: mockLoadCliEnvironment
+}));
 
 class ExitCalled extends Error {
   constructor(public readonly code: number | undefined) {
@@ -89,6 +94,8 @@ describe("CLI entrypoint", () => {
     mockListCommandDefinitions.mockReset();
     mockGetCommandDefinition.mockReset();
     mockRunCommandDefinition.mockReset();
+    mockLoadCliEnvironment.mockReset();
+    mockLoadCliEnvironment.mockReturnValue([]);
 
     exitSpy.mockReset();
     logSpy.mockReset();
@@ -122,6 +129,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(mockListCommandDefinitions).toHaveBeenCalled();
     expect(logSpy).toHaveBeenCalledWith("Commands:");
     expect(
@@ -141,6 +149,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith("Unknown argument: --foo");
     expect(
       logSpy.mock.calls.some(([value]) =>
@@ -159,6 +168,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(logSpy.mock.calls[0]?.[0]).toContain("Usage: pnpm run cli");
     expect(exitSpy).toHaveBeenCalledWith(0);
     expect(exitCode).toBe(0);
@@ -174,6 +184,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith("Unknown argument: --foo");
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(exitCode).toBe(1);
@@ -189,6 +200,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith("Unknown command: deploy");
     expect(logSpy).toHaveBeenCalledWith("Commands:");
     expect(exitSpy).toHaveBeenCalledWith(1);
@@ -213,6 +225,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(mockRunCommandDefinition).toHaveBeenCalledWith(definition, {
       dryRun: true,
       skip: expect.any(Set)
@@ -242,6 +255,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith("unexpected failure");
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(exitCode).toBe(1);
@@ -269,6 +283,7 @@ describe("CLI entrypoint", () => {
 
     const exitCode = await invokeMain();
 
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith(
       'Step "lint" failed: lint failed'
     );
@@ -287,5 +302,28 @@ describe("command definitions", () => {
       command: "pnpm",
       args: ["exec", "tsx", "tools/verify-drizzle-env.ts"]
     });
+  });
+
+  it("loads environment files before parsing arguments", async () => {
+    mockLoadCliEnvironment.mockClear();
+    mockParseArguments.mockClear();
+    process.env.CLI_TEST_MODE = "1";
+    process.argv = originalArgv.slice(0, 2);
+
+    mockLoadCliEnvironment.mockImplementationOnce(() => {
+      expect(mockParseArguments).not.toHaveBeenCalled();
+      return [];
+    });
+
+    mockParseArguments.mockReturnValue({
+      ...baseArgs(),
+      help: true
+    });
+
+    const exitCode = await invokeMain();
+
+    expect(exitCode).toBe(0);
+    expect(mockLoadCliEnvironment).toHaveBeenCalled();
+    expect(mockParseArguments).toHaveBeenCalled();
   });
 });

@@ -69,6 +69,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Logi `/api/pricing/quote` są zapisywane w tabeli `quote_requests` (Drizzle); korzystaj z repozytorium `src/lib/pricing/quote-requests-repository.ts`, aby łatwo mockować zapisy w testach.
 - Testy kontraktowe API opieraj o schematy z `src/lib/catalog/schemas.ts`, mockuj moduł `@/lib/catalog/repository`, aby nie łączyć się z bazą.
 - Mocki (`src/lib/catalog`) z rozszerzonym modelem (slug, warianty, order reference) do czasu podłączenia Drizzle.
+- Repozytorium katalogu ma fallback do danych referencyjnych (`src/lib/catalog/data.ts`) w razie braku połączenia z bazą — nie usuwaj testów `repository.fallback.test.ts` i unikaj top-level importów `@jk/db` w modułach produkcyjnych.
 - Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku.
 
 ## Co robić w taskach

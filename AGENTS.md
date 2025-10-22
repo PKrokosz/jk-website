@@ -77,10 +77,13 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Endpointy: `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote` (mock). `/api/products` korzysta z Drizzle (styl/skóra) + templatek, walidacja Zod.
 - `/api/pricing/quote` korzysta z `pricingQuoteRequestSchema`/`pricingQuoteResponseSchema` (`src/lib/pricing/schemas.ts`) – przy zmianach aktualizuj testy kontraktowe w `src/app/api/pricing/quote/route.test.ts`.
 - Logi `/api/pricing/quote` są zapisywane w tabeli `quote_requests` (Drizzle); korzystaj z repozytorium `src/lib/pricing/quote-requests-repository.ts`, aby łatwo mockować zapisy w testach.
+- Handlery API korzystające z bazy sprawdzają `process.env.DATABASE_URL` w runtime i inicjalizują klienta DB dopiero wewnątrz funkcji `GET`/`POST` (bez top-level side-effectów); w razie braku konfiguracji zwracaj `HTTP 500` z komunikatem dla klienta.
+- Korzystaj z helpera `@/lib/db/next-client` (`getNextDbClient`) do współdzielenia połączenia w środowisku Next.js – moduł sam weryfikuje `DATABASE_URL`, cache'uje klienta i wystawia `resetNextDbClient` na potrzeby testów.
+- Migruj pozostałe handlery DB (`/api/products`, `/api/styles`, `/api/leather`) na helper podczas kolejnych zadań, aby spójnie zarządzać połączeniami.
 - Testy kontraktowe API opieraj o schematy z `src/lib/catalog/schemas.ts`, mockuj moduł `@/lib/catalog/repository`, aby nie łączyć się z bazą.
 - Mocki (`src/lib/catalog`) z rozszerzonym modelem (slug, warianty, order reference) do czasu podłączenia Drizzle.
 - Repozytorium katalogu ma fallback do danych referencyjnych (`src/lib/catalog/data.ts`) w razie braku połączenia z bazą — nie usuwaj testów `repository.fallback.test.ts` i unikaj top-level importów `@jk/db` w modułach produkcyjnych.
-- Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku.
+- Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku. Konfiguracja `drizzle.config.ts` ładuje zmienne z `.env.local` (fallback `.env`); pamiętaj o aktualizacji dokumentacji, jeśli zmienisz nazwy plików lub wymagane zmienne.
 
 ## Co robić w taskach
 - Dodawaj komponenty w `src/components/` lub `src/components/ui/` dla prymitywów.
@@ -95,6 +98,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.
 - Używaj `pnpm qa` do lokalnych kontroli jakości oraz `pnpm qa:ci` do pełnego przebiegu przed PR.
 - Flagi CLI: `--dry-run` (podgląd kroków) oraz `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`).
+- Pierwszy krok `quality`/`quality:ci` odpala `tools/verify-drizzle-env.ts`, aby upewnić się, że komplet zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) jest skonfigurowany. Skrypt wypisuje brakujące wpisy i przykładowe wartości – popraw `.env.local` zanim ruszysz dalej.
 - Entry point `tools/cli/index.ts` musi mieć odzwierciedlenie w testach (`tools/cli/__tests__/index.test.ts`) – w testach stubuj `process.exit` i logi (`console.log`, `console.error`), aby weryfikować komunikaty i kody wyjścia bez kończenia procesu.
 
 ## Czego NIE robić

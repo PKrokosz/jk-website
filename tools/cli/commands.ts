@@ -1,10 +1,27 @@
+import { REQUIRED_ENVIRONMENT_VARIABLES } from "../verify-drizzle-env";
 import type { CommandDefinition } from "./types";
+
+const REQUIRED_ENV_SUMMARY = REQUIRED_ENVIRONMENT_VARIABLES.map((requirement) => requirement.name).join(
+  ", "
+);
+
+const VERIFY_ENV_DESCRIPTION =
+  "Sprawdza wymagane zmienne środowiskowe (" +
+  REQUIRED_ENV_SUMMARY +
+  ") przed uruchomieniem kontroli jakości.";
 
 export const COMMANDS: Record<string, CommandDefinition> = {
   quality: {
     name: "quality",
     summary: "Run lint, type checks and unit tests (local developer workflow).",
     steps: [
+      {
+        id: "verify-drizzle-env",
+        title: "Verify Drizzle env",
+        command: "pnpm",
+        args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
+        description: VERIFY_ENV_DESCRIPTION
+      },
       {
         id: "lint",
         title: "ESLint",
@@ -33,6 +50,13 @@ export const COMMANDS: Record<string, CommandDefinition> = {
     summary:
       "Run the full CI gate including lint, type checks, build, coverage, e2e and depcheck.",
     steps: [
+      {
+        id: "verify-drizzle-env",
+        title: "Verify Drizzle env",
+        command: "pnpm",
+        args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
+        description: VERIFY_ENV_DESCRIPTION
+      },
       {
         id: "lint",
         title: "ESLint",

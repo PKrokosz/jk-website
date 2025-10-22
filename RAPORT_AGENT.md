@@ -90,6 +90,18 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
 - **Jakie przyjęto założenia:** Backend katalogu zwraca dane referencyjne dostępne lokalnie; Playwright korzysta z uruchomionego dev servera, a testy mogą wykonywać żądania GET do endpointów mockowanych.
 - **Co dalej:** Przygotować pełny flow e2e zamówienia (modal → `/order/native`), dopisać testy integracyjne `/catalog/[slug]` i `/account`, kontynuować migrację design tokens.
 
+## Raport agenta – 2025-10-25
+- **Co zrobiono:** Przeniesiono inicjalizację klienta bazy do handlera `/api/pricing/quote`, dodano runtime'ową walidację `DATABASE_URL`, przebudowano repozytorium logów na wstrzykiwany klient oraz rozszerzono testy o scenariusz braku konfiguracji.
+- **Dlaczego:** Aby uniknąć błędów w czasie budowania/ładowania modułów przy braku `DATABASE_URL` i wymusić leniwą inicjalizację zgodną z App Routerem.
+- **Jakie przyjęto założenia:** Pool `pg` może być współdzielony w module Next.js, a testy jednostkowe będą mockować repozytorium i klienta DB zamiast realnego połączenia.
+- **Co dalej:** Dostosować pozostałe endpointy API do tego wzorca (np. `/api/products`) i rozważyć wspólny helper do zarządzania cache'owaniem klienta.
+
+## Raport agenta – 2025-10-26
+- **Co zrobiono:** Wyodrębniono helper `@/lib/db/next-client` udostępniający `getNextDbClient` i `resetNextDbClient`, zintegrowano z `/api/pricing/quote` oraz zaktualizowano testy do resetowania cache'u między scenariuszami.
+- **Dlaczego:** Aby uniknąć duplikowania logiki cache'owania klienta DB w handlerach i zapewnić deterministyczne testy przy współdzieleniu połączeń.
+- **Jakie przyjęto założenia:** Endpointy Next.js korzystają z jednego procesu, dzięki czemu cache modułu jest bezpieczny, a reset helpera będzie używany tylko w testach jednostkowych.
+- **Co dalej:** Migrować `/api/products`, `/api/styles` oraz `/api/leather` na nowy helper i dopisać testy weryfikujące reset cache'u po mockowaniu środowiska.
+
 ---
 **Priorytety rekomendowane:**
 1. Podpiąć API Next.js oraz mocki katalogu do bazy (Drizzle) na bazie gotowych migracji i seeda.

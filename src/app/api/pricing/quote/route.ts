@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { calculateQuote } from "@/lib/pricing/calc";
 import {
   countQuoteRequestsSince,
   insertQuoteRequestLog
 } from "@/lib/pricing/quote-requests-repository";
 import { pricingQuoteRequestSchema, pricingQuoteResponseSchema } from "@/lib/pricing/schemas";
+import { DatabaseConfigurationError, getNextDbClient } from "@/lib/db/next-client";
+import type { Database } from "@jk/db";
 
 const RATE_LIMIT_MAX_REQUESTS = 10;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 godzina
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 function getClientIp(request: NextRequest): string {
   if (request.ip) {
@@ -41,11 +48,38 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let database: Database;
+
+  try {
+    database = getNextDbClient().db;
+  } catch (error) {
+    console.error("Failed to initialize database client", error);
+
+    if (error instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Database connection is not configured. Please try again later."
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Unable to access database. Please try again later."
+      },
+      { status: 500 }
+    );
+  }
+
   const ipAddress = getClientIp(request);
   const now = new Date();
   const rateLimitWindowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_MS);
 
   const recentRequestCount = await countQuoteRequestsSince(
+    database,
     ipAddress,
     rateLimitWindowStart,
     RATE_LIMIT_MAX_REQUESTS
@@ -78,7 +112,7 @@ export async function POST(request: NextRequest) {
   });
 
   try {
-    await insertQuoteRequestLog({
+    await insertQuoteRequestLog(database, {
       ipAddress,
       userAgent: request.headers.get("user-agent"),
       payload: responsePayload.payload,

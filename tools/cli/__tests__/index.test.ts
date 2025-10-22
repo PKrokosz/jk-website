@@ -268,3 +268,16 @@ describe("CLI entrypoint", () => {
     expect(exitCode).toBe(1);
   });
 });
+
+describe("command definitions", () => {
+  it("includes Drizzle environment verification as the first quality step", async () => {
+    const actual = await vi.importActual<typeof import("../commands")>("../commands");
+    const qualitySteps = actual.COMMANDS.quality.steps;
+
+    expect(qualitySteps[0]).toMatchObject({
+      id: "verify-drizzle-env",
+      command: "pnpm",
+      args: ["exec", "tsx", "tools/verify-drizzle-env.ts"]
+    });
+  });
+});

@@ -3,10 +3,30 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { pricingQuoteResponseSchema } from "@/lib/pricing/schemas";
 
+vi.mock("@jk/db", async () => {
+  const actual = await vi.importActual<typeof import("@jk/db")>("@jk/db");
+
+  return {
+    ...actual,
+    createDbClient: vi.fn(
+      () => ({
+        db: {} as import("@jk/db").Database,
+        pool: {} as unknown as import("pg").Pool
+      })
+    )
+  };
+});
+
 vi.mock("@/lib/pricing/quote-requests-repository", () => ({
   countQuoteRequestsSince: vi.fn().mockResolvedValue(0),
   insertQuoteRequestLog: vi.fn().mockResolvedValue(undefined)
 }));
+
+const dbClientHelper = await import("@/lib/db/next-client");
+const { resetNextDbClient } = dbClientHelper;
+
+const dbModule = await import("@jk/db");
+const mockedCreateDbClient = vi.mocked(dbModule.createDbClient);
 
 const quoteRequestsRepository = await import("@/lib/pricing/quote-requests-repository");
 const mockedCountQuoteRequestsSince = vi.mocked(
@@ -17,6 +37,9 @@ const mockedInsertQuoteRequestLog = vi.mocked(
 );
 
 const { POST } = await import("./route");
+
+const ORIGINAL_DATABASE_URL = process.env.DATABASE_URL;
+const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
 function makeRequest(body: unknown, headers: Record<string, string> = {}) {
   return new NextRequest("https://jkhandmade.pl/api/pricing/quote", {
@@ -31,10 +54,17 @@ function makeRequest(body: unknown, headers: Record<string, string> = {}) {
 
 describe("POST /api/pricing/quote", () => {
   beforeEach(() => {
+    resetNextDbClient();
+    mockedCreateDbClient.mockClear();
+    mockedCreateDbClient.mockReturnValue({
+      db: {} as import("@jk/db").Database,
+      pool: {} as unknown as import("pg").Pool
+    });
     mockedCountQuoteRequestsSince.mockClear();
     mockedInsertQuoteRequestLog.mockClear();
     mockedCountQuoteRequestsSince.mockResolvedValue(0);
     mockedInsertQuoteRequestLog.mockResolvedValue();
+    process.env.DATABASE_URL = "postgres://test:test@localhost:5432/db";
   });
 
   it("zwraca poprawną wycenę dla prawidłowego payloadu", async () => {
@@ -58,11 +88,13 @@ describe("POST /api/pricing/quote", () => {
     expect(parsed.quote.totalGrossGrosz).toBeGreaterThan(parsed.quote.totalNetGrosz);
     expect(parsed.quote.breakdown.length).toBeGreaterThan(1);
     expect(mockedCountQuoteRequestsSince).toHaveBeenCalledWith(
+      expect.anything(),
       "203.0.113.1",
       expect.any(Date),
       expect.any(Number)
     );
     expect(mockedInsertQuoteRequestLog).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({
         ipAddress: "203.0.113.1",
         payload: parsed.payload,
@@ -82,6 +114,7 @@ describe("POST /api/pricing/quote", () => {
     expect(response.status).toBe(422);
     expect(mockedCountQuoteRequestsSince).not.toHaveBeenCalled();
     expect(mockedInsertQuoteRequestLog).not.toHaveBeenCalled();
+    expect(mockedCreateDbClient).not.toHaveBeenCalled();
   });
 
   it("obsługuje pusty payload przez zastosowanie wartości domyślnych", async () => {
@@ -93,7 +126,12 @@ describe("POST /api/pricing/quote", () => {
 
     expect(parsed.payload).toEqual({});
     expect(parsed.quote.totalNetGrosz).toBeGreaterThan(0);
-    expect(mockedCountQuoteRequestsSince).toHaveBeenCalled();
+    expect(mockedCountQuoteRequestsSince).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(String),
+      expect.any(Date),
+      expect.any(Number)
+    );
     expect(mockedInsertQuoteRequestLog).toHaveBeenCalled();
   });
 
@@ -113,4 +151,21 @@ describe("POST /api/pricing/quote", () => {
 
     expect(response.status).toBe(500);
   });
+
+  it("zwraca błąd 500 gdy brakuje konfiguracji bazy danych", async () => {
+    delete process.env.DATABASE_URL;
+
+    const response = await POST(makeRequest({}));
+
+    expect(response.status).toBe(500);
+    expect(mockedCreateDbClient).not.toHaveBeenCalled();
+    expect(mockedCountQuoteRequestsSince).not.toHaveBeenCalled();
+    expect(mockedInsertQuoteRequestLog).not.toHaveBeenCalled();
+  });
+});
+
+afterAll(() => {
+  resetNextDbClient();
+  process.env.DATABASE_URL = ORIGINAL_DATABASE_URL;
+  consoleErrorSpy.mockRestore();
 });

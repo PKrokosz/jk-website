@@ -2,45 +2,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { countQuoteRequestsSince, insertQuoteRequestLog } from "../quote-requests-repository";
 import type { PricingQuote, PricingQuoteRequest } from "../schemas";
+import { createMockPricingDatabase } from "./mock-db";
 
-const { selectMock, insertMock, queryBuilder, valuesMock, andMock, eqMock, gteMock, descMock } = vi.hoisted(() => {
-  const selectMock = vi.fn();
-  const insertMock = vi.fn();
-  const queryBuilder = {
-    from: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    limit: vi.fn()
-  } as {
-    from: ReturnType<typeof vi.fn>;
-    where: ReturnType<typeof vi.fn>;
-    orderBy: ReturnType<typeof vi.fn>;
-    limit: ReturnType<typeof vi.fn>;
-  };
-  const valuesMock = vi.fn();
-
-  return {
-    selectMock,
-    insertMock,
-    queryBuilder,
-    valuesMock,
-    andMock: vi.fn((...conditions: unknown[]) => conditions),
-    eqMock: vi.fn((...args: unknown[]) => args),
-    gteMock: vi.fn((...args: unknown[]) => args),
-    descMock: vi.fn((value: unknown) => value)
-  };
-});
-
-vi.mock("@jk/db", () => ({
-  db: {
-    select: selectMock,
-    insert: insertMock
-  },
-  quoteRequest: {
+const { andMock, eqMock, gteMock, descMock, quoteRequestMock } = vi.hoisted(() => ({
+  andMock: vi.fn((...conditions: unknown[]) => conditions),
+  eqMock: vi.fn((...args: unknown[]) => args),
+  gteMock: vi.fn((...args: unknown[]) => args),
+  descMock: vi.fn((value: unknown) => value),
+  quoteRequestMock: {
     id: Symbol("id"),
     ipAddress: Symbol("ipAddress"),
     requestedAt: Symbol("requestedAt")
-  },
+  }
+}));
+
+vi.mock("@jk/db", () => ({
+  quoteRequest: quoteRequestMock,
   and: andMock,
   eq: eqMock,
   gte: gteMock,
@@ -59,22 +36,15 @@ describe("quote-requests-repository", () => {
     breakdown: [{ label: "Model", amountGrosz: 100_00 }]
   };
 
+  let db: ReturnType<typeof createMockPricingDatabase>["db"];
+  let selectMock: ReturnType<typeof createMockPricingDatabase>["selectMock"];
+  let insertMock: ReturnType<typeof createMockPricingDatabase>["insertMock"];
+  let valuesMock: ReturnType<typeof createMockPricingDatabase>["valuesMock"];
+  let queryBuilder: ReturnType<typeof createMockPricingDatabase>["queryBuilder"];
+
   beforeEach(() => {
-    selectMock.mockReset();
-    insertMock.mockReset();
-    valuesMock.mockReset();
-    andMock.mockReset();
-    eqMock.mockReset();
-    gteMock.mockReset();
-    descMock.mockReset();
-    Object.assign(queryBuilder, {
-      from: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      orderBy: vi.fn().mockReturnThis(),
-      limit: vi.fn()
-    });
-    selectMock.mockReturnValue(queryBuilder);
-    insertMock.mockReturnValue({ values: valuesMock });
+    ({ db, selectMock, insertMock, valuesMock, queryBuilder } = createMockPricingDatabase());
+
     queryBuilder.limit.mockResolvedValue([{ id: 1 }, { id: 2 }]);
     valuesMock.mockResolvedValue(undefined);
   });
@@ -85,17 +55,18 @@ describe("quote-requests-repository", () => {
 
   it("returns number of quote requests observed within the time window", async () => {
     const since = new Date("2024-10-01T10:00:00Z");
-    const count = await countQuoteRequestsSince("127.0.0.1", since, 5);
+    const count = await countQuoteRequestsSince(db, "127.0.0.1", since, 5);
 
     expect(count).toBe(2);
     expect(queryBuilder.limit).toHaveBeenCalledWith(5);
     expect(selectMock).toHaveBeenCalledWith({ id: expect.anything() });
+    expect(queryBuilder.from).toHaveBeenCalledWith(quoteRequestMock);
   });
 
   it("returns zero when no matching rows exist", async () => {
     queryBuilder.limit.mockResolvedValueOnce([]);
 
-    const count = await countQuoteRequestsSince("192.168.0.1", new Date(), 10);
+    const count = await countQuoteRequestsSince(db, "192.168.0.1", new Date(), 10);
 
     expect(count).toBe(0);
   });
@@ -103,7 +74,7 @@ describe("quote-requests-repository", () => {
   it("persists quote request log with sanitized values", async () => {
     const requestedAt = new Date("2024-11-20T12:00:00Z");
 
-    await insertQuoteRequestLog({
+    await insertQuoteRequestLog(db, {
       ipAddress: "192.168.1.1",
       userAgent: "Vitest",
       payload: baseRequest,
@@ -111,7 +82,7 @@ describe("quote-requests-repository", () => {
       requestedAt
     });
 
-    expect(insertMock).toHaveBeenCalled();
+    expect(insertMock).toHaveBeenCalledWith(quoteRequestMock);
     expect(valuesMock).toHaveBeenCalledWith({
       ipAddress: "192.168.1.1",
       userAgent: "Vitest",
@@ -126,7 +97,7 @@ describe("quote-requests-repository", () => {
     valuesMock.mockRejectedValueOnce(error);
 
     await expect(
-      insertQuoteRequestLog({
+      insertQuoteRequestLog(db, {
         ipAddress: "10.0.0.2",
         userAgent: null,
         payload: baseRequest,

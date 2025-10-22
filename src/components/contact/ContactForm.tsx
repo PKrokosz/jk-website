@@ -3,7 +3,6 @@
 import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 
 import { sanitizeProductQuery } from "@/lib/contact/sanitizeProduct";
-import React, { ChangeEvent, FormEvent, useMemo, useState } from "react";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 

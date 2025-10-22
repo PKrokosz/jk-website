@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Polityka prywatności",
   description:
-    "Polityka prywatności JK Handmade Footwear – informacje o administratorze danych, celach przetwarzania oraz prawach użytkownika."
-  title: "Polityka prywatności"
+    "Polityka prywatności JK Handmade Footwear – informacje o administratorze danych, celach przetwarzania oraz prawach użytkownika.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -17,6 +16,15 @@ export default function PrivacyPolicyPage() {
             Niniejszy dokument określa zasady przetwarzania danych osobowych użytkowników serwisu jkhandmade.pl w
             związku z prowadzeniem korespondencji przez formularz kontaktowy.
           </p>
+          <div className="legal-page__actions">
+            <a
+              className="button button--ghost"
+              href="/api/legal/privacy-policy"
+              download
+            >
+              Pobierz wersję PDF
+            </a>
+          </div>
         </header>
 
         <section className="legal-page__section" aria-labelledby="privacy-policy-admin">
@@ -135,7 +143,7 @@ export default function PrivacyPolicyPage() {
             </a>
             .
           </p>
-        </header>
+        </section>
         <section className="legal-page__section" aria-labelledby="privacy-policy-administrator-heading">
           <h2 id="privacy-policy-administrator-heading">1. Administrator danych</h2>
           <p>

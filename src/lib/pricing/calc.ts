@@ -22,7 +22,7 @@ export function calculateQuote(request: PricingQuoteRequest = {}): PricingQuote 
   const vat = Math.round(net * VAT_RATE);
   const gross = net + vat;
 
-  const breakdown: PricingBreakdownItem[] = [
+  const breakdown: PricingQuoteBreakdownItem[] = [
     {
       label: baseLabel,
       amountGrosz: basePrice

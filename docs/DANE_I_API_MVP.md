@@ -98,6 +98,6 @@
   - Jak mapować `orderReference` przy przejściu na realne dane (np. ID z bazy)?
   - Autopodpowiedź pola `product` w `ContactForm` na podstawie query paramu – ✅ wdrożona (prefill po stronie klienta).
 - **Następne kroki**
-  - Zaimplementować persystencję danych wycen (np. w tabeli `quote_requests`) z wykorzystaniem Drizzle i rate-limitów.
+  - ✅ Zaimplementowano persystencję danych wycen (`quote_requests`) wraz z rate-limitami per IP i logowaniem user-agentów.
   - Przygotować konwersję mocków do seeda Drizzle (JSON/SQL).
   - Zaplanować API `/api/products` oparte na Drizzle lub co najmniej `GET /api/products/[slug]` z mocków.

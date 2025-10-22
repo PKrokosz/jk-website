@@ -22,7 +22,6 @@ describe("ContactForm", () => {
   };
 
   const toggleConsent = () => {
-    const checkbox = screen.getByLabelText(/wyrażam zgodę/i);
     const checkbox = screen.getByLabelText(consentLabel);
     fireEvent.click(checkbox);
   };

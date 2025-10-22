@@ -94,7 +94,8 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Używaj szablonu z sekcjami `Opis`, `Lista zmian`, `Testy`, `Zrzuty ekranu`, `Checklist` (po utworzeniu template).
 
 ## Priorytety UX
-- Nawigacja globalna: Home, Catalog, About, Contact, Order (sticky header, focus states, skip link).
+- Nawigacja globalna: sticky header, focus states, skip link; copy trzymaj po polsku (Strona główna, Katalog, O pracowni,
+  Zamówienia grupowe, Kontakt, Konto) i synchronizuj etykiety w testach oraz breadcrumbach stron produktowych.
 - Katalog: siatka produktów z filtrami (styl, skóra), empty state „Brak wyników”.
 - Produkt: breadcrumbs, galeria, CTA do formularza zamówień i kontaktu, badge lejka sprzedażowego.
 - Styl: jasne tło, złote akcenty, duże zdjęcia, spacing zgodny z tokens.

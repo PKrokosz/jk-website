@@ -40,12 +40,12 @@ describe("Header", () => {
   it("renders all navigation links", () => {
     render(<Header />);
 
-    expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Catalog" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Group Orders" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Contact" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Account" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Strona główna" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Katalog" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "O pracowni" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Zamówienia grupowe" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Kontakt" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Konto" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Przejdź do koszyka" })).toBeInTheDocument();
   });
 
@@ -54,8 +54,8 @@ describe("Header", () => {
 
     render(<Header />);
 
-    const catalogLink = screen.getByRole("link", { name: "Catalog" });
-    const homeLink = screen.getByRole("link", { name: "Home" });
+    const catalogLink = screen.getByRole("link", { name: "Katalog" });
+    const homeLink = screen.getByRole("link", { name: "Strona główna" });
 
     expect(catalogLink).toHaveAttribute("aria-current", "page");
     expect(catalogLink).toHaveClass("site-header__link--active");
@@ -67,7 +67,7 @@ describe("Header", () => {
 
     render(<Header />);
 
-    const contactLink = screen.getByRole("link", { name: "Contact" });
+    const contactLink = screen.getByRole("link", { name: "Kontakt" });
 
     expect(contactLink).toHaveAttribute("aria-current", "page");
     expect(contactLink).toHaveClass("site-header__link--active");
@@ -78,7 +78,7 @@ describe("Header", () => {
 
     render(<Header />);
 
-    const groupOrdersLink = screen.getByRole("link", { name: "Group Orders" });
+    const groupOrdersLink = screen.getByRole("link", { name: "Zamówienia grupowe" });
 
     expect(groupOrdersLink).toHaveAttribute("aria-current", "page");
     expect(groupOrdersLink).toHaveClass("site-header__link--active");

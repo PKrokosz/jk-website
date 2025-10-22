@@ -125,10 +125,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="container">
             <ol>
               <li>
-                <Link href="/">Home</Link>
+                <Link href="/">Strona główna</Link>
               </li>
               <li>
-                <Link href="/catalog">Catalog</Link>
+                <Link href="/catalog">Katalog</Link>
               </li>
               <li aria-current="page">{product.name}</li>
             </ol>

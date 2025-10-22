@@ -1,14 +1,28 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const reportServerError = vi.fn();
+
+vi.mock("@/lib/telemetry", () => ({
+  reportServerError
+}));
+
 const sendMailMock = vi.fn();
+const nodemailerMock = vi.hoisted(() => {
+  const sendMail = vi.fn();
+
+  return {
+    sendMail,
+    createTransport: vi.fn(() => ({
+      sendMail
+    }))
+  };
+});
 
 vi.mock("nodemailer", () => ({
   __esModule: true,
   default: {
-    createTransport: vi.fn(() => ({
-      sendMail: sendMailMock
-    }))
+    createTransport: nodemailerMock.createTransport
   }
 }));
 
@@ -38,12 +52,12 @@ describe("POST /api/contact/submit", () => {
     process.env.SMTP_PASS = "pass";
     process.env.MAIL_FROM = "JK Handmade Footwear <jkhandmade@example.com>";
     process.env.MAIL_TO = "kontakt@jkhandmade.pl";
-    sendMailMock.mockResolvedValue({});
+    nodemailerMock.sendMail.mockResolvedValue({});
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    sendMailMock.mockReset();
+    nodemailerMock.sendMail.mockReset();
   });
 
   it("rejects invalid payloads", async () => {
@@ -66,6 +80,47 @@ describe("POST /api/contact/submit", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(sendMailMock).toHaveBeenCalledOnce();
+    expect(nodemailerMock.sendMail).toHaveBeenCalledOnce();
+  });
+
+  it("zwraca błąd przy braku konfiguracji SMTP", async () => {
+    delete process.env.SMTP_HOST;
+
+    const response = await POST(
+      makeRequest({
+        name: "Jan Kowalski",
+        email: "jan@example.com",
+        message: "Chcę zamówić buty szyte metodą Goodyear.",
+        phone: "",
+        product: "Derby"
+      })
+    );
+
+    expect(response.status).toBe(502);
+    expect(reportServerError).toHaveBeenCalledWith(
+      "contact-mail:transport",
+      expect.any(Error)
+    );
+  });
+
+  it("zwraca błąd przy problemie transportu poczty", async () => {
+    const smtpError = new Error("SMTP unavailable");
+    sendMailMock.mockRejectedValueOnce(smtpError);
+
+    const response = await POST(
+      makeRequest({
+        name: "Jan Kowalski",
+        email: "jan@example.com",
+        message: "Chcę zamówić buty szyte metodą Goodyear.",
+        phone: "",
+        product: "Derby"
+      })
+    );
+
+    expect(response.status).toBe(502);
+    expect(reportServerError).toHaveBeenCalledWith(
+      "contact-mail:transport",
+      smtpError
+    );
   });
 });

@@ -1,8 +1,15 @@
 "use client";
 
-import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import React, {
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 
 import { sanitizeProductQuery } from "@/lib/contact/sanitizeProduct";
+import { reportClientError } from "@/lib/telemetry";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -18,6 +25,7 @@ interface ContactFormData {
 
 interface ContactFormProps {
   initialProduct?: string;
+  submitRequest?: typeof fetch;
 }
 
 const initialData: ContactFormData = {
@@ -34,11 +42,17 @@ function validateEmail(email: string) {
   return /\S+@\S+\.\S+/.test(email);
 }
 
-export function ContactForm({ initialProduct }: ContactFormProps) {
+export function ContactForm({ initialProduct, submitRequest }: ContactFormProps) {
   const sanitizedInitialProduct = useMemo(
     () => sanitizeProductQuery(initialProduct ?? ""),
     [initialProduct]
   );
+  const submit: typeof fetch =
+    submitRequest ??
+    (globalThis.fetch as typeof fetch | undefined) ??
+    ((async (..._args: Parameters<typeof fetch>) => {
+      throw new Error("Fetch API is not available in this environment.");
+    }) as typeof fetch);
 
   const [data, setData] = useState<ContactFormData>(() => ({
     ...initialData,
@@ -142,7 +156,7 @@ export function ContactForm({ initialProduct }: ContactFormProps) {
     };
 
     try {
-      const response = await fetch("/api/contact/submit", {
+      const response = await submit("/api/contact/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -171,10 +185,14 @@ export function ContactForm({ initialProduct }: ContactFormProps) {
           "Usługa poczty chwilowo niedostępna. Wyślij maila bezpośrednio: kontakt@jkhandmade.pl.";
       }
 
+      reportClientError("contact-form:response", new Error("Response not ok"), {
+        status: response.status,
+        statusText: response.statusText
+      });
       setError(errorMessage);
       setStatus("error");
     } catch (submitError) {
-      console.error("Contact form submit error", submitError);
+      reportClientError("contact-form:transport", submitError);
       setError("Nie udało się wysłać formularza. Sprawdź połączenie i spróbuj ponownie.");
       setStatus("error");
     }

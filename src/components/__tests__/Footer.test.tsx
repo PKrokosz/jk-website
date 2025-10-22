@@ -23,6 +23,8 @@ describe("Footer", () => {
     const privacyLink = screen.getByRole("link", { name: "Polityka prywatności" });
     const regulationLink = screen.getByRole("link", { name: "Regulamin" });
     const storeTermsLink = screen.getByRole("link", { name: "Regulamin sklepu" });
+    const termsLink = screen.getByRole("link", { name: "Regulamin" });
+    const [termsLink] = screen.getAllByRole("link", { name: /Regulamin/ });
 
     expect(privacyLink).toHaveAttribute("href", "/privacy-policy");
     expect(regulationLink).toHaveAttribute("href", "/terms");

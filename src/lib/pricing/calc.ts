@@ -1,36 +1,15 @@
-export interface PricingRequestOption {
-  id: number | string;
-  priceModGrosz?: number;
-  label?: string;
-}
-
-export interface PricingRequest {
-  styleId?: number;
-  leatherId?: number;
-  soleId?: number;
-  basePriceGrosz?: number;
-  baseLabel?: string;
-  options?: PricingRequestOption[];
-}
-
-export interface PricingBreakdownItem {
-  label: string;
-  amountGrosz: number;
-}
-
-export interface PricingQuote {
-  currency: "PLN";
-  totalNetGrosz: number;
-  totalVatGrosz: number;
-  totalGrossGrosz: number;
-  breakdown: PricingBreakdownItem[];
-}
+import type {
+  PricingQuote,
+  PricingQuoteBreakdownItem,
+  PricingQuoteRequest,
+  PricingQuoteRequestOption
+} from "./schemas";
 
 const VAT_RATE = 0.23;
 const BASE_PRICE_GROSZ = 120_000; // 1200 PLN base price for custom pair
 const DEFAULT_BASE_LABEL = "Bazowa para";
 
-export function calculateQuote(request: PricingRequest = {}): PricingQuote {
+export function calculateQuote(request: PricingQuoteRequest = {}): PricingQuote {
   const basePrice = Math.max(0, request.basePriceGrosz ?? BASE_PRICE_GROSZ);
   const baseLabel = request.baseLabel ?? DEFAULT_BASE_LABEL;
   const options = request.options ?? [];
@@ -43,7 +22,7 @@ export function calculateQuote(request: PricingRequest = {}): PricingQuote {
   const vat = Math.round(net * VAT_RATE);
   const gross = net + vat;
 
-  const breakdown: PricingBreakdownItem[] = [
+  const breakdown: PricingQuoteBreakdownItem[] = [
     {
       label: baseLabel,
       amountGrosz: basePrice
@@ -70,3 +49,10 @@ export function calculateQuote(request: PricingRequest = {}): PricingQuote {
     breakdown
   };
 }
+
+export type {
+  PricingQuote,
+  PricingQuoteBreakdownItem,
+  PricingQuoteRequest as PricingRequest,
+  PricingQuoteRequestOption as PricingRequestOption
+} from "./schemas";

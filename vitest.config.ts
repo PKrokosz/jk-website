@@ -9,13 +9,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src")
+      "@": path.resolve(__dirname, "src"),
+      "@jk/db": path.resolve(__dirname, "packages/db/src"),
+      "server-only": path.resolve(__dirname, "test/__mocks__/server-only.ts")
     }
   },
   test: {
     globals: true,
     environment: "jsdom",
     setupFiles: "./vitest.setup.ts",
+    exclude: ["node_modules/**", "src/tests/e2e/**"],
     coverage: {
       reporter: ["text", "lcov"],
       provider: "v8"

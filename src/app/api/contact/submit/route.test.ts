@@ -1,6 +1,13 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const reportServerError = vi.fn();
+
+vi.mock("@/lib/telemetry", () => ({
+  reportServerError
+}));
+
+const sendMailMock = vi.fn();
 const nodemailerMock = vi.hoisted(() => {
   const sendMail = vi.fn();
 
@@ -74,5 +81,46 @@ describe("POST /api/contact/submit", () => {
 
     expect(response.status).toBe(200);
     expect(nodemailerMock.sendMail).toHaveBeenCalledOnce();
+  });
+
+  it("zwraca błąd przy braku konfiguracji SMTP", async () => {
+    delete process.env.SMTP_HOST;
+
+    const response = await POST(
+      makeRequest({
+        name: "Jan Kowalski",
+        email: "jan@example.com",
+        message: "Chcę zamówić buty szyte metodą Goodyear.",
+        phone: "",
+        product: "Derby"
+      })
+    );
+
+    expect(response.status).toBe(502);
+    expect(reportServerError).toHaveBeenCalledWith(
+      "contact-mail:transport",
+      expect.any(Error)
+    );
+  });
+
+  it("zwraca błąd przy problemie transportu poczty", async () => {
+    const smtpError = new Error("SMTP unavailable");
+    sendMailMock.mockRejectedValueOnce(smtpError);
+
+    const response = await POST(
+      makeRequest({
+        name: "Jan Kowalski",
+        email: "jan@example.com",
+        message: "Chcę zamówić buty szyte metodą Goodyear.",
+        phone: "",
+        product: "Derby"
+      })
+    );
+
+    expect(response.status).toBe(502);
+    expect(reportServerError).toHaveBeenCalledWith(
+      "contact-mail:transport",
+      smtpError
+    );
   });
 });

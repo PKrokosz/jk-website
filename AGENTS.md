@@ -43,6 +43,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Commity: Conventional Commits.
 - Strony w App Router pod `app/`: home, catalog, product, order/native, contact, about.
 - Stosuj design tokens z `docs/UI_TOKENS.md`; obecnie wartości zakodowane w `globals.css` – kolejne zadania powinny je przenieść do CSS variables.
+- Telemetria błędów: korzystaj z helperów `reportClientError` i `reportServerError` z `src/lib/telemetry`. W testach mockuj moduł `@/lib/telemetry` i potwierdzaj wywołania.
 - Przy testowaniu formularza kontaktowego wstrzykuj zależność `submitRequest` (mock `fetch`) lub korzystaj z helperów ustawionych globalnie.
 
 ## Zasady PR

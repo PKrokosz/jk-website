@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer, { type Transporter } from "nodemailer";
 import { z } from "zod";
 
+import { reportServerError } from "@/lib/telemetry";
 export const runtime = "nodejs";
 
 const schema = z.object({
@@ -143,7 +144,7 @@ export async function POST(req: NextRequest) {
       text: mailText
     });
   } catch (error) {
-    console.error("Mail error:", error);
+    reportServerError("contact-mail:transport", error);
     return NextResponse.json({ error: "Mail service unavailable" }, { status: 502 });
   }
 

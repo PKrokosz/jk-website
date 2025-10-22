@@ -7,7 +7,6 @@ vi.mock("@/lib/telemetry", () => ({
   reportServerError
 }));
 
-const sendMailMock = vi.fn();
 const nodemailerMock = vi.hoisted(() => {
   const sendMail = vi.fn();
 
@@ -105,7 +104,7 @@ describe("POST /api/contact/submit", () => {
 
   it("zwraca błąd przy problemie transportu poczty", async () => {
     const smtpError = new Error("SMTP unavailable");
-    sendMailMock.mockRejectedValueOnce(smtpError);
+    nodemailerMock.sendMail.mockRejectedValueOnce(smtpError);
 
     const response = await POST(
       makeRequest({

@@ -20,15 +20,6 @@ import { ContactForm } from "../ContactForm";
 
 describe("ContactForm", () => {
   const consentLabel = /wyrażam zgodę/i;
-  let fetchMock: ReturnType<typeof vi.fn>;
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-    fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({}),
-    });
-    vi.stubGlobal("fetch", fetchMock);
   let submitRequest: MockedFunction<typeof fetch>;
 
   beforeEach(() => {
@@ -36,15 +27,14 @@ describe("ContactForm", () => {
     submitRequest = vi
       .fn<typeof fetch>()
       .mockResolvedValue(new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", submitRequest);
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
-    vi.clearAllMocks();
     vi.unstubAllGlobals();
+    vi.clearAllMocks();
   });
 
   const fillField = (label: RegExp, value: string) => {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 import { z } from "zod";
+
+export const runtime = "nodejs";
 
 const schema = z.object({
   name: z.string().min(2).max(100),
@@ -18,6 +20,7 @@ const schema = z.object({
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 5;
 const buckets = new Map<string, { count: number; ts: number }>();
+let cachedTransporter: Transporter | null = null;
 
 function isRateLimited(key: string) {
   const now = Date.now();
@@ -61,12 +64,18 @@ function getMailer() {
     throw new Error("Missing SMTP configuration");
   }
 
-  return nodemailer.createTransport({
+  if (cachedTransporter) {
+    return cachedTransporter;
+  }
+
+  cachedTransporter = nodemailer.createTransport({
     host,
     port: Number(port),
     secure: false,
     auth: { user, pass }
   });
+
+  return cachedTransporter;
 }
 
 export async function POST(req: NextRequest) {

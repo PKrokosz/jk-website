@@ -20,30 +20,51 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
   const slideRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      const target = slideRefs.current[index];
+  const scrollToIndex = useCallback((index: number) => {
+    const target = slideRefs.current[index];
 
-      if (target) {
-        target.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (!target) {
+      return;
+    }
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    target.scrollIntoView({
+      block: "start",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  }, []);
+
+  const goToIndex = useCallback(
+    (index: number) => {
+      if (!slides.length) {
+        return;
       }
+
+      const nextIndex = Math.max(0, Math.min(slides.length - 1, index));
+
+      setActiveIndex(nextIndex);
+      scrollToIndex(nextIndex);
     },
-    []
+    [scrollToIndex, slides.length]
   );
 
   const handleNext = useCallback(() => {
-    scrollToIndex((activeIndex + 1) % slides.length);
-  }, [activeIndex, scrollToIndex, slides.length]);
+    goToIndex(activeIndex + 1);
+  }, [activeIndex, goToIndex]);
 
   const handlePrev = useCallback(() => {
-    scrollToIndex((activeIndex - 1 + slides.length) % slides.length);
-  }, [activeIndex, scrollToIndex, slides.length]);
+    goToIndex(activeIndex - 1);
+  }, [activeIndex, goToIndex]);
 
   useEffect(() => {
-    const track = trackRef.current;
-    const slideElements = slideRefs.current.filter((slide): slide is HTMLElement => Boolean(slide));
+    const slideElements = slideRefs.current
+      .slice(0, slides.length)
+      .filter((slide): slide is HTMLElement => Boolean(slide));
 
-    if (!track || !slideElements.length) {
+    if (!slideElements.length) {
       return;
     }
 
@@ -62,8 +83,9 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
         }
       },
       {
-        root: track,
-        threshold: [0.4, 0.6, 0.8],
+        root: null,
+        rootMargin: "-20% 0px -50% 0px",
+        threshold: [0.35, 0.5, 0.65],
       }
     );
 
@@ -73,7 +95,7 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
       slideElements.forEach((slide) => observer.unobserve(slide));
       observer.disconnect();
     };
-  }, []);
+  }, [slides.length]);
 
   return (
     <div ref={trackRef} className="about-track">
@@ -118,6 +140,7 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
           className="about-control"
           onClick={handlePrev}
           aria-label="Poprzedni slajd"
+          disabled={activeIndex === 0}
         >
           Poprzedni
         </button>
@@ -129,6 +152,7 @@ export function AboutCarousel({ slides }: AboutCarouselProps) {
           className="about-control"
           onClick={handleNext}
           aria-label="Następny slajd"
+          disabled={activeIndex === slides.length - 1}
         >
           Dalej
         </button>

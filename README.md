@@ -57,6 +57,12 @@ Repozytorium sklepu MTO „JK Handmade Footwear” zbudowanego na Next.js 14 (Ap
 └── vitest.config.ts       # Konfiguracja testów jednostkowych
 ```
 
+## Zasady aktualizacji README
+
+- Każdą istotną zmianę w repozytorium lub konfiguracji środowiska (np. nowe zależności, procesy CI/CD, komendy skryptów, usługi Docker/Docker Compose) od razu odnotuj w odpowiednich sekcjach README.
+- Synchronizuj wpisy w tabeli „Status modułów”, liście komend oraz checklistach jakościowych z realnym stanem kodu, aby onboardowanie i QA miały aktualne źródło prawdy.
+- Aktualizując dokumentację, dopisz wzmiankę w historii zmian (PR/commicie) i sprawdź, czy `AGENTS.md` nie wymaga rozszerzenia o nowe zasady.
+
 ## Konfiguracja środowiska
 
 1. Zainstaluj zależności:

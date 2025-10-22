@@ -86,6 +86,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## README
 - Utrzymuj tabelę „Status modułów” w `README.md` — dopisuj nowe moduły lub aktualizuj kolumnę „Stan” przy każdej znaczącej zmianie w kodzie lub dokumentacji.
 - Aktualizuj tabelę komend i sekcję „Testy i jakość kodu” w `README.md` za każdym razem, gdy dodajesz/usuwasz skrypt npm albo nowy typ testu.
+- Każdą istotną zmianę w repozytorium lub konfiguracji środowiska (np. nowe zależności, dodatkowe usługi, zmienione komendy, pipeline'y) natychmiast odzwierciedl w `README.md`, synchronizując odpowiednie sekcje.
 
 ## Zasady PR
 - Każdy task = osobny branch + PR.

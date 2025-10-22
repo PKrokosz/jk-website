@@ -6,12 +6,12 @@ import { NavLink } from "./NavLink";
 import { CartStatusIndicator } from "./cart/CartStatusIndicator";
 
 const navigationItems = [
-  { href: "/", label: "Home", exact: true },
-  { href: "/catalog", label: "Catalog" },
-  { href: "/about", label: "About" },
-  { href: "/group-orders", label: "Group Orders" },
-  { href: "/contact", label: "Contact" },
-  { href: "/account", label: "Account" }
+  { href: "/", label: "Strona główna", exact: true },
+  { href: "/catalog", label: "Katalog" },
+  { href: "/about", label: "O pracowni" },
+  { href: "/group-orders", label: "Zamówienia grupowe" },
+  { href: "/contact", label: "Kontakt" },
+  { href: "/account", label: "Konto" }
 ] satisfies ReadonlyArray<{
   href: Route;
   label: string;

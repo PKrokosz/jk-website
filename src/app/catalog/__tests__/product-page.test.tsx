@@ -178,7 +178,7 @@ describe("ProductPage", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: sampleProduct.name })).toBeInTheDocument();
     expect(screen.getByText(sampleProduct.description)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Catalog" })).toHaveAttribute("href", "/catalog");
+    expect(screen.getByRole("link", { name: "Katalog" })).toHaveAttribute("href", "/catalog");
     expect(screen.getByRole("link", { name: "Skontaktuj się z nami" })).toHaveAttribute(
       "href",
       `/contact?product=${sampleProduct.slug}`

@@ -39,6 +39,7 @@
     "@playwright/test": "^1.56.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "20.16.5",
     "@types/nodemailer": "^7.0.2",
     "@types/pg": "^8.15.5",
@@ -50,10 +51,9 @@
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.13",
     "jsdom": "^27.0.1",
-    "tsx": "^4.16.2",
+    "tsx": "^4.7.1",
     "typescript": "5.5.4",
-    "vitest": "2.1.1",
-    "tsx": "^4.7.1"
+    "vitest": "2.1.1"
   },
   "packageManager": "pnpm@10.18.3"
 }

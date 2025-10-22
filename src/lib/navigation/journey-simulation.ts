@@ -202,9 +202,7 @@ export interface LoadNavigationWeightsOptions {
 const NAVIGATION_WEIGHTS_JSON_ENV = "NAVIGATION_WEIGHTS_JSON";
 const NAVIGATION_WEIGHTS_PATH_ENV = "NAVIGATION_WEIGHTS_PATH";
 
-const assertIsNavigationNodeId = (
-  value: string,
-): asserts value is NavigationNodeId => {
+const assertIsNavigationNodeId: (value: string) => asserts value is NavigationNodeId = (value) => {
   const isNode = value in BASE_NAVIGATION_GRAPH;
   if (!isNode) {
     throw new Error(`Unknown navigation node \"${value}\" in weights configuration`);

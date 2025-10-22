@@ -40,6 +40,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
+- Testy `ContactForm` obejmują walidację, sanetyzację prefill produktu i obsługę limitów API — przy zmianach utrzymuj pokrycie w `src/components/contact/__tests__/ContactForm.test.tsx`.
 - Testy API kontaktu: w `src/app/api/contact/submit/route.test.ts` mockuj `nodemailer` przez `vi.hoisted`, aby uniknąć importu natywnego transportu.
 - Dodano smoke test kompilacji modułów stron (`src/app/__tests__/pages.compile.test.ts`) korzystający z `import.meta.glob` – przy dodawaniu nowych stron upewnij się, że przechodzą import bez błędów runtime.
 - Commity: Conventional Commits.

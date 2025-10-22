@@ -1,3 +1,5 @@
+import React from "react";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -28,18 +30,18 @@ export function NativeModelShowcase() {
                 <div className="native-model-card__media" aria-hidden="true">
                   <Image
                     src={model.image}
-                  alt={`Model ${model.name} z katalogu JK Handmade Footwear`}
-                  width={320}
-                  height={240}
-                  className="native-model-card__image"
-                  sizes="(min-width: 1024px) 260px, 80vw"
-                />
-              </div>
-              <div className="native-model-card__body">
-                <h3>{model.name}</h3>
-                <p className="native-model-card__price">
-                  {currencyFormatter.format(model.price)}
-                </p>
+                    alt={`Model ${model.name} z katalogu JK Handmade Footwear`}
+                    width={320}
+                    height={240}
+                    className="native-model-card__image"
+                    sizes="(min-width: 1024px) 260px, 80vw"
+                  />
+                </div>
+                <div className="native-model-card__body">
+                  <h3>{model.name}</h3>
+                  <p className="native-model-card__price">
+                    {currencyFormatter.format(model.price)}
+                  </p>
                   <p className="native-model-card__description">{detail}</p>
                 </div>
               </article>

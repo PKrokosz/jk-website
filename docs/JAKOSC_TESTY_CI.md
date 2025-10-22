@@ -11,7 +11,7 @@
 
 ## Podsumowanie
 - DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`.
-- Testy: Vitest + React Testing Library (layout, katalog, kalkulator, docelowo formularz kontaktowy i product page).
+- Testy: Vitest + React Testing Library (layout, katalog, kalkulator, formularz kontaktowy, product page, NativeModelShowcase).
 - CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck, orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
 - Commity: Conventional Commits, PR zawiera opis, listę zmian, wyniki komend, screeny dla UI.
 
@@ -37,7 +37,8 @@ Checklist dla każdego PR:
 | Strona produktu | Component/server | Render breadcrumb, galeria, CTA, 404 fallback | Vitest + RTL | ✅ (testy w `src/app/catalog/__tests__`) |
 | SEO/Metadata | Unit | `generateMetadata` zwraca właściwe tytuły/opisy | Vitest | ✅ (pokryte w `product-page.test.tsx`) |
 | UI prymitywy (`button`, `badge`) | Snapshot/accessibility | Style/role, focus ring | Vitest + `@testing-library/react` | 🔄 |
-| Formularz kontaktowy | Component | Walidacja required fields, stany success/error | Vitest | ✅ (testy w `src/components/contact/__tests__`) |
+| Formularz kontaktowy | Component | Walidacja required fields, stany success/error, prefill produktu, obsługa limitów | Vitest | ✅ (testy w `src/components/contact/__tests__`) |
+| NativeModelShowcase | Component | Lista modeli, formatowanie cen, CTA do `/order/native` | Vitest + RTL | ✅ (test w `src/components/catalog/__tests__/NativeModelShowcase.test.tsx`) |
 | Pricing calculator | Unit | `calculateQuote`, integracja z UI | Vitest | ✅ (istniejące testy w `src/app/components/__tests__`) |
 | Order modal | Component | Otwarcie, focus trap, CTA linki | Vitest | ✅ (testy w `src/components/ui/order/__tests__`) |
 | Strony prawne | E2E | Pobranie PDF + nagłówki odpowiedzi | Playwright | ✅ (`src/tests/e2e/legal-download.spec.ts`) |

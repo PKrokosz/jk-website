@@ -24,7 +24,7 @@
 
 ### Zadanie bazowe `x₂`: Domknąć brakujące testy jakościowe (T6)
 - `-x₂`: Zidentyfikować i usunąć przestarzałe snapshoty/testy blokujące pokrycie po dopisaniu nowych przypadków.
-- `1/x₂`: Napisać test jednostkowy dla `ContactForm` (render, walidacja, komunikaty statusu).
+- `1/x₂`: Napisać test jednostkowy dla `ContactForm` (render, walidacja, komunikaty statusu). ✅ 2025-10-22 — zrealizowane wraz z pokryciem prefill i CTA katalogu.
 - `x₂²`: Przygotować zestaw testów integracyjnych dla `/catalog/[slug]` i `/account` sprawdzających dostępność kluczowych CTA.
 - `x₂ˣ`: Skonfigurować automatyczny raport pokrycia z wysyłką do Slacka/emailem po każdej gałęzi PR.
 

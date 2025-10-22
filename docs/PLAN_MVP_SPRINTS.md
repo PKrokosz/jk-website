@@ -105,7 +105,7 @@
 - **DoD**:
   - [x] `.github/workflows/ci.yml` zgodny z `JAKOSC_TESTY_CI.md` (lint, typecheck, test, coverage, depcheck).
   - [x] Zaktualizowany `README.md` z instrukcjami lint/test.
-  - [ ] Minimum testów uzupełnionych (product page, contact form) – TODO.
+  - [x] Minimum testów uzupełnionych (product page, contact form) – dopisano scenariusze walidacji, prefill produktu i CTA katalogu.
   - [x] Template PR (`.github/pull_request_template.md`).
   - [x] `pnpm lint`, `pnpm test`.
 - **Ryzyka**: dłuższy pipeline; potrzeba utrzymania logów coverage.

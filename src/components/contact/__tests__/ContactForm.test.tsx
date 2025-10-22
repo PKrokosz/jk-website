@@ -16,23 +16,11 @@ function createResponse(status: number, statusText?: string) {
 }
 
 describe("ContactForm", () => {
-  const consentLabel = /wyrażam zgodę/i;
-  let submitRequest: MockedFunction<typeof fetch>;
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-    submitRequest = vi
-      .fn<typeof fetch>()
-      .mockResolvedValue(new Response(null, { status: 200 }));
-    vi.stubGlobal("fetch", submitRequest);
-  });
-
-  afterEach(() => {
-    vi.runOnlyPendingTimers();
-    vi.useRealTimers();
-    vi.unstubAllGlobals();
   const submitLabel = /wyślij wiadomość/i;
-  let submitRequest: ReturnType<typeof vi.fn<typeof fetch>>;
+  const consentLabel = /wyrażam zgodę/i;
+
+  type FetchMock = ReturnType<typeof vi.fn<typeof fetch>>;
+  let submitRequest: FetchMock;
 
   const fillField = async (label: RegExp, value: string) => {
     const field = screen.getByLabelText(label);
@@ -46,6 +34,7 @@ describe("ContactForm", () => {
 
   beforeEach(() => {
     submitRequest = vi.fn<typeof fetch>();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -206,7 +195,9 @@ describe("ContactForm", () => {
 
     await waitFor(() =>
       expect(
-        screen.getByText(/Nie udało się wysłać formularza. Sprawdź połączenie i spróbuj ponownie./i)
+        screen.getByText(
+          /Nie udało się wysłać formularza. Sprawdź połączenie i spróbuj ponownie./i
+        )
       ).toBeInTheDocument()
     );
 
@@ -260,3 +251,4 @@ describe("ContactForm", () => {
     });
   });
 });
+

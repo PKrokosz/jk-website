@@ -42,6 +42,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
 - Testy `ContactForm` obejmują walidację, sanetyzację prefill produktu i obsługę limitów API — przy zmianach utrzymuj pokrycie w `src/components/contact/__tests__/ContactForm.test.tsx`.
+- Testy komponentów interaktywnych korzystają z `@testing-library/user-event`; gdy Vitest zgłasza brak modułu, uruchom `pnpm install`, aby pnpm 10 ponownie zlinkował pakiet w workspace.
 - Testy API kontaktu: w `src/app/api/contact/submit/route.test.ts` mockuj `nodemailer` przez `vi.hoisted`, aby uniknąć importu natywnego transportu.
 - Dodano smoke test kompilacji modułów stron (`src/app/__tests__/pages.compile.test.ts`) korzystający z `import.meta.glob` – przy dodawaniu nowych stron upewnij się, że przechodzą import bez błędów runtime.
 - Commity: Conventional Commits.
@@ -86,6 +87,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.
 - Używaj `pnpm qa` do lokalnych kontroli jakości oraz `pnpm qa:ci` do pełnego przebiegu przed PR.
 - Flagi CLI: `--dry-run` (podgląd kroków) oraz `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`).
+- Entry point `tools/cli/index.ts` musi mieć odzwierciedlenie w testach (`tools/cli/__tests__/index.test.ts`) – w testach stubuj `process.exit` i logi (`console.log`, `console.error`), aby weryfikować komunikaty i kody wyjścia bez kończenia procesu.
 
 ## Czego NIE robić
 - Nie wprowadzaj zewnętrznych UI kitów bez uzasadnienia.

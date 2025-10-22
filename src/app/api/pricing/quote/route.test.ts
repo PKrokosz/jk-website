@@ -28,12 +28,14 @@ const { resetNextDbClient } = dbClientHelper;
 const dbModule = await import("@jk/db");
 const mockedCreateDbClient = vi.mocked(dbModule.createDbClient);
 
-const quoteRequestsRepository = await import("@/lib/pricing/quote-requests-repository");
+const pricingQuoteRequestsRepositoryModule = await import(
+  "@/lib/pricing/quote-requests-repository"
+);
 const mockedCountQuoteRequestsSince = vi.mocked(
-  quoteRequestsRepository.countQuoteRequestsSince
+  pricingQuoteRequestsRepositoryModule.countQuoteRequestsSince
 );
 const mockedInsertQuoteRequestLog = vi.mocked(
-  quoteRequestsRepository.insertQuoteRequestLog
+  pricingQuoteRequestsRepositoryModule.insertQuoteRequestLog
 );
 
 const { POST } = await import("./route");

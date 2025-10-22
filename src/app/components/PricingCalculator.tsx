@@ -9,6 +9,7 @@ import {
 } from "@/components/cart/CartProvider";
 import { ORDER_ACCESSORIES } from "@/config/orderAccessories";
 import { ORDER_MODELS } from "@/config/orderModels";
+import { ORDER_EXTRAS } from "@/config/orderExtras";
 import { calculateQuote } from "@/lib/pricing/calc";
 
 import { OrderDetailsModal, type OrderDetailsFormValues } from "@/components/ui/order/OrderDetailsModal";
@@ -43,26 +44,12 @@ const accessories: AddonOption[] = ORDER_ACCESSORIES.map((accessory) => ({
   priceGrosz: Math.round(accessory.price * 100)
 }));
 
-const serviceExtras: AddonOption[] = [
-  {
-    id: "waterskin",
-    label: "Bukłak podróżny",
-    description: "Ręcznie szyty bukłak z naszej skóry — 250 zł",
-    priceGrosz: 25_000
-  },
-  {
-    id: "bracer",
-    label: "Karwasz ochronny",
-    description: "Kompletowany z butami, wzmacniany filcem — 280 zł",
-    priceGrosz: 28_000
-  },
-  {
-    id: "shoeTrees",
-    label: "Prawidła sosnowe",
-    description: "Para drzewiaków zabezpieczająca kształt — 150 zł",
-    priceGrosz: 15_000
-  }
-];
+const serviceExtras: AddonOption[] = ORDER_EXTRAS.map((extra) => ({
+  id: extra.id,
+  label: extra.name,
+  description: extra.description,
+  priceGrosz: Math.round(extra.price * 100)
+}));
 
 const currencyFormatter = new Intl.NumberFormat("pl-PL", {
   style: "currency",

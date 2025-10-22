@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Zamówienie natywne | JK Handmade Footwear",
   description:
-    "Wypełnij natywny formularz zamówienia JK Handmade Footwear, aby przekazać nam wszystkie szczegóły dotyczące wymarzonej pary butów.",
+    "Rozpocznij zamówienie bespoke JK Handmade Footwear, podając imię i nazwisko, a następnie uzupełnij szczegóły w dedykowanym koszyku.",
   alternates: {
     canonical: "/order/native"
   }
@@ -20,8 +20,9 @@ export default function NativeOrderPage() {
           <p className="order-native__eyebrow">Zamówienie bespoke</p>
           <h1 id="order-native-heading">Zamów parę szytą w naszej pracowni</h1>
           <p className="order-native__lead">
-            Podaj niezbędne informacje, a przygotujemy dla Ciebie spersonalizowaną ofertę. W każdej chwili możesz wrócić do
-            osadzonego formularza Google, korzystając z poniższego odnośnika.
+            Podaj imię i nazwisko, a poprowadzimy Cię do koszyka z konfiguracją. Tam uzupełnisz wszystkie parametry, dodatki
+            i preferencje dotyczące realizacji. W każdej chwili możesz wrócić do osadzonego formularza Google, korzystając z
+            poniższego odnośnika.
           </p>
           <p className="order-native__fallback">
             Preferujesz dotychczasową wersję? {" "}

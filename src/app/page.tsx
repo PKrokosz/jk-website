@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ORDER_MODELS } from "@/config/orderModels";
+import { listProductSlugs } from "@/lib/catalog/products";
 import { OrderModalTrigger } from "@/components/ui/order/OrderModalTrigger";
 
 import { PricingCalculator } from "./components/PricingCalculator";
@@ -62,7 +63,11 @@ const sellingPoints = [
   }
 ];
 
-const portfolioItems = ORDER_MODELS.filter((model) => !model.image.endsWith("placeholder.svg"))
+const portfolioSlugs = new Set(listProductSlugs());
+
+const portfolioItems = ORDER_MODELS.filter(
+  (model) => !model.image.endsWith("placeholder.svg") && portfolioSlugs.has(model.id)
+)
   .slice(0, 8)
   .map((model) => ({
     id: model.id,
@@ -181,7 +186,14 @@ export default function Home() {
           </div>
           <div className="portfolio-showcase" role="list">
             {portfolioItems.map((item) => (
-              <article key={item.id} role="listitem" className="portfolio-card">
+              <Link
+                key={item.id}
+                role="listitem"
+                href={`/catalog/${item.id}`}
+                className="portfolio-card"
+                aria-label={`Zobacz model ${item.title} w katalogu`}
+                prefetch={false}
+              >
                 <div className="portfolio-card__media">
                   <Image
                     src={item.image}
@@ -189,7 +201,7 @@ export default function Home() {
                     width={640}
                     height={480}
                     className="portfolio-card__image"
-                    sizes="(min-width: 1280px) 400px, (min-width: 768px) 45vw, 90vw"
+                    sizes="(min-width: 1280px) 320px, (min-width: 768px) 38vw, 80vw"
                   />
                 </div>
                 <div className="portfolio-card__body">
@@ -197,7 +209,7 @@ export default function Home() {
                   <h3>{item.title}</h3>
                   <p>Model dostępny w formularzu natywnym — zobacz detale i dobierz dodatki.</p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </div>

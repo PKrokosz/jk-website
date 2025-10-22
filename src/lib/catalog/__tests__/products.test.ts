@@ -10,10 +10,13 @@ describe("catalog products helpers", () => {
     expect(products).toHaveLength(15);
     expect(products[0]).toMatchObject({
       slug: "szpic",
-      priceGrosz: expect.any(Number),
+      priceGrosz: 75_000,
       category: "footwear",
       funnelStage: expect.stringMatching(/TOFU|MOFU|BOFU/)
     });
+
+    const shoeTrees = products.find((product) => product.slug === "prawidla-sosnowe");
+    expect(shoeTrees?.priceGrosz).toBe(15_000);
   });
 
   it("returns detailed product data by slug", () => {

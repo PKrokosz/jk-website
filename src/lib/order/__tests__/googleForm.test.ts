@@ -4,6 +4,7 @@ import { ORDER_ACCESSORIES } from "@/config/orderAccessories";
 import { ORDER_FORM_ENTRIES } from "@/config/orderFormEntries";
 import { ORDER_COLORS } from "@/config/orderOptions";
 import { ORDER_MODELS } from "@/config/orderModels";
+import { ORDER_EXTRA_MAP } from "@/config/orderExtras";
 
 import { buildGoogleFormPayload } from "../googleForm";
 import { orderFormSchema } from "../schema";
@@ -38,16 +39,18 @@ describe("buildGoogleFormPayload", () => {
       ORDER_ACCESSORIES[0].googleValue
     );
     expect(params.getAll(ORDER_FORM_ENTRIES.waterskin)).toEqual([
-      "Bukłak - 250 zł",
+      ORDER_EXTRA_MAP.waterskin.googleValue,
       "__other_option__"
     ]);
     expect(params.get(`${ORDER_FORM_ENTRIES.waterskin}.other_option_response`)).toBe("Smok");
     expect(params.getAll(ORDER_FORM_ENTRIES.bracer)).toEqual([
-      "Dodaj karwasz - 280 zł",
+      ORDER_EXTRA_MAP.bracer.googleValue,
       "__other_option__"
     ]);
     expect(params.get(`${ORDER_FORM_ENTRIES.bracer}.other_option_response`)).toBe("Czarny");
-    expect(params.get(ORDER_FORM_ENTRIES.shoeTrees)).toContain("prawidła");
+    expect(params.get(ORDER_FORM_ENTRIES.shoeTrees)).toBe(
+      ORDER_EXTRA_MAP.shoeTrees.googleValue
+    );
     expect(params.get("fvv")).toBeDefined();
     expect(params.get("pageHistory")).toBeDefined();
     expect(params.get("fbzx")).toBeDefined();

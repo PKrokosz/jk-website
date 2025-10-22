@@ -19,6 +19,13 @@ describe("parseArguments", () => {
     expect(parsed.commandName).toBe("quality");
   });
 
+  it("ignores argument separators", () => {
+    const parsed = parseArguments(["--", "quality"]);
+
+    expect(parsed.errors).toHaveLength(0);
+    expect(parsed.commandName).toBe("quality");
+  });
+
   it("requires value for --skip when provided separately", () => {
     const parsed = parseArguments(["quality", "--skip", "--dry-run"]);
 

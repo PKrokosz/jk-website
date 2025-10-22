@@ -26,7 +26,48 @@ const TEST_STYLE_ID = 2;
 const TEST_LEATHER_ID = 1;
 const TEST_PRODUCT_SLUG = "szpic";
 
-describe("GET /api/products (integration)", () => {
+async function ensureIntegrationDatabaseAvailability(): Promise<{
+  available: boolean;
+  reason?: string;
+}> {
+  try {
+    loadIntegrationTestEnv();
+  } catch (error) {
+    return {
+      available: false,
+      reason:
+        "Pomijam testy integracyjne — nie udało się załadować konfiguracji .env.test."
+    };
+  }
+
+  try {
+    const client = getIntegrationTestClient();
+    const connection = await client.pool.connect();
+    connection.release();
+    return { available: true };
+  } catch (error) {
+    await closeIntegrationTestClient().catch(() => {});
+    const details =
+      error instanceof Error && error.message.trim().length > 0
+        ? error.message
+        : String(error);
+    return {
+      available: false,
+      reason: `Pomijam testy integracyjne — brak połączenia z bazą danych (${details}).`
+    };
+  }
+}
+
+const { available: integrationDbAvailable, reason: integrationSkipReason } =
+  await ensureIntegrationDatabaseAvailability();
+
+if (integrationSkipReason) {
+  console.warn(integrationSkipReason);
+}
+
+const describeIntegration = integrationDbAvailable ? describe : describe.skip;
+
+describeIntegration("GET /api/products (integration)", () => {
   let originalBasePrice: number;
   let originalActive: boolean;
   let leatherPriceMod: number;

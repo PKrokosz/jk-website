@@ -18,6 +18,7 @@ interface ContactFormData {
 
 interface ContactFormProps {
   initialProduct?: string;
+  submitRequest?: typeof fetch;
 }
 
 const initialData: ContactFormData = {
@@ -34,11 +35,17 @@ function validateEmail(email: string) {
   return /\S+@\S+\.\S+/.test(email);
 }
 
-export function ContactForm({ initialProduct }: ContactFormProps) {
+export function ContactForm({ initialProduct, submitRequest }: ContactFormProps) {
   const sanitizedInitialProduct = useMemo(
     () => sanitizeProductQuery(initialProduct ?? ""),
     [initialProduct]
   );
+  const submit: typeof fetch =
+    submitRequest ??
+    (globalThis.fetch as typeof fetch | undefined) ??
+    ((async (..._args: Parameters<typeof fetch>) => {
+      throw new Error("Fetch API is not available in this environment.");
+    }) as typeof fetch);
 
   const [data, setData] = useState<ContactFormData>(() => ({
     ...initialData,
@@ -142,7 +149,7 @@ export function ContactForm({ initialProduct }: ContactFormProps) {
     };
 
     try {
-      const response = await fetch("/api/contact/submit", {
+      const response = await submit("/api/contact/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

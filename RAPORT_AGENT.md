@@ -65,6 +65,15 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
   - **Why5:** Brak czasu/zasobów na automatyzację.
 - **Ulepszenie:** Dodać skrypt generujący mocki z katalogu assetów lub pliku CSV (np. `pnpm generate:catalog`), co zmniejszy ryzyko literówek.
 
+## 8. Stabilność formularza kontaktowego (5xWhy)
+- **Problem:** `pnpm typecheck` i testy komponentu `ContactForm` wymagały manualnej konfiguracji środowiska (`APP_BASE_URL`, brak modułu `nodemailer`).
+  1. **Dlaczego?** Formularz odwoływał się bezpośrednio do `fetch` oraz importował `nodemailer`, który nie udostępnia deklaracji zgodnych z `moduleResolution: bundler`.
+  2. **Dlaczego bezpośrednio?** Implementacja była robiona „na szybko”, bez wzorca wstrzykiwania zależności.
+  3. **Dlaczego brak wzorca?** Brak dokumentacji w `AGENTS.md` oraz testów korzystających z mocków.
+  4. **Dlaczego testy nie mockowały fetch?** Nie istniał setup globalny, a komponent nie pozwalał wstrzyknąć zależności.
+  5. **Dlaczego brak setupu?** Priorytet był na UI i copy, nie na infrastrukturę testową.
+- **Ulepszenie:** Wstrzykiwać `submitRequest` w komponentach/formach, trzymać shim `types/nodemailer.d.ts` i dopisać scenariusze testowe z kontrolą odpowiedzi backendu.
+
 ---
 **Priorytety rekomendowane:**
 1. Podpiąć API Next.js oraz mocki katalogu do bazy (Drizzle) na bazie gotowych migracji i seeda.

@@ -310,6 +310,11 @@ export function CatalogExplorer({
           const segmentProducts = filteredProducts.filter((product) =>
             segment.categories.includes(product.category)
           );
+          const segmentSize = segmentProducts.length;
+          const segmentCountLabel =
+            segmentSize === 0
+              ? "Brak pozycji"
+              : `${segmentSize} ${segmentSize === 1 ? "pozycja" : segmentSize >= 5 ? "pozycji" : "pozycje"}`;
 
           return (
             <section
@@ -319,7 +324,12 @@ export function CatalogExplorer({
               aria-labelledby={`segment-${segment.id}-heading`}
             >
               <header className="catalog-segment__header">
-                <h2 id={`segment-${segment.id}-heading`}>{segment.label}</h2>
+                <div className="catalog-segment__title">
+                  <h2 id={`segment-${segment.id}-heading`}>{segment.label}</h2>
+                  <span className="catalog-segment__count" aria-live="polite">
+                    {segmentCountLabel}
+                  </span>
+                </div>
                 <p>{segment.description}</p>
               </header>
               {segmentProducts.length === 0 ? (
@@ -331,7 +341,8 @@ export function CatalogExplorer({
                     const leather = leathersById.get(product.leatherId);
                     const titleId = `${product.id}-title`;
                     const descriptionId = `${product.id}-description`;
-                    const metaId = `${product.id}-meta`;
+                    const leadId = `${product.id}-lead`;
+                    const summaryId = `${product.id}-summary`;
                     const funnelId = `${product.id}-funnel`;
                     const funnelCta = getFunnelCta(product.funnelStage);
                     const orderHref = resolveOrderHref(product.orderReference);
@@ -346,7 +357,7 @@ export function CatalogExplorer({
                           className="catalog-card__inner"
                           tabIndex={0}
                           aria-labelledby={titleId}
-                          aria-describedby={`${descriptionId} ${metaId} ${funnelId}`}
+                          aria-describedby={`${leadId} ${summaryId} ${descriptionId} ${funnelId}`}
                         >
                           <header className="catalog-card__header">
                             <div className="catalog-card__tags">
@@ -359,35 +370,39 @@ export function CatalogExplorer({
                             <h3 id={titleId}>{product.name}</h3>
                           </header>
 
+                          <p id={leadId} className="catalog-card__lead">
+                            {product.highlight}
+                          </p>
+
+                          <ul
+                            id={summaryId}
+                            className="catalog-card__summary"
+                            aria-label={`Najważniejsze informacje o modelu ${product.name}`}
+                          >
+                            <li>
+                              <span className="catalog-card__summary-label">Styl</span>
+                              <span className="catalog-card__summary-value">{style?.name ?? "Nieznany"}</span>
+                            </li>
+                            <li>
+                              <span className="catalog-card__summary-label">Skóra</span>
+                              <span className="catalog-card__summary-value">
+                                {leather?.name ?? "Nieznana"}
+                                {leather?.color ? (
+                                  <span className="catalog-card__summary-hint"> ({leather.color})</span>
+                                ) : null}
+                              </span>
+                            </li>
+                            <li>
+                              <span className="catalog-card__summary-label">Etap zamówienia</span>
+                              <span className="catalog-card__summary-value" id={funnelId}>
+                                {product.funnelLabel}
+                              </span>
+                            </li>
+                          </ul>
+
                           <p id={descriptionId} className="catalog-card__description">
                             {product.description}
                           </p>
-
-                          <dl id={metaId} className="catalog-card__meta">
-                            <div>
-                              <dt>Kategoria</dt>
-                              <dd>{product.categoryLabel}</dd>
-                            </div>
-                            <div>
-                              <dt>Styl</dt>
-                              <dd>{style?.name ?? "Nieznany"}</dd>
-                            </div>
-                            <div>
-                              <dt>Skóra</dt>
-                              <dd>
-                                {leather?.name ?? "Nieznana"}
-                                {leather?.color ? <span className="catalog-card__meta-hint"> ({leather.color})</span> : null}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Lejek</dt>
-                              <dd id={funnelId}>{product.funnelLabel}</dd>
-                            </div>
-                            <div>
-                              <dt>Detal</dt>
-                              <dd>{product.highlight}</dd>
-                            </div>
-                          </dl>
 
                           <footer className="catalog-card__footer">
                             <p className="catalog-card__price" aria-label={`Cena: ${formatPrice(product.priceGrosz)}`}>

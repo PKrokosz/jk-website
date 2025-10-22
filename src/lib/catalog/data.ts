@@ -51,41 +51,41 @@ export const catalogStyles: CatalogStyle[] = [
 export const catalogLeathers: CatalogLeather[] = [
   {
     id: 1,
-    name: "Chestnut Veg-Tan",
-    color: "Chestnut",
-    finish: "Matte",
+    name: "Kasztanowa licowa",
+    color: "Kasztan",
+    finish: "Matowa",
     priceModGrosz: 18_000,
     description: "Naturalnie garbowana skóra roślinna o głębokim kasztanowym odcieniu i satynowym połysku."
   },
   {
     id: 2,
-    name: "Amber Pull-Up",
-    color: "Honey",
-    finish: "Waxed",
+    name: "Bursztynowy pull-up",
+    color: "Miód",
+    finish: "Woskowana",
     priceModGrosz: 24_000,
     description: "Skóra pull-up z woskowaną powłoką, która ujawnia jaśniejsze tony podczas zginania."
   },
   {
     id: 3,
-    name: "Obsidian Calf",
-    color: "Ebony",
-    finish: "Polished",
+    name: "Obsydianowa cielęca",
+    color: "Heban",
+    finish: "Polerowana",
     priceModGrosz: 32_000,
     description: "Precyzyjnie wykończona cielęca skóra o głębokiej czerni i lustrzanym połysku."
   },
   {
     id: 4,
-    name: "Moorland Nubuck",
-    color: "Moss",
-    finish: "Soft-touch",
+    name: "Wrzoścowy nubuk",
+    color: "Mech",
+    finish: "Miękka",
     priceModGrosz: 12_000,
     description: "Miękka skóra nubukowa o ziemistym, zielonkawym odcieniu przypominającym poranne mgły na wrzosowiskach."
   },
   {
     id: 5,
-    name: "Workshop Utility Blend",
-    color: "Neutral",
-    finish: "Utility",
+    name: "Warsztatowy mix",
+    color: "Neutralny",
+    finish: "Techniczna",
     priceModGrosz: 0,
     description: "Materiał warsztatowy stosowany w akcesoriach, bukłakach i prawidłach uzupełniających zamówienie."
   }

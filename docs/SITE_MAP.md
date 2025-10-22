@@ -9,12 +9,13 @@
   - [3.3 Product](#33-product)
   - [3.4 Contact](#34-contact)
   - [3.5 Order](#35-order)
+  - [3.6 Group Orders](#36-group-orders)
 - [4. Stany systemowe](#stany-systemowe)
 - [5. Checklisty kontrolne](#checklisty-kontrolne)
 - [6. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- Nawigacja obejmuje Home, Catalog, Product (dynamiczne slug), About, Contact oraz Order (iframe + natywny fallback).
+- Nawigacja obejmuje Home, Catalog, Product (dynamiczne slug), About, Group Orders, Contact oraz Order (iframe + natywny fallback).
 - Każda strona ma zdefiniowane sekcje treści, CTA oraz stany (loading, empty, error).
 - Site map odzwierciedla przepływ: Home → Catalog → Product → Order/Contact → formularz natywny.
 
@@ -38,6 +39,10 @@
 │   └── Warianty personalizacji
 ├── About (/about)
 │   └── Treść o pracowni (placeholder copy)
+├── Group Orders (/group-orders)
+│   ├── Hero (CTA mailto + link do kontaktu)
+│   ├── Lista benefitów współpracy
+│   └── Sekcja procesu 3 kroków + CTA konsultacji
 ├── Contact (/contact)
 │   ├── Hero kontaktu (dane, CTA)
 │   ├── Formularz
@@ -87,6 +92,14 @@
 | --- | --- | --- | --- |
 | Order (iframe) | Hero copy, fallback link, iframe z `NEXT_PUBLIC_ORDER_FORM_URL` | Link do pełnej wersji formularza | Loading natywny (iframe), fallback link |
 | Order native | Lista modeli (`ORDER_MODELS`), CTA do formularza, FAQ (jeśli dodane) | Link `href=ORDER_FORM_URL` | Empty: fallback copy gdy brak modeli |
+
+### 3.6 Group Orders
+| Sekcja | Elementy | CTA | Stany |
+| --- | --- | --- | --- |
+| Hero współpracy | Eyebrow, H1, lead, opis, CTA `mailto` i anchor do `/contact#contact-form` | `mailto:pracownia@jk-footwear.pl`, `/contact#contact-form` | Stały |
+| Korzyści partnerstwa | Karta benefitów (lista 3 pozycji) | Linki w tekście (brak dodatkowych CTA) | Stały |
+| Proces w 3 krokach | Lista numerowana (counter), lead | Brak – informacyjna | Stały |
+| CTA konsultacji | Panel CTA z przyciskami kontaktu | `mailto`, `tel` | Stały |
 
 ## Stany systemowe
 - Loading: katalog (skeleton), order (iframe loading), planowane skeletony dla product/contact.

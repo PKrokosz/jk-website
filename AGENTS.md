@@ -20,6 +20,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 
 ### Konfiguracja środowiska
 - `.env.example` zawiera komplet wymaganych przez walidator zmiennych z bezpiecznymi placeholderami (`NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, identyfikatory marketingowe). Skopiuj plik bez zmian, aby odpalić środowisko lokalne.
+- Narzędzia Drizzle automatycznie wczytają `.env.example`, gdy brakuje `.env.local`/`.env`, więc pierwszy start nie wymaga ręcznej konfiguracji zmiennych (pamiętaj jednak o nadpisaniu wartości przy realnych integracjach).
 - Nadpisuj wartości tylko, gdy integrujesz prawdziwe usługi (np. SMTP produkcyjne, realne piksle marketingowe). Dodając nowe zmienne, pamiętaj o aktualizacji `.env.example`, README i sekcji dokumentacyjnej opisującej walidację.
 
 ## Runbook (MVP workflow)
@@ -103,7 +104,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Mocki (`src/lib/catalog`) z rozszerzonym modelem (slug, warianty, order reference) do czasu podłączenia Drizzle.
 - Repozytorium katalogu ma fallback do danych referencyjnych (`src/lib/catalog/data.ts`) w razie braku połączenia z bazą — nie usuwaj testów `repository.fallback.test.ts` i unikaj top-level importów `@jk/db` w modułach produkcyjnych.
 - Test `src/lib/catalog/__tests__/repository.drizzle.test.ts` utrzymuje zgodność rekordów Drizzle ze słownikami fallback; przy zmianie seeda/migracji aktualizuj zarówno test, jak i dokumentację (`docs/DANE_I_API_MVP.md`, `docs/ARCHITEKTURA_I_LUKI.md`).
-- Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku. Konfiguracja `drizzle.config.ts` ładuje zmienne z `.env.local` (fallback `.env`); pamiętaj o aktualizacji dokumentacji, jeśli zmienisz nazwy plików lub wymagane zmienne.
+- Drizzle: nie zmieniaj schematu bez migracji (`drizzle-kit`) i bez osobnego tasku. Ujednolicenie `DATABASE_URL` (`.env.example` vs `docker-compose.yml`) w toku. Konfiguracja `drizzle.config.ts` ładuje zmienne z `.env.local` (fallback `.env`, a przy braku obu sięgnie po `.env.example`); pamiętaj o aktualizacji dokumentacji, jeśli zmienisz nazwy plików lub wymagane zmienne.
 
 ## Co robić w taskach
 - Dodawaj komponenty w `src/components/` lub `src/components/ui/` dla prymitywów.

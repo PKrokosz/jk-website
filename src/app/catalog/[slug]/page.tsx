@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -47,9 +47,11 @@ function resolveLeather(leatherId: number): CatalogLeather | undefined {
   return catalogLeathers.find((leather) => leather.id === leatherId);
 }
 
-function resolveOrderHref(orderReference?: CatalogProductDetail["orderReference"]) {
+function resolveOrderHref(orderReference?: CatalogProductDetail["orderReference"]): Route {
+  const baseHref = "/order/native" as const;
+
   if (!orderReference) {
-    return "/order/native";
+    return baseHref;
   }
 
   const params = new URLSearchParams();
@@ -63,7 +65,7 @@ function resolveOrderHref(orderReference?: CatalogProductDetail["orderReference"
   }
 
   const query = params.toString();
-  return query ? `/order/native?${query}` : "/order/native";
+  return (query ? `${baseHref}?${query}` : baseHref) as Route;
 }
 
 function getFunnelCta(stage: CatalogProductDetail["funnelStage"]) {

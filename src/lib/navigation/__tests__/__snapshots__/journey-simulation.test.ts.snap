@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`aggregateJourneyTransitions > counts transitions across all journeys 1`] = `
+[
+  {
+    "count": 1,
+    "from": "about",
+    "to": "contact",
+  },
+  {
+    "count": 2,
+    "from": "catalog",
+    "to": "product",
+  },
+  {
+    "count": 2,
+    "from": "contact",
+    "to": "home",
+  },
+  {
+    "count": 1,
+    "from": "home",
+    "to": "about",
+  },
+  {
+    "count": 2,
+    "from": "home",
+    "to": "catalog",
+  },
+  {
+    "count": 1,
+    "from": "order",
+    "to": "home",
+  },
+  {
+    "count": 1,
+    "from": "orderNative",
+    "to": "order",
+  },
+  {
+    "count": 1,
+    "from": "product",
+    "to": "contact",
+  },
+  {
+    "count": 1,
+    "from": "product",
+    "to": "orderNative",
+  },
+]
+`;

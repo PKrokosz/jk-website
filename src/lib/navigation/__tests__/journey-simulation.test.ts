@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildNavigationGraph,
+  aggregateJourneyTransitions,
   formatJourney,
   loadNavigationWeights,
   navigationGraph,
@@ -188,5 +189,23 @@ describe("formatJourney", () => {
     expect(summary).toContain(`User ${journey.id}`);
     expect(summary).toContain("loop at");
     expect(summary).toContain("[");
+  });
+});
+
+describe("aggregateJourneyTransitions", () => {
+  it("counts transitions across all journeys", () => {
+    const journeys = simulateUserJourneys({
+      userCount: 3,
+      random: createSeededRandom(11),
+    });
+
+    const aggregates = aggregateJourneyTransitions(journeys);
+
+    const transition = aggregates.find(
+      (item) => item.from === "home" && item.to === "catalog",
+    );
+
+    expect(transition?.count).toBeGreaterThan(0);
+    expect(aggregates).toMatchSnapshot();
   });
 });

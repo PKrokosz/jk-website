@@ -73,7 +73,7 @@
   ```
   Następnie dodaj do `.env.local` wpis `NAVIGATION_WEIGHTS_PATH=config/navigation-weights.local.json`.
 - Alternatywnie wskaż ścieżkę do pliku JSON jednorazowo w poleceniu (ścieżka względna względem katalogu projektu lub absolutna).
-- Nowy skrypt `pnpm simulate:navigation --config <ścieżka>` uruchamia symulację z podanym plikiem i wypisuje wynik w konsoli (pozwala szybko zweryfikować wpływ wag bez modyfikacji `.env.local`).
+- Nowy skrypt `pnpm simulate:navigation --config <ścieżka> [--user-count <liczba>] [--summary]` uruchamia symulację z podanym plikiem i wypisuje wynik w konsoli (pozwala szybko zweryfikować wpływ wag bez modyfikacji `.env.local`; przełącznik `--summary` dodaje zestawienie liczby przejść na każdej krawędzi, a `--user-count` kontroluje liczbę symulowanych użytkowników).
 - Wagi muszą być liczbami dodatnimi; konfiguracje odwołujące się do nieistniejących węzłów lub przejść spowodują błąd ładowania (testowane w `src/lib/navigation/__tests__/journey-simulation.test.ts`).
 - Po zmianie wag uruchom `pnpm test src/lib/navigation/__tests__/journey-simulation.test.ts` aby zweryfikować poprawność konfiguracji.
 

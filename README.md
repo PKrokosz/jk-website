@@ -102,7 +102,7 @@ Warstwa CLI zapewnia spójność między lokalnymi kontrolami jakości a pipelin
 
 - W katalogu `config/` znajdziesz przykład `navigation-weights.example.json` z komentarzami `_comment` opisującymi format (klucz źródłowy → klucz docelowy → waga dodatnia).
 - Sklonuj plik do własnej konfiguracji, np. `cp config/navigation-weights.example.json config/navigation-weights.local.json`, a następnie dodaj do `.env.local` wpis `NAVIGATION_WEIGHTS_PATH=config/navigation-weights.local.json`.
-- Aby zweryfikować konfigurację bez modyfikowania `.env.local`, uruchom `pnpm simulate:navigation --config <ścieżka>`, który ładuje wskazany plik przez `buildNavigationGraph` i wypisuje wynik symulacji.
+- Aby zweryfikować konfigurację bez modyfikowania `.env.local`, uruchom `pnpm simulate:navigation --config <ścieżka> [--user-count <liczba>] [--summary]`, który ładuje wskazany plik przez `buildNavigationGraph` i wypisuje wynik symulacji (opcja `--summary` dodaje zestawienie liczby przejść na każdej krawędzi).
 
 ## Pakiet `@jk/db`
 

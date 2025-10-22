@@ -2530,6 +2530,27 @@ ul {
   margin-bottom: 0.5rem;
 }
 
+.catalog-segment__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.catalog-segment__count {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(198, 164, 110, 0.12);
+  color: rgba(23, 24, 40, 0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .catalog-segment__header p {
   color: rgba(23, 24, 40, 0.72);
   max-width: 48ch;
@@ -2715,31 +2736,55 @@ ul {
 
 .catalog-card__description {
   color: #403a34;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 62ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.catalog-card__meta {
+.catalog-card__lead {
+  font-weight: 600;
+  color: #3a2a1f;
+}
+
+.catalog-card__summary {
   display: grid;
   gap: 0.75rem;
-}
-
-.catalog-card__meta > div {
-  display: grid;
-  gap: 0.15rem;
-}
-
-.catalog-card__meta dt {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: rgba(108, 79, 61, 0.72);
-}
-
-.catalog-card__meta dd {
+  padding: 0;
   margin: 0;
+  list-style: none;
 }
 
-.catalog-card__meta-hint {
+.catalog-card__summary li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px dashed rgba(198, 164, 110, 0.4);
+  padding-bottom: 0.35rem;
+}
+
+.catalog-card__summary li:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.catalog-card__summary-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(108, 79, 61, 0.8);
+}
+
+.catalog-card__summary-value {
+  font-weight: 600;
+  color: #1b1b1b;
+  text-align: right;
+}
+
+.catalog-card__summary-hint {
   color: #6c6c6c;
 }
 
@@ -2963,15 +3008,23 @@ ul {
   color: rgba(248, 245, 242, 0.74);
 }
 
-.catalog-page .catalog-card__meta dt {
+.catalog-page .catalog-card__lead {
+  color: rgba(255, 226, 166, 0.78);
+}
+
+.catalog-page .catalog-card__summary li {
+  border-color: rgba(255, 226, 166, 0.32);
+}
+
+.catalog-page .catalog-card__summary-label {
   color: rgba(255, 226, 166, 0.56);
 }
 
-.catalog-page .catalog-card__meta dd {
+.catalog-page .catalog-card__summary-value {
   color: rgba(248, 245, 242, 0.88);
 }
 
-.catalog-page .catalog-card__meta-hint {
+.catalog-page .catalog-card__summary-hint {
   color: rgba(248, 245, 242, 0.63);
 }
 

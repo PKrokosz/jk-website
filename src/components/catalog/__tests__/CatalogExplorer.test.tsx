@@ -52,7 +52,7 @@ describe("CatalogExplorer", () => {
       <CatalogExplorer styles={catalogStyles} leathers={catalogLeathers} products={products} />
     );
 
-    fireEvent.click(screen.getByLabelText("Ebony"));
+    fireEvent.click(screen.getByLabelText("Heban"));
 
     expect(screen.getByRole("heading", { name: "Wysokie Szpice" })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Szpic" })).not.toBeInTheDocument();

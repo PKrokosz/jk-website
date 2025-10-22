@@ -52,7 +52,7 @@ export function calculateQuote(request: PricingQuoteRequest = {}): PricingQuote 
 
 export type {
   PricingQuote,
-  PricingQuoteBreakdownItem as PricingBreakdownItem,
+  PricingQuoteBreakdownItem,
   PricingQuoteRequest as PricingRequest,
   PricingQuoteRequestOption as PricingRequestOption
 } from "./schemas";

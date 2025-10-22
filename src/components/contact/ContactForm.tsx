@@ -1,8 +1,15 @@
 "use client";
 
-import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import React, {
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 
 import { sanitizeProductQuery } from "@/lib/contact/sanitizeProduct";
+import { reportClientError } from "@/lib/telemetry";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -178,10 +185,14 @@ export function ContactForm({ initialProduct, submitRequest }: ContactFormProps)
           "Usługa poczty chwilowo niedostępna. Wyślij maila bezpośrednio: kontakt@jkhandmade.pl.";
       }
 
+      reportClientError("contact-form:response", new Error("Response not ok"), {
+        status: response.status,
+        statusText: response.statusText
+      });
       setError(errorMessage);
       setStatus("error");
     } catch (submitError) {
-      console.error("Contact form submit error", submitError);
+      reportClientError("contact-form:transport", submitError);
       setError("Nie udało się wysłać formularza. Sprawdź połączenie i spróbuj ponownie.");
       setStatus("error");
     }

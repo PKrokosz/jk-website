@@ -98,6 +98,7 @@
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
+  - Brak finalnych dokumentów prawnych (pełna polityka/regulamin) może opóźnić publikację stron informacyjnych.
   - Brak finalnego regulaminu może opóźnić publikację kompletnego zestawu dokumentów prawnych.
   - Brak backendu formularza = potencjalna utrata leadów.
   - Brak `robots.txt`/`sitemap` może obniżyć SEO.
@@ -106,6 +107,7 @@
   - Jakie minimalne informacje prawne muszą znaleźć się w footerze na starcie?
   - Czy modal zamówienia pozostaje w MVP, czy promujemy `/order/native` jako primary CTA?
 - **Następne kroki**
+  - Dostarczyć finalną treść polityki prywatności i regulaminu do podmiany placeholderów.
   - Dostarczyć finalną treść regulaminu i zaktualizować stronę `/terms`.
   - Zaplanować backend wysyłki formularza kontaktowego (n8n / e-mail service).
   - Przygotować generację `robots.txt` i `sitemap.ts` w App Routerze.

@@ -54,6 +54,9 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 
 - `DATABASE_URL` – connection string do instancji Postgresa; domyślna wartość w repo korzysta z `devuser/devpass@jkdb` zgodnie z Docker Compose.
 - `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`).
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja serwera SMTP używanego do wysyłki wiadomości z formularza kontaktowego.
+- `MAIL_FROM`, `MAIL_TO` – adres nadawcy i odbiorcy wiadomości wysyłanych przez `/api/contact/submit`.
+- `APP_BASE_URL` – adres aplikacji wykorzystywany do walidacji nagłówków `Origin`/`Referer` w API kontaktowym.
 
 > **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d` i korzystać z `devuser/devpass@jkdb`.
 
@@ -106,7 +109,7 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 - **Strona produktu (`/catalog/[slug]`)** – breadcrumbs, galeria, warianty personalizacji, CTA do modala zamówienia i linków do `/order/native` oraz `/contact`.
 - **Kontakt (`/contact`)** – sekcja hero z danymi pracowni, formularz kontaktowy z walidacją oraz statusami sukces/błąd, linki do sociali.
 - **Zamówienie (`/order`, `/order/native`)** – osadzony formularz natywny (`NEXT_PUBLIC_ORDER_FORM_URL`) i fallback link do pełnej wersji.
-- **API** – mockowane endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote` oraz health-check `/healthz`.
+- **API** – mockowane endpointy `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/api/contact/submit` oraz health-check `/healthz`.
 
 ## Testy i jakość kodu
 

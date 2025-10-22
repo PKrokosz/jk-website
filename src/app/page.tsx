@@ -205,7 +205,7 @@ export default function Home() {
           {
             "@type": "ContactPoint",
             contactType: "customer service",
-            email: "pracownia@jk-footwear.pl",
+            email: "kontakt@jkhandmade.pl",
             availableLanguage: ["pl", "en"]
           }
         ],
@@ -289,7 +289,7 @@ export default function Home() {
                 triggerLabel="Zamów buty"
                 ctaLabel="Przejdź do formularza"
               />
-              <a className="button button--ghost" href="mailto:pracownia@jk-footwear.pl">
+              <a className="button button--ghost" href="mailto:kontakt@jkhandmade.pl">
                 Umów konsultację
               </a>
               <Link className="button button--primary order-modal__mobile-link" href="/order/native">
@@ -451,7 +451,7 @@ export default function Home() {
             </p>
           </div>
           <div className="callout__actions">
-            <a className="button button--primary" href="mailto:pracownia@jk-footwear.pl">
+            <a className="button button--primary" href="mailto:kontakt@jkhandmade.pl">
               Rezerwuj termin
             </a>
             <Link className="button button--ghost" href="/healthz">

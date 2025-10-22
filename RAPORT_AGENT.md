@@ -90,6 +90,12 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
 - **Jakie przyjęto założenia:** Backend katalogu zwraca dane referencyjne dostępne lokalnie; Playwright korzysta z uruchomionego dev servera, a testy mogą wykonywać żądania GET do endpointów mockowanych.
 - **Co dalej:** Przygotować pełny flow e2e zamówienia (modal → `/order/native`), dopisać testy integracyjne `/catalog/[slug]` i `/account`, kontynuować migrację design tokens.
 
+## Raport agenta – 2025-10-25
+- **Co zrobiono:** Przeniesiono inicjalizację klienta bazy do handlera `/api/pricing/quote`, dodano runtime'ową walidację `DATABASE_URL`, przebudowano repozytorium logów na wstrzykiwany klient oraz rozszerzono testy o scenariusz braku konfiguracji.
+- **Dlaczego:** Aby uniknąć błędów w czasie budowania/ładowania modułów przy braku `DATABASE_URL` i wymusić leniwą inicjalizację zgodną z App Routerem.
+- **Jakie przyjęto założenia:** Pool `pg` może być współdzielony w module Next.js, a testy jednostkowe będą mockować repozytorium i klienta DB zamiast realnego połączenia.
+- **Co dalej:** Dostosować pozostałe endpointy API do tego wzorca (np. `/api/products`) i rozważyć wspólny helper do zarządzania cache'owaniem klienta.
+
 ---
 **Priorytety rekomendowane:**
 1. Podpiąć API Next.js oraz mocki katalogu do bazy (Drizzle) na bazie gotowych migracji i seeda.

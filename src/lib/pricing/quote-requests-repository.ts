@@ -1,13 +1,14 @@
-import { and, desc, eq, gte, db, quoteRequest } from "@jk/db";
+import { and, desc, eq, gte, quoteRequest, type Database } from "@jk/db";
 
 import type { PricingQuote, PricingQuoteRequest } from "./schemas";
 
 export async function countQuoteRequestsSince(
+  database: Database,
   ipAddress: string,
   since: Date,
   limit: number
 ): Promise<number> {
-  const rows = await db
+  const rows = await database
     .select({ id: quoteRequest.id })
     .from(quoteRequest)
     .where(
@@ -19,16 +20,19 @@ export async function countQuoteRequestsSince(
   return rows.length;
 }
 
-export async function insertQuoteRequestLog(args: {
-  ipAddress: string;
-  userAgent?: string | null;
-  payload: PricingQuoteRequest;
-  quote: PricingQuote;
-  requestedAt: Date;
-}): Promise<void> {
+export async function insertQuoteRequestLog(
+  database: Database,
+  args: {
+    ipAddress: string;
+    userAgent?: string | null;
+    payload: PricingQuoteRequest;
+    quote: PricingQuote;
+    requestedAt: Date;
+  }
+): Promise<void> {
   const { ipAddress, userAgent, payload, quote, requestedAt } = args;
 
-  await db.insert(quoteRequest).values({
+  await database.insert(quoteRequest).values({
     ipAddress,
     userAgent: userAgent ?? null,
     payload,

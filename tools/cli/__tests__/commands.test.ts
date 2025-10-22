@@ -16,6 +16,20 @@ describe("command registry", () => {
       expect(getCommandDefinition(name)).toEqual(definition);
     }
   });
+
+  it("definiuje krok sprzątania dla scenariusza quality:ci", () => {
+    const cleanupSteps = COMMANDS["quality:ci"].cleanupSteps ?? [];
+
+    expect(cleanupSteps).toContainEqual(
+      expect.objectContaining({
+        id: "cleanup-node20-db",
+        command: "docker",
+        args: ["compose", "down", "--volumes", "jkdb"],
+        title: expect.stringContaining("Cleanup Node 20"),
+        description: expect.stringContaining("jkdb")
+      })
+    );
+  });
 });
 
 describe("CLI environment verification", () => {

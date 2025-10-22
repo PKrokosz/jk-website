@@ -106,7 +106,7 @@ Po skończonej pracy zatrzymaj kontener i usuń wolumeny poleceniem `docker comp
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 | `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) oraz sprawdza zgodność `DATABASE_URL` z `docker-compose.yml`. |
 | `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test). |
-| `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright i depcheck). |
+| `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright, depcheck i sprzątaniem `docker compose down --volumes jkdb`). |
 | `pnpm simulate:user-journeys` | Uruchamia symulacje ścieżek użytkowników na podstawie modułu `src/lib/navigation`. |
 | `pnpm simulate:navigation` | Agreguje dane przejść na grafie nawigacji (obsługuje flagi `--config`, `--user-count`, `--summary`). |
 | `pnpm db:generate` | Generuje migrację Drizzle na podstawie zmian w schemacie. |
@@ -120,6 +120,7 @@ Repozytorium udostępnia warstwę CLI (`pnpm run cli`), która orkiestruje kroki
 - `pnpm run cli -- --list` – lista dostępnych komend wraz z opisem.
 - `pnpm run cli -- quality` – pełny przebieg lint + typecheck + test (skrót dostępny jako `pnpm qa`).
 - `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck; skrót `pnpm qa:ci`).
+- Po scenariuszu Node 20 CLI automatycznie wywołuje `docker compose down --volumes jkdb`, aby zutylizować kontener bazy; w razie debugowania można pominąć krok flagą `--skip=cleanup-node20-db`.
 - `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
 
 Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts`, sprawdza komplet wymaganych zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) i ostrzega o ewentualnej rozbieżności między `.env.example` a `docker-compose.yml`. Dzięki temu brak konfiguracji bazy lub mailingu jest raportowany zanim wystartuje lint czy testy.

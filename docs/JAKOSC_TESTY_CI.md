@@ -1,6 +1,6 @@
 # Jakość, testy i CI/CD
 
-## Meta audytu 2025-10-29
+## Meta audytu 2025-10-30
 - **Status zagadnień**: Workflow CI działa i pokrywa wszystkie opisane kroki (`pnpm qa`, `pnpm qa:ci`). Pozostają otwarte działania opcjonalne (`pnpm test:e2e` dla kolejnych flow, monitorowanie coverage threshold). DoD wymaga konsekwentnego odhaczania pól.
 - **Nowe ścieżki rozwoju**:
   - Ustalić minimalny próg coverage i opisać go w dokumencie (np. 85% pokrycia statements) oraz dodać w pipeline.
@@ -10,9 +10,10 @@
 - **Sens dokumentu**: Określa Definition of Done, plan testów, konfigurację CI i konwencje pracy. Zapewnia, że każda zmiana przechodzi spójny zestaw kontroli jakości.
 - **Aktualizacje wykonane**:
   - Dodano sekcję meta audytu i wskazano konieczność decyzji o progu coverage.
-  - Zsynchronizowano status dokumentu z audytem (2025-10-29).
+  - Zsynchronizowano status dokumentu z audytem (2025-10-30).
   - Uzupełniono opis pipeline o krok przygotowujący bazę oraz uruchomienie `pnpm test:integration`.
   - Doprecyzowano etap sprzątania kontenerów (`docker compose down --volumes jkdb`) po testach integracyjnych.
+  - Rozszerzono CLI `quality:ci` o automatyczne sprzątanie bazy `jkdb` po scenariuszu Node 20 oraz udokumentowano flagę `--skip=cleanup-node20-db`.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -27,6 +28,7 @@
 - DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`.
 - Testy: Vitest + React Testing Library (layout, katalog, kalkulator, formularz kontaktowy, product page, NativeModelShowcase).
 - CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck oraz dedykowane przygotowanie bazy + testy integracyjne na Node 20.x; orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
+- CLI `quality:ci` po zakończeniu pełnej bramki uruchamia `docker compose down --volumes jkdb`, aby domknąć scenariusz Node 20 (można pominąć przy debugowaniu `--skip=cleanup-node20-db`).
 - Commity: Conventional Commits, PR zawiera opis, listę zmian, wyniki komend, screeny dla UI.
 
 ## Definition of Done
@@ -148,6 +150,7 @@ jobs:
   - Kroki `pnpm db:migrate`, `pnpm db:seed` przygotowują kontener Postgresa (`jkdb`) i synchronizują schemat przed testami integracyjnymi.
   - `pnpm test:integration` korzysta z helpera `ensureIntegrationTestMigrations`, aby upewnić się, że migracje zostały zastosowane i dane referencyjne są dostępne.
   - `docker compose down --volumes jkdb` gwarantuje zwolnienie wolumenów i kontenera `jkdb` po zakończeniu testów na Node 20.x.
+  - Komenda `pnpm qa:ci` wywołuje ten sam krok sprzątający lokalnie; w razie potrzeby debugowania można użyć `pnpm qa:ci -- --skip=cleanup-node20-db`.
   - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
   - Scenariusze Playwright uruchamiane są na Node 20.x, raport HTML dołączany jako artefakt `playwright-report`.
 

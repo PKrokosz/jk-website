@@ -54,22 +54,82 @@ export const runCommandDefinition = async (
   const skippedSteps: string[] = [];
   const skipSet = options.skip ?? new Set<string>();
   const executor = options.executor ?? defaultExecutor;
+  const failures: unknown[] = [];
 
-  for (const step of definition.steps) {
+  const runSingleStep = async (step: CommandStep): Promise<void> => {
     if (skipSet.has(step.id)) {
       skippedSteps.push(step.id);
-      continue;
+      return;
     }
 
     if (options.dryRun) {
       console.log(`• ${step.title}: ${formatStep(step)}`);
       executedSteps.push(step.id);
-      continue;
+      return;
     }
 
     console.log(`→ ${step.title}`);
     await executor(step);
     executedSteps.push(step.id);
+  };
+
+  for (const step of definition.steps) {
+    try {
+      await runSingleStep(step);
+    } catch (error) {
+      failures.push(error);
+      break;
+    }
+  }
+
+  if (definition.cleanupSteps?.length) {
+    for (const step of definition.cleanupSteps) {
+      try {
+        await runSingleStep(step);
+      } catch (error) {
+        failures.push(error);
+      }
+    }
+  }
+
+  if (failures.length > 0) {
+    const [primary, ...others] = failures;
+
+    if (others.length === 0) {
+      throw primary;
+    }
+
+    const formatAdditionalError = (error: unknown): string => {
+      if (error instanceof StepExecutionError) {
+        return `cleanup step "${error.step.id}" failed: ${error.message}`;
+      }
+
+      if (error instanceof Error) {
+        return error.message;
+      }
+
+      return String(error);
+    };
+
+    const additionalMessage = others.map(formatAdditionalError).join("; ");
+
+    if (primary instanceof StepExecutionError) {
+      const combined = new StepExecutionError(
+        primary.step,
+        `${primary.message}; dodatkowe błędy: ${additionalMessage}`
+      );
+      combined.stack = primary.stack;
+      (combined as { cause?: unknown }).cause =
+        others.length === 1 ? others[0] : new AggregateError(others);
+      throw combined;
+    }
+
+    if (primary instanceof Error) {
+      primary.message = `${primary.message}; dodatkowe błędy: ${additionalMessage}`;
+      throw primary;
+    }
+
+    throw new Error(`Command execution failed; dodatkowe błędy: ${additionalMessage}`);
   }
 
   return { executedSteps, skippedSteps };

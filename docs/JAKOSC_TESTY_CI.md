@@ -43,6 +43,7 @@ Checklist dla każdego PR:
 | Order modal | Component | Otwarcie, focus trap, CTA linki | Vitest | ✅ (testy w `src/components/ui/order/__tests__`) |
 | Strony prawne | E2E | Pobranie PDF + nagłówki odpowiedzi | Playwright | ✅ (`src/tests/e2e/legal-download.spec.ts`) |
 | Nawigacja głównych stron + API katalogu | E2E | Smoke test nawigacji H1 + GET `/api/products`, `/api/styles`, `/api/leather` | Playwright | ✅ (`src/tests/e2e/site-navigation.spec.ts`) |
+| Zamówienie natywne | E2E | Modal Home → `/order/native` → `/order/cart`, walidacja imienia i prefill koszyka | Playwright | ✅ (`src/tests/e2e/order-native-flow.spec.ts`) |
 | E2E smoke | Flow | Home → Catalog → Product → Contact | Playwright (opcjonalnie) | ⏳ (future) |
 
 ## Konfiguracja GitHub Actions

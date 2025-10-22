@@ -6,3 +6,4 @@
 - Staraj się używać selektorów semantycznych (`getByRole`, `getByLabel`) zamiast klas.
 - Każdy scenariusz powinien asercjami potwierdzać kod statusu odpowiedzi (`response?.status()` albo `request.get`).
 - Dodawaj komentarze tylko, jeśli asercja wymaga kontekstu biznesowego; unikaj snapshotów w Playwright.
+- Scenariusze zamówień muszą potwierdzać walidację pól (`Imię i nazwisko`) i prefill danych na `/order/cart`, aby utrzymać spójność z lejem sprzedażowym.

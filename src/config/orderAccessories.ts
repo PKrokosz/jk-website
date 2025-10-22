@@ -48,7 +48,7 @@ export const ORDER_ACCESSORIES: OrderAccessory[] = [
     id: "leather-soles",
     name: "Spody skórzane",
     price: 200,
-    googleValue: "Spody skórzane -200zł"
+    googleValue: "Spody skórzane - 200 zł"
   },
   {
     id: "double-leather-soles",

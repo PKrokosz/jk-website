@@ -9,7 +9,7 @@
 - [6. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- Lista pytań konieczna do domknięcia przed publikacją MVP. Po ostatnich iteracjach część odpowiedzi została zaadresowana placeholderami (np. formularz kontaktowy), jednak decyzje biznesowe nadal wymagają potwierdzenia.
+- Lista pytań konieczna do domknięcia przed publikacją MVP. Po ostatnich iteracjach kluczowe placeholdery (copy About, zgoda RODO) zostały zastąpione finalnymi tekstami, jednak część decyzji biznesowych nadal wymaga potwierdzenia.
 - Kolumna „Status” wskazuje bieżące ustalenia (✅=rozwiązane w kodzie, 🔄=w toku, ⏳=czeka na decyzję właściciela).
 
 ## Pytania produktowe
@@ -24,11 +24,11 @@
 ## Pytania dotyczące treści i brandu
 | # | Pytanie | Status | Notatka |
 | --- | --- | --- | --- |
-| 1 | Czy mamy zaakceptowane copy dla sekcji About/Contact? Kto dostarcza finalne teksty? | 🔄 | Home/Contact posiadają placeholder copy; About wciąż placeholder, wymaga akceptacji. |
+| 1 | Czy mamy zaakceptowane copy dla sekcji About/Contact? Kto dostarcza finalne teksty? | ✅ | Finalne copy wdrożone na About i Contact zgodnie z przekazanym materiałem. |
 | 2 | Czy dostępne są logotypy, zdjęcia warsztatu, grafiki brandowe? W jakim formacie? | ⏳ | Aktualnie wykorzystujemy zdjęcia modeli z katalogu + wideo w hero. Potrzebne materiały finalne. |
 | 3 | Czy preferowane fonty (np. EB Garamond) są zatwierdzone/licencjonowane? | ⏳ | W projekcie działa fallback `Inter`; brak decyzji dot. serif. |
 | 4 | Jakie kanały social (Instagram, Facebook, LinkedIn) mają być linkowane w stopce? | ✅ | Kontakt posiada linki do Instagram + Facebook (placeholders). Potwierdzić czy dodać inne kanały. |
-| 5 | Czy istnieje polityka prywatności/regulamin do podlinkowania (nawet w formie placeholdera PDF)? | ⏳ | Footer brak linków; czeka na materiały prawne. |
+| 5 | Czy istnieje polityka prywatności/regulamin do podlinkowania (nawet w formie placeholdera PDF)? | 🔄 | Strony placeholder `/privacy-policy` i `/terms` dodane; czekamy na finalne dokumenty prawne. |
 
 ## Pytania techniczne i operacyjne
 | # | Pytanie | Status | Notatka |
@@ -37,7 +37,7 @@
 | 2 | Czy wymagane jest podpięcie analityki (np. GA, Plausible) w MVP? | ⏳ | Brak implementacji; decyzja zależna od właściciela. |
 | 3 | Czy endpointy API (styles, leather) mają docelowo korzystać z bazy, czy pozostajemy przy mockach na MVP? | 🔄 | Obecnie mocki. Potrzebny harmonogram migracji do Drizzle. |
 | 4 | Czy planowane są integracje (np. Stripe, n8n) już w pierwszej wersji, czy później? | 🔄 | W roadmapie (README) przewidziano integracje po stabilizacji MVP; brak terminu. |
-| 5 | Jakie są wymogi prawne dot. zgód RODO w formularzu (checkbox, treść zgody, polityka)? | ⏳ | Formularz posiada placeholder zgody; konieczna konsultacja prawna. |
+| 5 | Jakie są wymogi prawne dot. zgód RODO w formularzu (checkbox, treść zgody, polityka)? | ✅ | Wdrożono zaakceptowany tekst zgody RODO wraz z linkiem do polityki prywatności. |
 
 ## Checklisty kontrolne
 - [x] Zebrano pytania w trzech obszarach (produkt, treści, technologia).
@@ -45,8 +45,8 @@
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak odpowiedzi opóźni finalizację treści (About, polityka prywatności) i integracji (backend formularza, Drizzle).
-  - Niejasne wymagania RODO mogą zablokować publikację formularza.
+  - Brak odpowiedzi opóźni finalizację dokumentów prawnych (polityka, regulamin) i integracji (backend formularza, Drizzle).
+  - Termin dostarczenia finalnych materiałów brandowych (zdjęcia, fonty) pozostaje niepewny.
 - **Decyzje do podjęcia**
   - Priorytetyzacja pytań (które potrzebujemy najpierw?).
   - Czy organizujemy warsztat discovery, czy asynchronicznie zbieramy odpowiedzi?

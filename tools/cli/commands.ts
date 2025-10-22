@@ -1,5 +1,5 @@
 import { REQUIRED_ENVIRONMENT_VARIABLES } from "../verify-drizzle-env";
-import type { CommandDefinition } from "./types";
+import type { CommandDefinition, CommandStep } from "./types";
 
 const REQUIRED_ENV_SUMMARY = REQUIRED_ENVIRONMENT_VARIABLES.map((requirement) => requirement.name).join(
   ", "
@@ -10,48 +10,59 @@ const VERIFY_ENV_DESCRIPTION =
   REQUIRED_ENV_SUMMARY +
   ") przed uruchomieniem kontroli jakości.";
 
+const QUALITY_PREPARE_INTEGRATION_DB_STEP: CommandStep = {
+  id: "prepare-integration-db",
+  title: "Prepare integration database",
+  command: "pnpm",
+  args: ["exec", "tsx", "scripts/prepare-integration-db.ts"],
+  description:
+    "Uruchamia kontener jkdb, czeka na połączenie i wykonuje `pnpm db:migrate` oraz `pnpm db:seed` z konfiguracją .env.test."
+};
+
+const QUALITY_STEPS: CommandStep[] = [
+  {
+    id: "verify-drizzle-env",
+    title: "Verify Drizzle env",
+    command: "pnpm",
+    args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
+    description: VERIFY_ENV_DESCRIPTION
+  },
+  {
+    id: "drizzle-generate-dry-run",
+    title: "Drizzle generate dry-run",
+    command: "pnpm",
+    args: ["exec", "tsx", "tools/cli/drizzle-generate-check.ts"],
+    description:
+      "Uruchamia `pnpm db:generate -- --dry-run` i sprawdza, czy katalog drizzle/ pozostał niezmieniony."
+  },
+  {
+    id: "lint",
+    title: "ESLint",
+    command: "pnpm",
+    args: ["lint"],
+    description: "Runs Next.js lint rules to ensure code quality."
+  },
+  {
+    id: "typecheck",
+    title: "TypeScript",
+    command: "pnpm",
+    args: ["typecheck"],
+    description: "Executes strict TypeScript checks without emitting output."
+  },
+  {
+    id: "unit-tests",
+    title: "Unit tests",
+    command: "pnpm",
+    args: ["test"],
+    description: "Runs Vitest unit and component test suite."
+  }
+];
+
 export const COMMANDS: Record<string, CommandDefinition> = {
   quality: {
     name: "quality",
     summary: "Run lint, type checks and unit tests (local developer workflow).",
-    steps: [
-      {
-        id: "verify-drizzle-env",
-        title: "Verify Drizzle env",
-        command: "pnpm",
-        args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
-        description: VERIFY_ENV_DESCRIPTION
-      },
-      {
-        id: "drizzle-generate-dry-run",
-        title: "Drizzle generate dry-run",
-        command: "pnpm",
-        args: ["exec", "tsx", "tools/cli/drizzle-generate-check.ts"],
-        description:
-          "Uruchamia `pnpm db:generate -- --dry-run` i sprawdza, czy katalog drizzle/ pozostał niezmieniony."
-      },
-      {
-        id: "lint",
-        title: "ESLint",
-        command: "pnpm",
-        args: ["lint"],
-        description: "Runs Next.js lint rules to ensure code quality."
-      },
-      {
-        id: "typecheck",
-        title: "TypeScript",
-        command: "pnpm",
-        args: ["typecheck"],
-        description: "Executes strict TypeScript checks without emitting output."
-      },
-      {
-        id: "unit-tests",
-        title: "Unit tests",
-        command: "pnpm",
-        args: ["test"],
-        description: "Runs Vitest unit and component test suite."
-      }
-    ]
+    steps: QUALITY_STEPS
   },
   "quality:ci": {
     name: "quality:ci",
@@ -158,5 +169,35 @@ export const COMMANDS: Record<string, CommandDefinition> = {
 export const listCommandDefinitions = (): CommandDefinition[] =>
   Object.values(COMMANDS).sort((a, b) => a.name.localeCompare(b.name));
 
-export const getCommandDefinition = (name: string): CommandDefinition | undefined =>
-  COMMANDS[name];
+export interface CommandLookupOptions {
+  withIntegrationDb?: boolean;
+}
+
+export const getCommandDefinition = (
+  name: string,
+  options?: CommandLookupOptions
+): CommandDefinition | undefined => {
+  const definition = COMMANDS[name];
+
+  if (!definition) {
+    return undefined;
+  }
+
+  if (name === "quality" && options?.withIntegrationDb) {
+    const drizzleIndex = definition.steps.findIndex(
+      (step) => step.id === "drizzle-generate-dry-run"
+    );
+    const insertionIndex = drizzleIndex >= 0 ? drizzleIndex + 1 : definition.steps.length;
+
+    return {
+      ...definition,
+      steps: [
+        ...definition.steps.slice(0, insertionIndex),
+        QUALITY_PREPARE_INTEGRATION_DB_STEP,
+        ...definition.steps.slice(insertionIndex)
+      ]
+    } satisfies CommandDefinition;
+  }
+
+  return definition;
+};

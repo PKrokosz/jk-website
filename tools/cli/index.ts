@@ -13,6 +13,7 @@ const printUsage = (): void => {
   console.log("\nOptions:");
   console.log("  --dry-run           Print the steps without executing them");
   console.log("  --skip=<ids>        Skip comma separated step ids (e.g. --skip=build,e2e)");
+  console.log("  --with-integration-db  Include przygotowanie bazy integracyjnej w komendzie quality");
   console.log("  --list              List available commands");
   console.log("  -h, --help          Show this help message");
 };
@@ -44,7 +45,9 @@ export const main = async () => {
     process.exit(1);
   }
 
-  const definition = getCommandDefinition(parsed.commandName);
+  const definition = getCommandDefinition(parsed.commandName, {
+    withIntegrationDb: parsed.withIntegrationDb
+  });
 
   if (!definition) {
     console.error(`Unknown command: ${parsed.commandName}`);

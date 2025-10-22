@@ -3,6 +3,7 @@ export interface ParsedArguments {
   dryRun: boolean;
   list: boolean;
   help: boolean;
+  withIntegrationDb: boolean;
   skip: Set<string>;
   errors: string[];
 }
@@ -26,6 +27,7 @@ export const parseArguments = (argv: string[]): ParsedArguments => {
     dryRun: false,
     list: false,
     help: false,
+    withIntegrationDb: false,
     skip: new Set<string>(),
     errors: []
   };
@@ -39,6 +41,11 @@ export const parseArguments = (argv: string[]): ParsedArguments => {
 
     if (value === "--dry-run") {
       result.dryRun = true;
+      continue;
+    }
+
+    if (value === "--with-integration-db") {
+      result.withIntegrationDb = true;
       continue;
     }
 

@@ -123,7 +123,7 @@ docker compose down --volumes jkdb
 | `pnpm test:e2e` | Scenariusze Playwright (najpierw `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analiza nieużywanych zależności. |
 | `pnpm exec tsx tools/verify-drizzle-env.ts` | Walidacja konfiguracji środowiskowej i spójności z Docker Compose. |
-| `pnpm qa` | `pnpm run cli -- quality` – lint + typecheck + test. |
+| `pnpm qa` | `pnpm run cli -- quality` – lint + typecheck + test (dodaj `-- --with-integration-db`, aby przygotować bazę integracyjną). |
 | `pnpm qa:ci` | `pnpm run cli -- quality:ci` – pełen pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, przygotowanie bazy `.env.test`, integracja katalogu, sprzątanie DB). |
 | `pnpm exec tsx scripts/prepare-integration-db.ts` | Startuje `jkdb`, czeka na dostępność, wykonuje migracje i seed korzystając z `.env.test`. |
 | `pnpm run cli -- --list` | Lista dostępnych komend CLI i opis kroków. |
@@ -139,6 +139,7 @@ docker compose down --volumes jkdb
 - `pnpm run cli -- quality:ci` – pełny pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, przygotowanie bazy `.env.test`, test integracyjny katalogu; skrót `pnpm qa:ci`).
 - CLI ładuje kolejno `.env.local`, `.env`, a następnie `.env.example` zanim wystartuje krok „Verify Drizzle env”.
 - `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, a `--skip=<id>` pozwala pominąć wskazane kroki (np. `--skip=build,e2e`).
+- `--with-integration-db` (np. `pnpm qa -- --with-integration-db`) dodaje krok `scripts/prepare-integration-db.ts`, dzięki czemu lokalna komenda `quality` odwzorowuje rozszerzoną bramkę CI.
 - Po scenariuszu Node 20 CLI wywołuje `docker compose down --volumes jkdb`; krok można pominąć flagą `--skip=cleanup-node20-db`.
 
 Testy CLI mockują `process.exit` i logi, dzięki czemu zachowania są weryfikowane bez kończenia procesu Node.js.
@@ -195,6 +196,7 @@ pnpm db:seed       # zasila bazę danymi referencyjnymi
 - `pnpm test:ci` (uruchamiane też w CI) wykorzystuje reporter `dot` i weryfikuje próg pokrycia 85% Statements/Lines.
 - `pnpm test:e2e` odpala Playwright (nawigacja po głównych stronach, health-checki API, dokumenty prawne). Przed pierwszym runem: `pnpm exec playwright install --with-deps`.
 - `pnpm test:integration` (alias `vitest run src/app/api/products/route.integration.test.ts`) korzysta z `.env.test` i helpera `src/tests/integration/db.ts`; przed uruchomieniem użyj `pnpm exec tsx scripts/prepare-integration-db.ts`, aby wystartować `jkdb`, zastosować migracje i seed.
+- `pnpm qa -- --with-integration-db` odpala krok przygotowania bazy (`scripts/prepare-integration-db.ts`), co pozwala lokalnie uruchomić pełną bramkę jakościową bez przełączania się na `quality:ci`.
 - `pnpm depcheck`, `pnpm lint` i `pnpm typecheck` odtwarzają etapy pipeline CI.
 - Dodatkowe symulacje nawigacji (`pnpm simulate:*`) mają testy snapshotowe weryfikujące konfiguracje wag i brak cykli.
 - Brak devDependency `drizzle-orm` w katalogu głównym blokuje krok migracji w `pnpm db:generate` (oraz w bramce jakości `pnpm qa` opisanej w `AGENTS.md`), ponieważ CLI Drizzle wymaga lokalnego importu modułu `drizzle-orm/version`.

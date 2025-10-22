@@ -150,11 +150,11 @@ describe("catalog repository database mocking", () => {
       productTemplateTable: actualDbModule.productTemplate
     });
 
-    const repositoryModule = await import("../repository");
-    repositoryModule.__catalogRepositoryInternals.resetDbModuleCache();
+    const catalogRepositoryModule = await import("../repository");
+    catalogRepositoryModule.__catalogRepositoryInternals.resetDbModuleCache();
 
-    const stylesResult = await repositoryModule.loadCatalogStyles(database);
-    const leathersResult = await repositoryModule.loadCatalogLeathers(database);
+    const stylesResult = await catalogRepositoryModule.loadCatalogStyles(database);
+    const leathersResult = await catalogRepositoryModule.loadCatalogLeathers(database);
 
     expect(stylesResult.source).toBe("database");
     expect(stylesResult.data).toEqual([
@@ -196,11 +196,11 @@ describe("catalog repository database mocking", () => {
 
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const repositoryModule = await import("../repository");
-    repositoryModule.__catalogRepositoryInternals.resetDbModuleCache();
+    const catalogRepositoryModule = await import("../repository");
+    catalogRepositoryModule.__catalogRepositoryInternals.resetDbModuleCache();
 
-    const stylesResult = await repositoryModule.loadCatalogStyles(database);
-    const leathersResult = await repositoryModule.loadCatalogLeathers(database);
+    const stylesResult = await catalogRepositoryModule.loadCatalogStyles(database);
+    const leathersResult = await catalogRepositoryModule.loadCatalogLeathers(database);
 
     expect(stylesResult.source).toBe("fallback");
     expect(stylesResult.data).toEqual([...catalogStyles].sort((a, b) => a.id - b.id));
@@ -248,11 +248,11 @@ describe("catalog repository database mocking", () => {
 
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-    const repositoryModule = await import("../repository");
-    repositoryModule.__catalogRepositoryInternals.resetDbModuleCache();
+    const catalogRepositoryModule = await import("../repository");
+    catalogRepositoryModule.__catalogRepositoryInternals.resetDbModuleCache();
 
-    const stylesResult = await repositoryModule.loadCatalogStyles(database);
-    const leathersResult = await repositoryModule.loadCatalogLeathers(database);
+    const stylesResult = await catalogRepositoryModule.loadCatalogStyles(database);
+    const leathersResult = await catalogRepositoryModule.loadCatalogLeathers(database);
 
     expect(stylesResult.source).toBe("fallback");
     expect(stylesResult.data).toEqual([...catalogStyles].sort((a, b) => a.id - b.id));

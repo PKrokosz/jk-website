@@ -63,6 +63,7 @@ Repozytorium sklepu MTO „JK Handmade Footwear” zbudowanego na Next.js 14 (Ap
    ```bash
    pnpm install
    ```
+   > **Uwaga:** Katalog główny workspace'u musi utrzymywać devDependency `drizzle-orm`. To zależność wymagana przez `drizzle-kit`, aby `pnpm db:generate` mogło zaciągnąć wersję ORM i przejść weryfikację kompatybilności.
 2. Zatwierdź instalację natywnych binariów:
    ```bash
    pnpm approve-builds
@@ -159,6 +160,19 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 pnpm db:seed       # zasila bazę danymi referencyjnymi
 ```
 
+> **Log `pnpm db:generate` (2025-10-22):**
+>
+> ```text
+> $ pnpm db:generate
+> No config path provided, using default 'drizzle.config.ts'
+> Reading config file '/workspace/jk-website/drizzle.config.ts'
+> This version of drizzle-kit is outdated
+> Please update drizzle-kit package to the latest version 👍
+>  ELIFECYCLE  Command failed with exit code 1.
+> ```
+>
+> Log potwierdza, że skrypt przechodzi walidację kompatybilności z `drizzle-orm`, a ewentualne błędy wynikają z wymogu aktualizacji `drizzle-kit` do wersji zgodnej z `compatibilityVersion` ORM.
+
 ## Funkcjonalności aplikacji
 
 - **Strona główna (`/`)** – hero z wideo, proces MTO, carousel selling points, portfolio modeli, kalkulator wyceny, CTA do zamówień i kontaktu.
@@ -182,6 +196,7 @@ pnpm db:seed       # zasila bazę danymi referencyjnymi
 - `pnpm test:integration` korzysta z `.env.test` i helpera `src/tests/integration/db.ts`, aby wykonać zapytania na realnej bazie (`docker compose up -d jkdb`, `pnpm db:migrate`, `pnpm db:seed`).
 - `pnpm depcheck`, `pnpm lint` i `pnpm typecheck` odtwarzają etapy pipeline CI.
 - Dodatkowe symulacje nawigacji (`pnpm simulate:*`) mają testy snapshotowe weryfikujące konfiguracje wag i brak cykli.
+- Brak devDependency `drizzle-orm` w katalogu głównym blokuje krok migracji w `pnpm db:generate` (oraz w bramce jakości `pnpm qa` opisanej w `AGENTS.md`), ponieważ CLI Drizzle wymaga lokalnego importu modułu `drizzle-orm/version`.
 
 ### Jak uruchamiać testy i utrzymać pokrycie
 

@@ -32,13 +32,13 @@ const runCommand = (
   command: string,
   args: string[],
   spawnImpl: SpawnFunction,
-  envOverrides?: NodeJS.ProcessEnv
+  envOverrides?: Partial<NodeJS.ProcessEnv>
 ): Promise<void> =>
   new Promise((resolve, reject) => {
     const child = spawnImpl(command, args, {
       stdio: "inherit",
       shell: false,
-      env: { ...process.env, ...envOverrides }
+      env: { ...process.env, ...envOverrides } as NodeJS.ProcessEnv
     });
 
     if (!child || typeof child.once !== "function") {

@@ -31,7 +31,7 @@ type CartContextValue = {
   clear: () => void;
 };
 
-const useCartMock = vi.fn<CartContextValue, []>();
+const useCartMock = vi.fn<() => CartContextValue>();
 
 vi.mock("@/components/cart/CartProvider", () => ({
   useCart: () => useCartMock()

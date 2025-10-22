@@ -3,14 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { reportClientError, reportServerError } from "../index";
 
 describe("telemetry", () => {
-  const originalEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    vi.stubEnv("NODE_ENV", "test");
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   it("dispatches a telemetry event in the browser without logging during tests", () => {
@@ -33,7 +33,7 @@ describe("telemetry", () => {
   });
 
   it("logs errors on the server side when not running tests", () => {
-    process.env.NODE_ENV = "development";
+    vi.stubEnv("NODE_ENV", "development");
     const consoleSpy = vi.spyOn(console, "error");
 
     reportServerError("api:pricing", "Unable to fetch pricing", { retry: true });

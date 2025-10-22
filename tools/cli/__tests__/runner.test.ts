@@ -9,6 +9,7 @@ import {
   runCommandDefinition,
   type RunResult
 } from "../runner";
+import type { CommandDefinition, CommandStep } from "../types";
 
 vi.mock("node:child_process", () => ({
   spawn: vi.fn()
@@ -18,13 +19,13 @@ const { spawn } = await import("node:child_process");
 const spawnMock = vi.mocked(spawn);
 
 // Mirrors the first quality step so expectations stay aligned with CLI defaults.
-const VERIFY_DRIZZLE_ENV_STEP = {
+const VERIFY_DRIZZLE_ENV_STEP: CommandStep = {
   id: "verify-drizzle-env",
   title: "Verify Drizzle env",
   command: "pnpm",
   args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
   env: {}
-} as const;
+};
 
 describe("runner", () => {
   afterEach(() => {
@@ -40,16 +41,18 @@ describe("runner", () => {
     const executor = vi.fn().mockResolvedValue(undefined);
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
+    const definition: CommandDefinition = {
+      name: "qa",
+      summary: "Quality checks",
+      steps: [
+        VERIFY_DRIZZLE_ENV_STEP,
+        { id: "lint", title: "Lint", command: "pnpm", args: ["lint"], env: {} },
+        { id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} }
+      ]
+    };
+
     const result = await runCommandDefinition(
-      {
-        id: "qa",
-        description: "Quality checks",
-        steps: [
-          VERIFY_DRIZZLE_ENV_STEP,
-          { id: "lint", title: "Lint", command: "pnpm", args: ["lint"], env: {} },
-          { id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} }
-        ]
-      },
+      definition,
       {
         dryRun: true,
         skip: new Set(["lint"]),
@@ -71,18 +74,16 @@ describe("runner", () => {
   });
 
   it("throws StepExecutionError when executor fails", async () => {
-    const error = new StepExecutionError(
-      { id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} },
-      "failed"
-    );
+    const failingStep: CommandStep = { id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} };
+    const error = new StepExecutionError(failingStep, "failed");
     const executor = vi.fn().mockRejectedValue(error);
 
     await expect(
       runCommandDefinition(
         {
-          id: "qa",
-          description: "Quality",
-          steps: [{ id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} }]
+          name: "qa",
+          summary: "Quality",
+          steps: [failingStep]
         },
         { executor }
       )

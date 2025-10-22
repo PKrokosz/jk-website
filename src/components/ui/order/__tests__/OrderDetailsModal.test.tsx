@@ -5,11 +5,12 @@ import { describe, expect, it, vi } from "vitest";
 import { OrderDetailsModal, type OrderDetailsFormValues } from "../OrderDetailsModal";
 
 describe("OrderDetailsModal", () => {
-  const baseConfiguration = {
+  const baseConfiguration: Parameters<typeof OrderDetailsModal>[0]["configuration"] = {
     model: { id: "model-1", label: "Obieżyświat", priceGrosz: 120_00 },
     accessories: [{ id: "acc-1", label: "Dodatkowe sprzączki", priceGrosz: 20_00 }],
     extras: [{ id: "extra-1", label: "Szybsza realizacja", priceGrosz: 30_00 }],
     quote: {
+      currency: "PLN",
       totalNetGrosz: 140_00,
       totalVatGrosz: 32_20,
       totalGrossGrosz: 172_20,
@@ -19,7 +20,7 @@ describe("OrderDetailsModal", () => {
         { label: "VAT", amountGrosz: 32_20 }
       ]
     }
-  } as const;
+  };
 
   it("focuses the first field when opened and lists configuration items", async () => {
     render(
@@ -60,7 +61,7 @@ describe("OrderDetailsModal", () => {
   });
 
   it("validates required fields and displays aria-described errors", async () => {
-    const onSubmit = vi.fn<Promise<void> | void, [OrderDetailsFormValues]>();
+    const onSubmit = vi.fn<(values: OrderDetailsFormValues) => void | Promise<void>>();
     const user = userEvent.setup();
 
     render(

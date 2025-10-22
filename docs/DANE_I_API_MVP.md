@@ -66,13 +66,13 @@
 | --- | --- | --- | --- | --- |
 | `/api/styles` | GET | brak | `{ data: CatalogStyle[] }` | Dane z tabeli `style` (Drizzle ORM, revalidate 3600 s). |
 | `/api/leather` | GET | brak | `{ data: CatalogLeather[] }` | Dane z tabeli `leather` (Drizzle ORM, revalidate 3600 s). |
-| `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; brak walidacji Zod. |
+| `/api/pricing/quote` | POST | `PricingRequest` (`modelId`, `leatherId`, `accessories`, `rushOrder`) | `{ ok: true; quote: PricingQuote; payload; requestedAt }` | Zwraca orientacyjną cenę; walidacja request/response w Zod. |
 | `/api/contact/submit` | POST | `{ name, email, phone?, message, product?, website? }` | `{ ok: true }` lub `{ error }` | Walidacja Zod, rate-limit per IP, honeypot `website`, wysyłka maila przez SMTP. |
 | `/api/products` | GET | `?slug?` | `{ data: CatalogProductSummary[] }` lub `{ data: CatalogProductDetail }` | Lista produktów katalogu lub szczegóły pojedynczego produktu. Walidacja query i payloadu w Zod. |
 | `/api/products/[slug]` | — | brak | — | Niezaimplementowane – strona produktu korzysta z funkcji bibliotecznych. |
 
 ## Walidacja i obsługa błędów
-- Walidacja requestów API: dodano schematy Zod dla `/api/products` (query i payload), nadal brak dla `PricingRequest`/`QuoteResponse`.
+- Walidacja requestów API: `/api/products` (query i payload) oraz `/api/pricing/quote` (request + response) korzystają z Zod.
 - Komponenty UI:
   - `CatalogExplorer` obsługuje brak wyników tekstem.
   - `ProductPage` wywołuje `notFound()` dla nieistniejącego sluga; brak fallbacku `error.tsx` (opcjonalny future work).
@@ -84,20 +84,20 @@
 - [x] Opisano, jak zasilać katalog i produkt bez back-endu.
 - [x] Zaktualizowano opis połączenia z Drizzle (API + seedy współdzielone z `@jk/db`).
 - [x] Spisano aktualne endpointy i ich status.
-- [ ] Dodano schematy Zod dla `PricingRequest` i potencjalnych API produktów.
+- [x] Dodano schematy Zod dla `PricingRequest` i potencjalnych API produktów.
 - [x] Utworzono backend dla formularza kontaktowego (`/api/contact/submit`).
 - [x] Autopodpowiedź pola `product` w formularzu na podstawie query paramu.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
   - Błędy połączenia z bazą zwracają fallback UI na stronach katalogu/produktu – brak jeszcze mechanizmu retry/alertingu.
-  - Brak walidacji w API (`/api/pricing/quote`) może dopuścić niepoprawne payloady.
+  - Walidacja `/api/pricing/quote` zabezpieczona schematami Zod i testami kontraktowymi (monitorować pokrycie przypadków edge).
   - Brak endpointu `/api/products` ogranicza re-use danych w przyszłych integracjach (np. SSR/CSR fetch).
 - **Decyzje do podjęcia**
   - Czy potrzebujemy `/api/products` przed integracją z Drizzle?
   - Jak mapować `orderReference` przy przejściu na realne dane (np. ID z bazy)?
   - Autopodpowiedź pola `product` w `ContactForm` na podstawie query paramu – ✅ wdrożona (prefill po stronie klienta).
 - **Następne kroki**
-  - Dodać walidację Zod i testy dla `calculateQuote` + endpointu.
+  - Zaimplementować persystencję danych wycen (np. w tabeli `quote_requests`) z wykorzystaniem Drizzle i rate-limitów.
   - Przygotować konwersję mocków do seeda Drizzle (JSON/SQL).
   - Zaplanować API `/api/products` oparte na Drizzle lub co najmniej `GET /api/products/[slug]` z mocków.

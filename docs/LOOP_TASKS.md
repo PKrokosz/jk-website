@@ -46,5 +46,10 @@
 - `1/x₅`: Zaprojektować komponenty `Button` i `Badge` eksportowane z `src/components/ui/primitives` wraz z mapowaniem wariantów na tokens.
 - `x₅²`: Zintegrować nowe komponenty w kluczowych widokach (`Home`, `Catalog`, `Order`) i zapewnić storybook/preview.
 - `x₅ˣ`: Dodać generator dokumentacji komponentów (MDX) synchronizowany z design tokens.
+### Zadanie bazowe `x₅`: Uspójnić fallback katalogu z docelową bazą danych
+- `-x₅`: Monitorować logi ostrzeżeń o fallbacku i dodać alert w telemetrii, aby łatwiej wykrywać brak połączenia z DB.
+- `1/x₅`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB.
+- `x₅²`: Zaimplementować cache warstwy katalogu (ISR + lokalny cache) i zsynchronizować go z Drizzle.
+- `x₅ˣ`: Dostarczyć healthcheck katalogu publikujący metryki (dostępność DB, czasy odpowiedzi, liczba fallbacków) do panelu obserwowalności.
 
 > Po zrealizowaniu dowolnego zadania z listy pamiętaj o aktualizacji dokumentów źródłowych (`UI_TOKENS.md`, `JAKOSC_TESTY_CI.md`, `DANE_I_API_MVP.md`) oraz sekcji statusów w `docs/README_DOCS.md`.

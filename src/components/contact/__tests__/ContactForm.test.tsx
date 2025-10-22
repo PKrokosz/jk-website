@@ -17,6 +17,20 @@ function createResponse(status: number, statusText?: string) {
 
 describe("ContactForm", () => {
   const consentLabel = /wyrażam zgodę/i;
+  let submitRequest: MockedFunction<typeof fetch>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    submitRequest = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", submitRequest);
+  });
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   const submitLabel = /wyślij wiadomość/i;
   let submitRequest: ReturnType<typeof vi.fn<typeof fetch>>;
 

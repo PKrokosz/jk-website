@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "depcheck": "depcheck --skip-missing=true --ignores=@vitest/coverage-v8,@types/pg",
+    "simulate:user-journeys": "tsx scripts/simulate-user-journeys.ts",
     "db:generate": "drizzle-kit generate:pg",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "pnpm --filter @jk/db run seed",
@@ -47,7 +48,8 @@
     "eslint-config-next": "14.2.13",
     "jsdom": "^27.0.1",
     "typescript": "5.5.4",
-    "vitest": "2.1.1"
+    "vitest": "2.1.1",
+    "tsx": "^4.7.1"
   },
   "packageManager": "pnpm@10.18.3"
 }

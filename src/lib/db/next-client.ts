@@ -11,6 +11,10 @@ export class DatabaseConfigurationError extends Error {
 
 let cachedClient: DbClient | null = null;
 
+export function getCachedNextDbClient(): DbClient | null {
+  return cachedClient;
+}
+
 export function getNextDbClient(): DbClient {
   if (cachedClient) {
     return cachedClient;
@@ -29,4 +33,11 @@ export function getNextDbClient(): DbClient {
 
 export function resetNextDbClient(): void {
   cachedClient = null;
+}
+
+export async function disposeNextDbClient(): Promise<void> {
+  if (cachedClient) {
+    await cachedClient.pool.end();
+    cachedClient = null;
+  }
 }

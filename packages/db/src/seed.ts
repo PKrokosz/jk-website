@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 
-import { db, pool } from "./lib/db";
+import { createDbClient, type Database } from "./lib/db";
 import { leather, option, sole, style } from "./schema";
 import {
   referenceLeathers,
@@ -26,10 +26,10 @@ const baseOptions = referenceOptions.map(({ id: _id, ...optionSeed }) => optionS
   typeof option.$inferInsert
 )[];
 
-async function seedReferenceData() {
+async function seedReferenceData(database: Database) {
   console.info("🔄 Resetting reference tables...");
 
-  await db.transaction(async (trx) => {
+  await database.transaction(async (trx) => {
     await trx.execute(sql`TRUNCATE TABLE "option" RESTART IDENTITY CASCADE;`);
     await trx.execute(sql`TRUNCATE TABLE "sole" RESTART IDENTITY CASCADE;`);
     await trx.execute(sql`TRUNCATE TABLE "leather" RESTART IDENTITY CASCADE;`);
@@ -45,8 +45,18 @@ async function seedReferenceData() {
 }
 
 async function main() {
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error(
+      "DATABASE_URL must be defined to run the seed script."
+    );
+  }
+
+  const { db, pool } = createDbClient(connectionString);
+
   try {
-    await seedReferenceData();
+    await seedReferenceData(db);
   } catch (error) {
     console.error("❌ Seeding failed", error);
     process.exitCode = 1;

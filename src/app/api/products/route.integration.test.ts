@@ -48,15 +48,41 @@ async function ensureIntegrationDatabaseAvailability(): Promise<{
     return { available: true };
   } catch (error) {
     await closeIntegrationTestClient().catch(() => {});
-    const details =
-      error instanceof Error && error.message.trim().length > 0
-        ? error.message
-        : String(error);
+    const details = formatIntegrationConnectionError(error);
+    const recoveryHint =
+      "Uruchom `docker compose up -d jkdb` oraz zweryfikuj konfigurację `.env.test`.";
     return {
       available: false,
-      reason: `Pomijam testy integracyjne — brak połączenia z bazą danych (${details}).`
+      reason: `Pomijam testy integracyjne — brak połączenia z bazą danych (${details}). ${recoveryHint}`
     };
   }
+}
+
+function formatIntegrationConnectionError(error: unknown): string {
+  if (error instanceof AggregateError) {
+    const messages = Array.from(
+      new Set(
+        error.errors
+          .map((entry) => {
+            if (entry instanceof Error) {
+              return entry.message.trim();
+            }
+            return String(entry).trim();
+          })
+          .filter((message) => message.length > 0)
+      )
+    );
+
+    if (messages.length > 0) {
+      return messages.join(", ");
+    }
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return String(error);
 }
 
 const { available: integrationDbAvailable, reason: integrationSkipReason } =

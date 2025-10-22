@@ -15,7 +15,7 @@ describe("telemetry", () => {
 
   it("dispatches a telemetry event in the browser without logging during tests", () => {
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
-    const consoleSpy = vi.spyOn(console, "error");
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     reportClientError("contact:submit", new Error("Boom"), { status: 500 });
 
@@ -34,7 +34,7 @@ describe("telemetry", () => {
 
   it("logs errors on the server side when not running tests", () => {
     vi.stubEnv("NODE_ENV", "development");
-    const consoleSpy = vi.spyOn(console, "error");
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     reportServerError("api:pricing", "Unable to fetch pricing", { retry: true });
 

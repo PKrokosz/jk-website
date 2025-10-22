@@ -129,6 +129,12 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
 - **Jakie przyjęto założenia:** Referencyjne seedy `@jk/db` pozostają źródłem prawdy dla stylów/skór, a produktowe mocki zostają do czasu migracji do Drizzle.
 - **Co dalej:** Przenieść `productTemplates` do migracji/seeda Drizzle, dodać endpoint `/api/products/[slug]` oparty na bazie oraz przygotować healthcheck i cache katalogu (`x₆²`, `x₆ˣ`).
 
+## Raport agenta – 2025-10-31
+- **Co zrobiono:** CLI automatycznie ładuje `.env.local`/`.env`/`.env.example` przed weryfikacją kroków QA oraz dodano testy zabezpieczające ładowanie plików środowiskowych.
+- **Dlaczego:** Aby `pnpm qa` działało bez ręcznego eksportu zmiennych i korzystało z domyślnej konfiguracji środowiska.
+- **Jakie przyjęto założenia:** Pliki `.env.local` i `.env.example` zawierają komplet wymaganych wpisów, a testy CLI mogą stubować ładowanie środowiska.
+- **Co dalej:** Zautomatyzować uruchamianie `docker compose up -d jkdb` przed testami integracyjnymi oraz dodać healthcheck dostępności bazy w CLI.
+
 ---
 **Priorytety rekomendowane:**
 1. Podpiąć API Next.js oraz mocki katalogu do bazy (Drizzle) na bazie gotowych migracji i seeda.

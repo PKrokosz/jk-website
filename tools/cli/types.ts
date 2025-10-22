@@ -11,6 +11,7 @@ export interface CommandDefinition {
   name: string;
   summary: string;
   steps: CommandStep[];
+  cleanupSteps?: CommandStep[];
 }
 
 export interface RunCommandOptions {

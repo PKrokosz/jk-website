@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { CatalogLeather, CatalogProductSummary, CatalogStyle } from "@/lib/catalog/types";
 
 const currencyFormatter = new Intl.NumberFormat("pl-PL", {
@@ -42,9 +43,11 @@ function formatPrice(priceGrosz: number) {
   return currencyFormatter.format(priceGrosz / 100);
 }
 
-function resolveOrderHref(orderReference?: CatalogProductSummary["orderReference"]) {
+function resolveOrderHref(orderReference?: CatalogProductSummary["orderReference"]): Route {
+  const baseHref = "/order/native" as const;
+
   if (!orderReference) {
-    return "/order/native";
+    return baseHref;
   }
 
   const params = new URLSearchParams();
@@ -58,7 +61,7 @@ function resolveOrderHref(orderReference?: CatalogProductSummary["orderReference
   }
 
   const query = params.toString();
-  return query ? `/order/native?${query}` : "/order/native";
+  return (query ? `${baseHref}?${query}` : baseHref) as Route;
 }
 
 function getFunnelCta(stage: CatalogProductSummary["funnelStage"]) {

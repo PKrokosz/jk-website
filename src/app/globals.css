@@ -1325,6 +1325,18 @@ ul {
   gap: 1rem;
 }
 
+.page-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.page-navigation .button {
+  min-width: 14rem;
+  justify-content: center;
+}
+
 .callout .button--primary {
   background: #f8f5f2;
   color: #111111;
@@ -1696,6 +1708,20 @@ ul {
   min-width: 180px;
 }
 
+.order-native__navigation {
+  justify-content: center;
+  margin-top: clamp(2.5rem, 6vw, 3.5rem);
+}
+
+.order-native__navigation .button--ghost {
+  border-color: rgba(255, 226, 166, 0.35);
+  color: rgba(255, 226, 166, 0.82);
+}
+
+.order-native__navigation .button--ghost:is(:hover, :focus-visible) {
+  background: rgba(255, 226, 166, 0.12);
+}
+
 .order-thanks-page {
   background: linear-gradient(180deg, #0f0d0a, #18110b 50%, #0f0d0a);
   color: #f8f5f2;
@@ -1724,6 +1750,19 @@ ul {
 .order-thanks__transfer {
   display: flex;
   justify-content: center;
+}
+
+.order-thanks__navigation {
+  justify-content: center;
+}
+
+.order-thanks__navigation .button--ghost {
+  border-color: rgba(255, 226, 166, 0.35);
+  color: rgba(255, 226, 166, 0.82);
+}
+
+.order-thanks__navigation .button--ghost:is(:hover, :focus-visible) {
+  background: rgba(255, 226, 166, 0.12);
 }
 
 .order-thanks__card {
@@ -2886,6 +2925,21 @@ ul {
   text-decoration-thickness: 2px;
 }
 
+.order-page__navigation {
+  justify-content: center;
+  margin-top: clamp(2.5rem, 6vw, 3.5rem);
+}
+
+.order-page__navigation .button--ghost {
+  border-color: rgba(255, 226, 166, 0.35);
+  color: rgba(255, 226, 166, 0.82);
+}
+
+.order-page__navigation .button--ghost:hover,
+.order-page__navigation .button--ghost:focus-visible {
+  background: rgba(255, 226, 166, 0.12);
+}
+
 .order-form__frame-wrapper {
   background: rgba(248, 245, 242, 0.05);
   border-radius: 1rem;
@@ -3777,10 +3831,47 @@ ul {
   position: relative;
   flex: 1;
   display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-block: 0;
   min-height: 100vh;
   color: rgba(248, 245, 242, 0.92);
   background: radial-gradient(circle at 20% 20%, rgba(56, 44, 30, 0.42), transparent 55%),
     radial-gradient(circle at 80% 80%, rgba(20, 18, 16, 0.54), rgba(5, 5, 5, 0.96));
+}
+
+.about-hero {
+  position: relative;
+  padding-block: clamp(4rem, 12vh, 6rem);
+  background: linear-gradient(180deg, rgba(7, 6, 5, 0.92), rgba(7, 6, 5, 0.7));
+  border-bottom: 1px solid rgba(198, 164, 110, 0.24);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+.about-hero__content {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 48rem;
+}
+
+.about-hero__content .lead {
+  color: rgba(248, 245, 242, 0.86);
+}
+
+.about-navigation {
+  justify-content: center;
+  margin-block: clamp(2.5rem, 6vw, 4rem) clamp(3rem, 7vw, 5rem);
+}
+
+.about-navigation .button--ghost {
+  border-color: rgba(248, 245, 242, 0.35);
+  color: rgba(248, 245, 242, 0.82);
+}
+
+.about-navigation .button--ghost:hover,
+.about-navigation .button--ghost:focus-visible {
+  background: rgba(248, 245, 242, 0.12);
 }
 
 .about-track {

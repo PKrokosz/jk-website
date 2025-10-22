@@ -21,9 +21,10 @@ describe("Footer", () => {
     expect(screen.getByText(/Pracownia Butów Na Miarę/)).toBeInTheDocument();
 
     const privacyLink = screen.getByRole("link", { name: "Polityka prywatności" });
-    const [termsLink] = screen.getAllByRole("link", { name: /Regulamin/ });
+    const [termsLink, termsShopLink] = screen.getAllByRole("link", { name: /Regulamin/ });
 
     expect(privacyLink).toHaveAttribute("href", "/privacy-policy");
     expect(termsLink).toHaveAttribute("href", "/terms");
+    expect(termsShopLink).toHaveAttribute("href", "/terms");
   });
 });

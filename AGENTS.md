@@ -57,6 +57,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
+- Przy użyciu TypeScriptowego operatora `satisfies` trzymaj go w tej samej linii, co domykający literał (`] satisfies Type`), aby uniknąć wstrzyknięcia średnika przez ASI.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
 - W testach modułu pricing korzystaj z helpera `createMockPricingDatabase` (`src/lib/pricing/__tests__/mock-db.ts`),
   aby odtworzyć metody Drizzle (`select`, `insert`, `values`) i móc destrukturyzować mocki.

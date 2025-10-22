@@ -880,6 +880,4 @@ export const referenceProductTemplates =
       },
       priceOverrideGrosz: 15000,
     },
-
-  ]
-  satisfies readonly ReferenceProductTemplateSeed[];
+  ] satisfies readonly ReferenceProductTemplateSeed[];

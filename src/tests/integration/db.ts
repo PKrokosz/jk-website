@@ -1,3 +1,6 @@
+import path from "node:path";
+
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { config as loadEnv } from "dotenv";
 
 import { createDbClient, type DbClient } from "@jk/db";
@@ -9,6 +12,7 @@ import {
 
 let envLoaded = false;
 let integrationClient: DbClient | null = null;
+let migrationsApplied = false;
 
 export function loadIntegrationTestEnv(): void {
   if (envLoaded) {
@@ -38,6 +42,21 @@ export function getIntegrationTestClient(): DbClient {
   }
 
   return integrationClient;
+}
+
+export async function ensureIntegrationTestMigrations(): Promise<void> {
+  loadIntegrationTestEnv();
+
+  if (migrationsApplied) {
+    return;
+  }
+
+  const client = getIntegrationTestClient();
+  const migrationsFolder = path.resolve(process.cwd(), "drizzle");
+
+  await migrate(client.db, { migrationsFolder });
+
+  migrationsApplied = true;
 }
 
 export async function closeIntegrationTestClient(): Promise<void> {

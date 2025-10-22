@@ -13,6 +13,7 @@ import { catalogProductDetailResponseSchema, catalogProductListResponseSchema } 
 import { findActiveStyles } from "@/lib/catalog/repository";
 import {
   closeIntegrationTestClient,
+  ensureIntegrationTestMigrations,
   getIntegrationTestClient,
   loadIntegrationTestEnv,
   resetCachedNextDbClient
@@ -74,6 +75,7 @@ describeIntegration("GET /api/products (integration)", () => {
 
   beforeAll(async () => {
     loadIntegrationTestEnv();
+    await ensureIntegrationTestMigrations();
 
     const { db } = getIntegrationTestClient();
     const [styleRow] = await db

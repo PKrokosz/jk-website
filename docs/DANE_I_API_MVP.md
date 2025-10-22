@@ -1,17 +1,17 @@
 # Dane i API dla MVP
 
-## Meta audytu 2025-10-29
-- **Status zagadnień**: Większość opisanych kontraktów istnieje w repo (w tym `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]`). Brakuje natomiast finalnej migracji Drizzle oraz spójnego endpointu `/api/products/[slug]`. Dokument zawiera zduplikowane akapity — usunięto je w tej iteracji.
+## Meta audytu 2025-10-30
+- **Status zagadnień**: Migracje Drizzle (`style`, `leather`, `option`, `sole`, `quote_requests`) oraz seed referencyjny są dostępne i używane przez endpointy katalogu. Dodano testy weryfikujące mapowanie rekordów Drizzle na fallback `catalogStyles`/`catalogLeathers`. Nadal brakuje `/api/products/[slug]` oraz przeniesienia templatek produktów do bazy.
 - **Nowe ścieżki rozwoju**:
-  - Dodać sekcję opisującą tabelę `quote_requests` oraz wymagania migracyjne (powiązać z zadaniem `x₃` w `LOOP_TASKS.md`).
-  - Zaplanować wdrożenie `/api/products/[slug]` z fallbackiem do mocków i dopisać test kontraktowy.
-  - Wprowadzić checklistę walidacji environment variables dla usług mailowych (SMTP) i zapisać ją w `JAKOSC_TESTY_CI.md`.
-- **Rekomendacja archiwizacji**: Nie — dokument jest źródłem prawdy dla modelu danych i kontraktów API.
-- **Sens dokumentu**: Definiuje schemat produktu, mapowanie stylów/skór, oraz opisuje kontrakty API wykorzystywane przez UI i testy.
+  - Przenieść `productTemplates` do źródła danych Drizzle lub osobnego seeda JSON i dopisać migrację wraz z testem kontraktowym dla `/api/products`.
+  - Rozszerzyć `JAKOSC_TESTY_CI.md` o checklistę uruchamiania `pnpm db:seed`, `pnpm test:integration` oraz testów mapowania `repository.drizzle.test.ts`.
+  - Opisać plan cache (ISR + lokalny cache) i healthcheck katalogu (`x₆²`, `x₆ˣ`) po stronie backendu danych.
+- **Rekomendacja archiwizacji**: Nie — dokument pozostaje źródłem prawdy dla modelu danych i kontraktów API.
+- **Sens dokumentu**: Definiuje schemat produktu, mapowanie stylów/skór oraz opisuje kontrakty API wykorzystywane przez UI i testy.
 - **Aktualizacje wykonane**:
-  - Usunięto duplikaty w sekcji podsumowania i dopisano nowe endpointy (`/api/order/submit`, `/api/legal/[document]`).
-  - Wskazano brak `/api/products/[slug]` jako otwarte zadanie.
-  - Zsynchronizowano status z audytem meta (2025-10-29).
+  - Dodano sekcję tabeli `quote_requests` i opisano kolumny w kontekście logów wycen.
+  - Zsynchronizowano opis stylów/skór z kolumnami Drizzle (`descriptionMd`, `description`) i seeda `@jk/db`.
+  - Wskazano automatyczne testy mapujące dane Drizzle na fallback katalogu oraz procedurę migracji/seedowania.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -24,11 +24,11 @@
 - [8. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- Referencyjne dane katalogu (style, skóry, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`).
-- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]` są dostępne; `/api/styles`, `/api/leather` i `/api/products` korzystają z Drizzle ORM (styl/skóra) oraz templatek katalogowych.
+- Referencyjne dane katalogu (style, skóry, podeszwy, opcje) żyją w pakiecie `@jk/db` i są seedowane do Postgresa (`packages/db/src/seed.ts`, `pnpm db:seed`).
+- Endpointy `/api/styles`, `/api/leather`, `/api/products`, `/api/pricing/quote`, `/api/contact/submit`, `/api/order/submit`, `/api/legal/[document]` są dostępne; `/api/styles`, `/api/leather` korzystają z Drizzle ORM i mają testy potwierdzające zgodność z fallbackiem katalogu.
 - Front (`/catalog`, `/catalog/[slug]`, `/cart`, `/group-orders`) konsumuje dane przez API Next.js, wykorzystując `fetchCatalogStyles`/`fetchCatalogLeathers` z revalidacją ISR.
 - Walidacja: statyczne typy TypeScript (`CatalogProductDetail`, `PricingRequest`) uzupełnione o schematy Zod w backendzie produktów, formularza kontaktowego i zamówień.
-- MVP operuje na mockowanych danych w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień); migracja do Drizzle wciąż otwarta.
+- MVP operuje na mockowanych danych produktów w pamięci (`src/lib/catalog`) z rozszerzonym modelem (slug, kategorie, funnel stage, warianty, referencje do formularza zamówień); przeniesienie produktów do Drizzle pozostaje otwarte.
 
 ## Model danych produktu
 | Pole | Typ | Opis |
@@ -51,9 +51,19 @@
 | `craftProcess` | `string[]` | Kroki procesu rzemieślniczego do sekcji "Detale". |
 | `seo` | `{ title: string; description: string; keywords: string[] }` | Metadata produktu. |
 
+### Tabela `quote_requests` (logi wycen)
+| Kolumna | Typ | Opis |
+| --- | --- | --- |
+| `id` | `number` | Klucz główny rekordu logu. |
+| `ip_address` | `string` | Adres IP klienta wykonującego zapytanie o wycenę. |
+| `user_agent` | `string?` | User-agent przeglądarki (opcjonalny, służy do analizy nadużyć). |
+| `payload` | `Record<string, unknown>` | Zweryfikowany request `PricingRequest` zapisany jako JSONB. |
+| `quote` | `Record<string, unknown>` | Wygenerowana odpowiedź wyceny (JSONB) zwracana klientowi. |
+| `requested_at` | `Date` | Timestamp z momentu utworzenia logu (domyślnie `now()`). |
+
 ## Mapowanie stylów i skór
-- Styl (`CatalogStyle`) → `id`, `slug`, `name`, `era`, `description`, `basePriceGrosz`.
-- Skóra (`CatalogLeather`) → `id`, `name`, `color`, `finish`, `priceModGrosz`, `description`.
+- Styl (`CatalogStyle`) → `id`, `slug`, `name`, `era`, `description` (Drizzle: `description_md`), `basePriceGrosz`.
+- Skóra (`CatalogLeather`) → `id`, `name`, `color`, `finish`, `priceModGrosz`, `description` (Drizzle: `description`).
 - Produkt korzysta z map:
   - `priceGrosz` obliczany z `basePriceGrosz + priceModGrosz` (nadpisywany `priceOverrideGrosz` jeśli podany w template).
   - `variantLeatherIds` mapują się na `CatalogLeather` i generują badge kolorów.
@@ -64,6 +74,7 @@
   - Wczytuje dane przez `fetchCatalogStyles()` i `fetchCatalogLeathers()` (Next.js route handlers + Drizzle).
   - `CatalogExplorer` filtruje lokalnie – sortowanie, filtry, aria-live.
   - CTA kart kieruje do `/catalog/[slug]`.
+  - Test `src/lib/catalog/__tests__/repository.drizzle.test.ts` potwierdza zgodność danych Drizzle z fallbackiem katalogu.
 - **Produkt (`/catalog/[slug]`)**
   - `getProductBySlug(slug, styles, leathers)` otrzymuje dane z API; w razie błędu strona zwraca fallback z komunikatem.
   - `generateStaticParams` wykorzystuje `listProductSlugs()` do pre-renderu (wciąż z templatek).

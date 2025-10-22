@@ -66,7 +66,7 @@
 
 ### Zadanie bazowe `x₆`: Uspójnić fallback katalogu z docelową bazą danych
 - `-x₆`: Monitorować logi ostrzeżeń o fallbacku i dodać alert w telemetrii, aby łatwiej wykrywać brak połączenia z DB.
-- `1/x₆`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB.
+- `1/x₆`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB. ✅ 2025-10-30 — `repository.drizzle.test.ts` pokrywa ścieżkę DB→fallback, pozostaje scenariusz API bez połączenia w Playwright.
 - `x₆²`: Zaimplementować cache warstwy katalogu (ISR + lokalny cache) i zsynchronizować go z Drizzle.
 - `x₆ˣ`: Dostarczyć healthcheck katalogu publikujący metryki (dostępność DB, czasy odpowiedzi, liczba fallbacków) do panelu obserwowalności.
 

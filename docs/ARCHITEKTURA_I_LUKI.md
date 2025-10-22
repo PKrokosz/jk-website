@@ -1,17 +1,17 @@
 # Architektura i luki
 
-## Meta audytu 2025-10-29
-- **Status zagadnień**: Kluczowe luki pozostają otwarte: migracja Drizzle dla katalogu i pricingu, adopcja design tokens oraz pełna automatyzacja formularzy zamówień. Backend formularza kontaktowego jest już wdrożony, więc wcześniejsze ostrzeżenie o jego braku zostało zaktualizowane.
+## Meta audytu 2025-10-30
+- **Status zagadnień**: Migracje Drizzle i seed referencyjny są wdrożone (`drizzle/0000`–`0002`, `pnpm db:seed`), a repozytorium katalogu ma testy potwierdzające zgodność danych DB ↔ fallback. Wciąż pozostają otwarte: diagram przepływu danych, adopcja tokens oraz integracja `/cart` i `/group-orders` z backendem leadów.
 - **Nowe ścieżki rozwoju**:
-  - Przygotować diagram przepływu danych katalogu po migracji do Drizzle (mapowanie API → DB → UI) i dopisać go w sekcji 4.
+  - Przygotować diagram przepływu danych katalogu (API → Drizzle → fallback → UI) i umieścić go w sekcji 4 wraz z opisem cache.
   - Zaplanować zadanie na obsługę `prefers-reduced-motion` i modularyzację animacji (powiązane z `FRONTEND_INTERFACE_SPEC.md`).
-  - Dopisać do pętli zadań iterację `x₆`: integracja `/cart` i `/group-orders` z backendem leadów.
+  - Doprecyzować zakres zadania `x₆²` dotyczącego cache katalogu oraz healthchecku (`x₆ˣ`).
 - **Rekomendacja archiwizacji**: Nie — dokument nadal identyfikuje kluczowe ryzyka architektoniczne.
 - **Sens dokumentu**: Prezentuje strukturę App Routera, layouty, warstwę danych i najważniejsze black-boxy. Stanowi podstawę do planowania refaktoryzacji i priorytetyzacji długu technicznego.
 - **Aktualizacje wykonane**:
-  - Rozszerzono drzewo routingu o `/cart`, `/group-orders`, `/privacy-policy`, `/terms`, `robots.ts`, `sitemap.ts`.
-  - Zaktualizowano sekcję warstwy danych o backend formularza kontaktowego oraz istniejące endpointy.
-  - Uściślono luki dotyczące migracji Drizzle i adopcji tokens.
+  - Uzupełniono sekcję warstwy danych o dostępne migracje Drizzle, seed oraz testy mapujące katalog.
+  - Zsynchronizowano opis repozytorium katalogu z dokumentacją `DANE_I_API_MVP.md`.
+  - Doprecyzowano otwarte prace wokół cache katalogu i healthchecku.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -96,19 +96,21 @@ src/app
 ## Warstwa danych i Drizzle ORM
 - Pakiet `@jk/db`:
   - `src/lib/db.ts` – inicjalizacja `drizzle(pool)` na podstawie `DATABASE_URL` (wymagana zmienna środowiskowa).
-  - `src/schema.ts` – definicje tabel: `style`, `leather`, `sole`, `option`, `customer`, `measurements`, `order` (brak migracji).
-  - Dostępna konfiguracja `drizzle.config.ts` i CLI `drizzle-kit`; migracje nie zostały jeszcze wygenerowane.
+  - `src/schema.ts` – definicje tabel: `style`, `leather`, `sole`, `option`, `customer`, `measurements`, `order`, `quote_requests`.
+  - Migracje `drizzle/0000_breezy_cannonball.sql`–`0002_add_quote_requests.sql` tworzą słowniki katalogu i logi wycen; `pnpm db:migrate` stosuje je na dowolnym środowisku.
+  - `packages/db/src/seed.ts` resetuje słowniki i odtwarza referencyjne rekordy z `seed-data.ts` (`pnpm db:seed`).
 - Frontend (Next.js) korzysta z mocków w `src/lib/catalog`:
   - `data.ts` – `catalogStyles`, `catalogLeathers` (rozszerzone o `slug`, `description`, `priceModGrosz`).
   - `products.ts` – `listProductSlugs`, `getProductBySlug`, generacja `CatalogProductSummary`/`Detail` z kategoriami, funnel stage, orderReference.
   - `types.ts` – definicje `CatalogProductDetail` (gallery, craftProcess, variants, `orderReference`).
 - Formularz kontaktowy posiada backend (`/api/contact/submit`) z walidacją Zod, rate-limitami i integracją SMTP (transport konfigurowany przez env).
 - Kalkulator wycen (`src/lib/pricing`) operuje na mockowanych cennikach (`ORDER_MODELS`, `ORDER_ACCESSORIES`) z możliwością zapisu logów wycen w tabeli `quote_requests`.
+- Test `src/lib/catalog/__tests__/repository.drizzle.test.ts` weryfikuje, że `findActiveStyles`/`findActiveLeathers` zwracają dane Drizzle zgodne z fallbackiem katalogu (zamknięcie luki `x₆` w zakresie słowników).
 
 ## Black-boxy i warianty rozwiązania
 | Luka / pytanie | Opis | Wariant A | Plusy | Minusy | Wariant B | Plusy | Minusy |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Migracje Drizzle | Brak wygenerowanych migracji mimo dostępnego `drizzle-kit` | Utworzyć migrację inicjalną i workflow seeda | Standaryzowane migracje, gotowość pod prod | Wymaga czasu na konfigurację, pipeline Docker | Pozostać na mockach do czasu integracji | Zero kosztu teraz | Dług techniczny, brak pewności danych |
+| Migracje Drizzle | Migracje słowników (style/leather/option/sole + `quote_requests`) istnieją, produkty nadal bazują na mockach | Przenieść `productTemplates` do seeda Drizzle + endpoint `/api/products/[slug]` | Spójny katalog DB→UI, brak dublowania mocków | Większa migracja danych i testów | Pozostawić produkty w mockach i synchronizować ręcznie | Brak natychmiastowego kosztu | Ryzyko rozjazdu danych, dług w produktach |
 | Konfiguracja DB | `.env.example` i `docker-compose.yml` używają `devuser/devpass@jkdb` | Zweryfikować secrets w CI/staging | Spójne środowiska, brak rozjazdów | Wymaga komunikacji z zespołem infra | Brak dodatkowych działań | Brak kosztu teraz | Ryzyko pominięcia aktualizacji secrets |
 | Formularz kontaktowy | Brak backendu / wysyłki maili | Integracja z API (server action, n8n) | Realna obsługa leadów, brak manuali | Potrzebna infrastruktura i bezpieczeństwo | Pozostawić mock i CTA mailto | Zero kosztu teraz | Brak automatyzacji, UX ograniczony |
 | UI tokens vs. CSS | Globals mają hard-coded wartości | Dodać design tokens do CSS custom properties / Tailwind | Spójność, łatwiejsze zmiany | Refactor styli globalnych | Pozostawić obecny styl | Szybkie MVP | Ryzyko rozjazdów kolorów i kontrastu |
@@ -123,7 +125,7 @@ src/app
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
-  - Brak integracji Next.js ↔ Drizzle utrzymuje dublowanie danych (mocki vs DB).
+  - Dublowanie danych dotyczy jeszcze produktów (`productTemplates` vs. docelowa baza); słowniki stylów/skór są już testowane przeciw Drizzle.
   - Hard-coded kolory w `globals.css` mogą rozjechać się z design tokens (kontrast, brand).
   - Formularz kontaktowy bez backendu = ryzyko utraty leadów.
 - **Decyzje do podjęcia**
@@ -131,6 +133,6 @@ src/app
   - Czy zachowujemy modal zamówienia, czy promujemy `/order/native` jako główne CTA.
   - Kiedy przenieść styling na system tokens (Tailwind/shadcn).
 - **Następne kroki**
-  - Wykorzystać `drizzle.config.ts` do przygotowania pierwszej migracji inicjalnej i pipeline seeda.
+  - Przenieść `productTemplates` do seeda/migracji Drizzle i dostarczyć endpoint `/api/products/[slug]` oparty na bazie.
   - Wprowadzić zmienne CSS odpowiadające tokens z `docs/UI_TOKENS.md`.
   - Zaprojektować integrację formularza kontaktowego (n8n / email service).

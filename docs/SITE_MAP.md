@@ -52,6 +52,25 @@
     └── Order native (/order/native) – lista modeli + CTA do pełnego formularza
 ```
 
+### Konfiguracja wag tokenów nawigacji
+- Symulacja ścieżek użytkownika (`src/lib/navigation/journey-simulation.ts`) domyślnie ustawia wagi przejść na podstawie poziomu pewności tokenu (`certain` = 3, `uncertain` = 1).
+- Aby nadpisać wagi, ustaw zmienną środowiskową `NAVIGATION_WEIGHTS_JSON` z JSON-em w formacie:
+  ```json
+  {
+    "home": {
+      "catalog": 5,
+      "contact": 2
+    },
+    "catalog": {
+      "home": 1
+    }
+  }
+  ```
+  Każdy klucz pierwszego poziomu odpowiada węzłowi źródłowemu, a klucz wewnętrzny – docelowemu węzłowi.
+- Alternatywnie wskaż ścieżkę do pliku JSON za pomocą `NAVIGATION_WEIGHTS_PATH` (ścieżka względna względem katalogu projektu lub absolutna).
+- Wagi muszą być liczbami dodatnimi; konfiguracje odwołujące się do nieistniejących węzłów lub przejść spowodują błąd ładowania (testowane w `src/lib/navigation/__tests__/journey-simulation.test.ts`).
+- Po zmianie wag uruchom `pnpm test src/lib/navigation/__tests__/journey-simulation.test.ts` aby zweryfikować poprawność konfiguracji.
+
 ## Mapy ekranów
 ### 3.1 Home
 | Sekcja | Elementy | CTA | Stany |

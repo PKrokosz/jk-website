@@ -74,6 +74,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Responsywność: mobile-first, 3 breakpoints.
 - Uzupełniaj dokumentację w `docs/` przy każdej zmianie funkcjonalności.
 - Symulacje ścieżek użytkownika umieszczaj w `src/lib/navigation/`. Każda nowa symulacja musi posiadać testy Vitest i skrypt uruchomieniowy (np. `pnpm simulate:user-journeys`). Graf nawigacji nie może mieć martwych węzłów, a moduł powinien eksportować helper do formatowania wyników dla raportów.
+- Wagi tokenów dla symulacji nawigacji ładuj przez `NAVIGATION_WEIGHTS_JSON` (inline JSON) lub `NAVIGATION_WEIGHTS_PATH` (ścieżka do pliku). Konfiguracje muszą przechodzić testy `src/lib/navigation/__tests__/journey-simulation.test.ts`.
 
 ## Czego NIE robić
 - Nie wprowadzaj zewnętrznych UI kitów bez uzasadnienia.

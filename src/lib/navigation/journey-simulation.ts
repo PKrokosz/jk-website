@@ -1,3 +1,6 @@
+import { readFileSync as defaultReadFileSync } from "node:fs";
+import { isAbsolute, resolve as resolvePath } from "node:path";
+
 export type NavigationNodeId =
   | "home"
   | "catalog"
@@ -48,7 +51,7 @@ export interface SimulationOptions {
 
 const DEFAULT_MAX_STEPS = 12;
 
-const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
+const BASE_NAVIGATION_GRAPH: NavigationGraph = {
   home: {
     id: "home",
     tokens: [
@@ -56,7 +59,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Przejdź do katalogu",
         target: "catalog",
         confidence: "certain",
-        weight: 3,
       },
       {
         label: "Nawiąż kontakt",
@@ -77,7 +79,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Wybierz model produktu",
         target: "product",
         confidence: "certain",
-        weight: 3,
       },
       {
         label: "Wróć na stronę główną",
@@ -98,7 +99,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Przejdź do zamówienia natywnego",
         target: "orderNative",
         confidence: "certain",
-        weight: 3,
       },
       {
         label: "Zadaj pytanie",
@@ -119,7 +119,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Otwórz pełny formularz zamówienia",
         target: "order",
         confidence: "certain",
-        weight: 3,
       },
       {
         label: "Porównaj modele",
@@ -135,7 +134,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Powrót na stronę główną",
         target: "home",
         confidence: "certain",
-        weight: 3,
       },
       {
         label: "Skontaktuj się z doradcą",
@@ -151,7 +149,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Wróć na stronę główną",
         target: "home",
         confidence: "certain",
-        weight: 3,
       },
       {
         label: "Przeglądaj katalog",
@@ -167,7 +164,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Nawiąż kontakt",
         target: "contact",
         confidence: "certain",
-        weight: 2,
       },
       {
         label: "Sprawdź katalog",
@@ -183,7 +179,6 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
         label: "Umów konsultację",
         target: "contact",
         confidence: "certain",
-        weight: 2,
       },
       {
         label: "Zobacz katalog",
@@ -194,7 +189,170 @@ const DEFAULT_NAVIGATION_GRAPH: NavigationGraph = {
   },
 };
 
-export const navigationGraph = DEFAULT_NAVIGATION_GRAPH;
+export type NavigationWeightsConfig = Partial<
+  Record<NavigationNodeId, Partial<Record<NavigationNodeId, number>>>
+>;
+
+export interface LoadNavigationWeightsOptions {
+  env?: NodeJS.ProcessEnv;
+  readFileSync?: (path: string, encoding: BufferEncoding) => string;
+  baseDir?: string;
+}
+
+const NAVIGATION_WEIGHTS_JSON_ENV = "NAVIGATION_WEIGHTS_JSON";
+const NAVIGATION_WEIGHTS_PATH_ENV = "NAVIGATION_WEIGHTS_PATH";
+
+const assertIsNavigationNodeId = (
+  value: string,
+): asserts value is NavigationNodeId => {
+  const isNode = value in BASE_NAVIGATION_GRAPH;
+  if (!isNode) {
+    throw new Error(`Unknown navigation node \"${value}\" in weights configuration`);
+  }
+};
+
+const validateWeight = (node: NavigationNodeId, target: NavigationNodeId, weight: unknown): number => {
+  if (typeof weight !== "number" || Number.isNaN(weight) || !Number.isFinite(weight)) {
+    throw new Error(
+      `Weight for transition ${node} -> ${target} must be a finite number, received ${String(weight)}`,
+    );
+  }
+
+  if (weight <= 0) {
+    throw new Error(`Weight for transition ${node} -> ${target} must be greater than 0`);
+  }
+
+  return weight;
+};
+
+const parseNavigationWeights = (
+  raw: unknown,
+  graph: NavigationGraph,
+): NavigationWeightsConfig => {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("Navigation weights configuration must be an object");
+  }
+
+  const weights: NavigationWeightsConfig = {};
+
+  for (const [nodeId, transitions] of Object.entries(raw)) {
+    assertIsNavigationNodeId(nodeId);
+
+    if (transitions === null || typeof transitions !== "object" || Array.isArray(transitions)) {
+      throw new Error(`Transitions for node ${nodeId} must be an object of target weights`);
+    }
+
+    const nodeWeights: Partial<Record<NavigationNodeId, number>> = {};
+    const availableTargets = new Set(graph[nodeId].tokens.map((token) => token.target));
+
+    for (const [targetId, weight] of Object.entries(transitions)) {
+      assertIsNavigationNodeId(targetId);
+
+      if (!availableTargets.has(targetId)) {
+        throw new Error(`Node ${nodeId} does not have a transition to ${targetId}`);
+      }
+
+      nodeWeights[targetId] = validateWeight(nodeId, targetId, weight);
+    }
+
+    weights[nodeId] = nodeWeights;
+  }
+
+  return weights;
+};
+
+export const loadNavigationWeights = ({
+  env = process.env,
+  readFileSync = defaultReadFileSync,
+  baseDir = process.cwd(),
+}: LoadNavigationWeightsOptions = {}): NavigationWeightsConfig => {
+  const jsonConfig = env[NAVIGATION_WEIGHTS_JSON_ENV];
+  const pathConfig = env[NAVIGATION_WEIGHTS_PATH_ENV];
+
+  if (jsonConfig && pathConfig) {
+    throw new Error(
+      `Both ${NAVIGATION_WEIGHTS_JSON_ENV} and ${NAVIGATION_WEIGHTS_PATH_ENV} are set. Please choose only one source.`,
+    );
+  }
+
+  if (!jsonConfig && !pathConfig) {
+    return {};
+  }
+
+  try {
+    const rawConfig = jsonConfig
+      ? jsonConfig
+      : readFileSync(
+          isAbsolute(pathConfig as string)
+            ? (pathConfig as string)
+            : resolvePath(baseDir, pathConfig as string),
+          "utf8",
+        );
+
+    const parsed = JSON.parse(rawConfig) as unknown;
+    return parseNavigationWeights(parsed, BASE_NAVIGATION_GRAPH);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error("Failed to parse navigation weights configuration: invalid JSON");
+    }
+
+    throw error instanceof Error
+      ? error
+      : new Error("Failed to load navigation weights configuration");
+  }
+};
+
+export const applyNavigationWeights = (
+  graph: NavigationGraph,
+  weights: NavigationWeightsConfig,
+): NavigationGraph => {
+  const result: Partial<NavigationGraph> = {};
+
+  for (const [nodeId, node] of Object.entries(graph) as [NavigationNodeId, NavigationNode][]) {
+    const nodeWeights = weights[nodeId] ?? {};
+    const updatedTokens = node.tokens.map((token) => {
+      const override = nodeWeights[token.target];
+      if (override !== undefined) {
+        return {
+          ...token,
+          weight: override,
+        } satisfies JourneyToken;
+      }
+
+      return token;
+    });
+
+    for (const targetId of Object.keys(nodeWeights)) {
+      const transitionExists = updatedTokens.some((token) => token.target === targetId);
+      if (!transitionExists) {
+        throw new Error(`Node ${nodeId} does not have a transition to ${targetId}`);
+      }
+    }
+
+    result[nodeId] = {
+      ...node,
+      tokens: updatedTokens,
+    } satisfies NavigationNode;
+  }
+
+  for (const nodeId of Object.keys(weights)) {
+    assertIsNavigationNodeId(nodeId);
+    if (!(nodeId in graph)) {
+      throw new Error(`Node ${nodeId} is not present in the navigation graph`);
+    }
+  }
+
+  return result as NavigationGraph;
+};
+
+export const buildNavigationGraph = (
+  options: LoadNavigationWeightsOptions & { weights?: NavigationWeightsConfig } = {},
+): NavigationGraph => {
+  const weightOverrides = options.weights ?? loadNavigationWeights(options);
+  return applyNavigationWeights(BASE_NAVIGATION_GRAPH, weightOverrides);
+};
+
+export const navigationGraph = buildNavigationGraph();
 
 type WeightedToken = JourneyToken & { weight: number };
 

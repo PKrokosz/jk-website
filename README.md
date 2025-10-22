@@ -86,6 +86,7 @@ docker compose up -d jkdb
 ```
 
 Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi `devuser/devpass` i bazą `jkdb`.
+Po skończonej pracy zatrzymaj kontener i usuń wolumeny poleceniem `docker compose down --volumes jkdb`, aby zachować spójność z etapem sprzątania w CI.
 
 ## Codzienna praca deweloperska
 

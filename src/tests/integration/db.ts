@@ -19,10 +19,10 @@ let cachedMigrate: MigratorModule["migrate"] | null = null;
 
 async function loadMigrator(): Promise<MigratorModule["migrate"]> {
   if (!cachedMigrate) {
-    const module: MigratorModule = await import(
+    const migratorModule: MigratorModule = await import(
       "drizzle-orm/node-postgres/migrator"
     );
-    cachedMigrate = module.migrate;
+    cachedMigrate = migratorModule.migrate;
   }
 
   return cachedMigrate;

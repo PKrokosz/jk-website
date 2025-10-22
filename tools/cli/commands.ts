@@ -23,6 +23,14 @@ export const COMMANDS: Record<string, CommandDefinition> = {
         description: VERIFY_ENV_DESCRIPTION
       },
       {
+        id: "drizzle-generate-dry-run",
+        title: "Drizzle generate dry-run",
+        command: "pnpm",
+        args: ["exec", "tsx", "tools/cli/drizzle-generate-check.ts"],
+        description:
+          "Uruchamia `pnpm db:generate -- --dry-run` i sprawdza, czy katalog drizzle/ pozostał niezmieniony."
+      },
+      {
         id: "lint",
         title: "ESLint",
         command: "pnpm",
@@ -56,6 +64,14 @@ export const COMMANDS: Record<string, CommandDefinition> = {
         command: "pnpm",
         args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
         description: VERIFY_ENV_DESCRIPTION
+      },
+      {
+        id: "drizzle-generate-dry-run",
+        title: "Drizzle generate dry-run",
+        command: "pnpm",
+        args: ["exec", "tsx", "tools/cli/drizzle-generate-check.ts"],
+        description:
+          "Uruchamia `pnpm db:generate -- --dry-run` i sprawdza, czy katalog drizzle/ pozostał niezmieniony."
       },
       {
         id: "lint",

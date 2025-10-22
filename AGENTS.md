@@ -18,6 +18,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - `pnpm qa:ci`                       # pełny zestaw CI (lint, typecheck, build, test, coverage, e2e, depcheck, dry-run `pnpm db:generate`)
 - `pnpm test:integration`            # testy Vitest z realną bazą (wymaga `.env.test`, migracji i seeda)
 - `pnpm db:generate`                 # generuje migracje (Drizzle Kit >= 0.31 korzysta z komendy `generate`)
+- **Dependency guard:** katalog główny workspace'u musi zachować devDependency `drizzle-orm`, bo `drizzle-kit` importuje `drizzle-orm/version` zanim odpali `pnpm db:generate`/`pnpm qa`. Usunięcie paczki blokuje migracje na starcie.
 
 ### Konfiguracja środowiska
 - `.env.example` zawiera komplet wymaganych przez walidator zmiennych z bezpiecznymi placeholderami (`NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, identyfikatory marketingowe). Skopiuj plik bez zmian, aby odpalić środowisko lokalne.

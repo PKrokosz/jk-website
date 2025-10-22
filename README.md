@@ -15,6 +15,19 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 - **Testy**: Vitest + React Testing Library (`@vitest/coverage-v8` do raportów pokrycia)
 - **Jakość kodu**: ESLint (`eslint-config-next`) + `depcheck`
 
+## Status modułów (2025-10)
+
+| Moduł | Co zawiera | Stan |
+| --- | --- | --- |
+| `src/app` | App Router ze stronami `/`, `/catalog`, `/catalog/[slug]`, `/order`, `/order/native`, `/contact`, `/about`, `/account` oraz `/healthz`. | Strony produkcyjne są kompletne, a smoke test `pages.compile.test.ts` pilnuje możliwości importu każdej z nich. |
+| `src/components` | Współdzielone komponenty (`Header`, `CatalogExplorer`, formularze kontaktowe i zamówień, prymitywy UI). | Kluczowe komponenty mają testy RTL (np. `ContactForm`) obejmujące walidację, stany błędów oraz telemetrię. |
+| `src/lib/catalog` | Mocki katalogu (produkty, style, skóry) oraz repozytorium z fallbackiem do danych referencyjnych. | Dane referencyjne są gotowe na MVP; przełączenie na Drizzle zaplanowane po wdrożeniu migracji. |
+| `src/lib/pricing` | Schematy Zod dla kalkulatora wyceny i repozytorium zapisu zapytań. | Kontrakty request/response są pokryte testami API (`/api/pricing/quote`). |
+| `src/lib/navigation` & `scripts/` | Symulacje ścieżek użytkowników + skrypty CLI do agregacji wyników. | Moduły posiadają testy Vitest oraz skrypty `simulate:user-journeys`/`simulate:navigation`. |
+| `packages/db` | Pakiet `@jk/db` z konfiguracją Drizzle, schematem tabel i seedem danych. | Migracja inicjalna i seed referencyjny dostępne; kolejne migracje wymagają osobnych tasków. |
+| `tools/cli` | Warstwa CLI spinająca kroki jakości (`quality`, `quality:ci`). | Entrypoint testowany unitowo z mockiem `process.exit` i logów. |
+| `docs/` | Artefakty discovery (audyt repo, roadmapa, UI tokens, plan sprintów, pętla zadań). | Dokumentacja utrzymywana w pętli – ostatni przegląd 2025-10-22. |
+
 ## Wymagania wstępne
 
 - Node.js `>=20`
@@ -74,6 +87,7 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 
 | Komenda | Opis |
 | --- | --- |
+| `pnpm approve-builds` | Zatwierdza instalację natywnych binariów wymaganych przez pnpm. |
 | `pnpm dev` | Start lokalnego serwera deweloperskiego Next.js. |
 | `pnpm build` | Buduje aplikację w trybie produkcyjnym. |
 | `pnpm start` | Uruchamia wcześniej zbudowaną aplikację. |
@@ -81,20 +95,26 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 | `pnpm typecheck` | Weryfikuje typy TypeScript bez emitowania plików. |
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
 | `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
+| `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
-| `pnpm qa` | Uruchamia lokalny zestaw jakościowy (`lint`, `typecheck`, `test`). |
-| `pnpm qa:ci` | Uruchamia pełny zestaw CI (`lint`, `typecheck`, `build`, `test`, `test:coverage`, `test:e2e`, `depcheck`). |
+| `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test). |
+| `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright i depcheck). |
+| `pnpm simulate:user-journeys` | Uruchamia symulacje ścieżek użytkowników na podstawie modułu `src/lib/navigation`. |
+| `pnpm simulate:navigation` | Agreguje dane przejść na grafie nawigacji (obsługuje flagi `--config`, `--user-count`, `--summary`). |
+| `pnpm db:generate` | Generuje migrację Drizzle na podstawie zmian w schemacie. |
+| `pnpm db:migrate` | Stosuje migracje Drizzle na wskazanej bazie danych. |
+| `pnpm db:seed` | Uruchamia seed danych z pakietu `@jk/db`. |
 
 ### CLI jakości
 
-Repozytorium udostępnia prostą warstwę CLI (`pnpm run cli`), która orkiestruje kroki jakościowe:
+Repozytorium udostępnia warstwę CLI (`pnpm run cli`), która orkiestruje kroki jakościowe i udostępnia flagi ułatwiające automatyzację:
 
 - `pnpm run cli -- --list` – lista dostępnych komend wraz z opisem.
-- `pnpm qa` – skrót do `pnpm run cli -- quality` (lint + typecheck + test).
-- `pnpm qa:ci` – skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright).
-- Flaga `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
+- `pnpm run cli -- quality` – pełny przebieg lint + typecheck + test (skrót dostępny jako `pnpm qa`).
+- `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck; skrót `pnpm qa:ci`).
+- `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
 
-Warstwa CLI zapewnia spójność między lokalnymi kontrolami jakości a pipeline GitHub Actions.
+Testy CLI mockują `process.exit` i logi, dzięki czemu zachowania są weryfikowane bez kończenia procesu Node.js.
 
 > Przed wysłaniem PR uruchom lokalnie `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` i (opcjonalnie) `pnpm test:coverage`, aby odtworzyć pipeline CI.
 
@@ -132,10 +152,11 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 
 ## Testy i jakość kodu
 
-- Testy jednostkowe uruchamiane przez `pnpm test` (`vitest.config.ts`).
-- Raport pokrycia generowany przez `pnpm test:coverage` (`coverage/`).
-- ESLint i TypeScript (`pnpm lint`, `pnpm typecheck`) pilnują jakości kodu.
-- `pnpm depcheck` pomaga utrzymać porządek w zależnościach.
+- `pnpm test` uruchamia pakiet testów Vitest obejmujący strony App Routera, komponenty kontaktu, prymitywy UI oraz warstwę CLI.
+- `pnpm test:coverage` generuje raport pokrycia (`coverage/`) na bazie `@vitest/coverage-v8`.
+- `pnpm test:e2e` wykonuje scenariusze Playwright (przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
+- Linting (`pnpm lint`), statyczna analiza typów (`pnpm typecheck`) i kontrola zależności (`pnpm depcheck`) odtwarzają etapy pipeline CI.
+- Dla modułu nawigacji dostępne są dodatkowe symulacje (`pnpm simulate:*`) z testami snapshotowymi agregacji przejść.
 
 ## Dokumentacja produktu i procesu
 

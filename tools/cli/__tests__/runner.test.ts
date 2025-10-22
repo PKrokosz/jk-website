@@ -1,64 +1,104 @@
+import { EventEmitter } from "node:events";
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { COMMANDS } from "../commands";
-import { runCommandDefinition } from "../runner";
+import {
+  StepExecutionError,
+  defaultExecutor,
+  formatStep,
+  runCommandDefinition,
+  type RunResult
+} from "../runner";
 
-const createExecutor = () => {
-  const calls: string[] = [];
-  const executor = vi.fn(async (step) => {
-    calls.push(step.id);
-  });
-  return { executor, calls };
-};
+vi.mock("node:child_process", () => ({
+  spawn: vi.fn()
+}));
 
-describe("runCommandDefinition", () => {
+const { spawn } = await import("node:child_process");
+const spawnMock = vi.mocked(spawn);
+
+describe("runner", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
-  it("executes steps sequentially", async () => {
-    const { executor, calls } = createExecutor();
-    const result = await runCommandDefinition(COMMANDS.quality, { executor });
-
-    expect(result.executedSteps).toEqual([
-      "verify-drizzle-env",
-      "lint",
-      "typecheck",
-      "unit-tests"
-    ]);
-    expect(calls).toEqual([
-      "verify-drizzle-env",
-      "lint",
-      "typecheck",
-      "unit-tests"
-    ]);
+  it("formats command steps including arguments", () => {
+    expect(formatStep({ id: "lint", title: "Lint", command: "pnpm", args: ["lint"], env: {} })).toBe("pnpm lint");
+    expect(formatStep({ id: "typecheck", title: "Type", command: "pnpm", args: [], env: {} })).toBe("pnpm");
   });
 
-  it("skips steps provided in options", async () => {
-    const { executor, calls } = createExecutor();
-    const result = await runCommandDefinition(COMMANDS["quality:ci"], {
-      executor,
-      skip: new Set(["build", "e2e"])
-    });
+  it("runs steps sequentially respecting skip and dry-run options", async () => {
+    const executor = vi.fn().mockResolvedValue(undefined);
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
-    expect(result.skippedSteps).toEqual(["build", "e2e"]);
-    expect(result.executedSteps).not.toContain("build");
-    expect(calls).not.toContain("build");
+    const result = await runCommandDefinition(
+      {
+        id: "qa",
+        description: "Quality checks",
+        steps: [
+          { id: "lint", title: "Lint", command: "pnpm", args: ["lint"], env: {} },
+          { id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} }
+        ]
+      },
+      {
+        dryRun: true,
+        skip: new Set(["lint"]),
+        executor
+      }
+    );
+
+    expect(result).toEqual<RunResult>({ executedSteps: ["test"], skippedSteps: ["lint"] });
+    expect(consoleSpy).toHaveBeenCalledWith("• Test: pnpm test");
+    expect(consoleSpy).not.toHaveBeenCalledWith("• Lint: pnpm lint");
+    expect(executor).not.toHaveBeenCalled();
   });
 
-  it("prints steps during dry run", async () => {
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+  it("throws StepExecutionError when executor fails", async () => {
+    const error = new StepExecutionError(
+      { id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} },
+      "failed"
+    );
+    const executor = vi.fn().mockRejectedValue(error);
 
-    const result = await runCommandDefinition(COMMANDS.quality, { dryRun: true });
+    await expect(
+      runCommandDefinition(
+        {
+          id: "qa",
+          description: "Quality",
+          steps: [{ id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} }]
+        },
+        { executor }
+      )
+    ).rejects.toThrow(error);
+  });
 
-    expect(result.executedSteps).toEqual([
-      "verify-drizzle-env",
-      "lint",
-      "typecheck",
-      "unit-tests"
-    ]);
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("ESLint"));
+  it("resolves when spawned process exits successfully", async () => {
+    const child = new EventEmitter() as EventEmitter & { on: EventEmitter["on"] };
+    spawnMock.mockReturnValue(child as unknown as ReturnType<typeof spawnMock>);
 
-    logSpy.mockRestore();
+    const promise = defaultExecutor({ id: "build", title: "Build", command: "pnpm", args: ["build"], env: {} });
+    child.emit("exit", 0, null);
+
+    await expect(promise).resolves.toBeUndefined();
+  });
+
+  it("rejects with StepExecutionError on non-zero exit code", async () => {
+    const child = new EventEmitter();
+    spawnMock.mockReturnValue(child as unknown as ReturnType<typeof spawnMock>);
+
+    const promise = defaultExecutor({ id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} });
+    child.emit("exit", 1, null);
+
+    await expect(promise).rejects.toBeInstanceOf(StepExecutionError);
+  });
+
+  it("rejects with StepExecutionError when process emits error", async () => {
+    const child = new EventEmitter();
+    spawnMock.mockReturnValue(child as unknown as ReturnType<typeof spawnMock>);
+
+    const promise = defaultExecutor({ id: "test", title: "Test", command: "pnpm", args: ["test"], env: {} });
+    child.emit("error", new Error("spawn failed"));
+
+    await expect(promise).rejects.toBeInstanceOf(StepExecutionError);
   });
 });

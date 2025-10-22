@@ -97,6 +97,7 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 | `pnpm typecheck` | Weryfikuje typy TypeScript bez emitowania plików. |
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
 | `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
+| `pnpm test:ci` | Uruchamia testy Vitest z reporterem `dot` oraz weryfikacją pokrycia (bramka CI). |
 | `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
 | `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). |
@@ -159,9 +160,16 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 
 - `pnpm test` uruchamia pakiet testów Vitest obejmujący strony App Routera, komponenty kontaktu, prymitywy UI oraz warstwę CLI.
 - `pnpm test:coverage` generuje raport pokrycia (`coverage/`) na bazie `@vitest/coverage-v8`.
+- `pnpm test:ci` wykonuje ten sam zestaw testów w trybie bez interakcji i kończy się błędem, jeśli próg pokrycia nie zostanie spełniony.
 - `pnpm test:e2e` wykonuje scenariusze Playwright (pobranie dokumentów prawnych + smoke test nawigacji i API katalogu; przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
 - Linting (`pnpm lint`), statyczna analiza typów (`pnpm typecheck`) i kontrola zależności (`pnpm depcheck`) odtwarzają etapy pipeline CI.
 - Dla modułu nawigacji dostępne są dodatkowe symulacje (`pnpm simulate:*`) z testami snapshotowymi agregacji przejść.
+
+### Jak uruchamiać testy & wymagania coverage
+
+- Do szybkiego feedbacku używaj `pnpm test` (watch), a na pipeline CI `pnpm test:ci`, który emituje raport `dot` i kontroluje progi pokrycia.
+- Globalne pokrycie Statements/Lines musi utrzymywać minimum **85%**. Bramka w `pnpm test:ci` dodatkowo wymusza ten próg na kluczowych modułach – spadek poniżej limitu przerywa job.
+- `pnpm test:coverage` generuje raport V8 (`coverage/lcov-report/index.html`), który ułatwia analizę brakujących scenariuszy.
 
 ## Dokumentacja produktu i procesu
 

@@ -57,6 +57,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
+- Przy użyciu TypeScriptowego operatora `satisfies` trzymaj go w tej samej linii, co domykający literał (`] satisfies Type`), aby uniknąć wstrzyknięcia średnika przez ASI.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
 - Testy repozytorium katalogu mockujące `@jk/db` muszą przed każdym scenariuszem wywołać `__catalogRepositoryInternals.resetDbModuleCache()` (lub `vi.resetModules()`), aby korzystać z świeżego mocka modułu.
 - W testach modułu pricing korzystaj z helpera `createMockPricingDatabase` (`src/lib/pricing/__tests__/mock-db.ts`),

@@ -879,5 +879,4 @@ export const referenceProductTemplates: ReadonlyArray<ReferenceProductTemplateSe
       },
       priceOverrideGrosz: 15000,
     },
-
-];
+  ] satisfies readonly ReferenceProductTemplateSeed[];

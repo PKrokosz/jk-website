@@ -1,12 +1,25 @@
+import type { Database } from "@jk/db";
+
 import { catalogLeathers, catalogStyles } from "./data";
 import { mapLeatherRowToCatalogLeather, mapStyleRowToCatalogStyle } from "./mappers";
 import type { CatalogLeather, CatalogStyle } from "./types";
 
-type DbModule = typeof import("@jk/db");
+type DbModule = Pick<typeof import("@jk/db"), "style" | "leather">;
+
+let cachedDbModule: DbModule | null = null;
 
 async function loadDbModule(): Promise<DbModule | null> {
+  if (cachedDbModule) {
+    return cachedDbModule;
+  }
+
   try {
-    return await import("@jk/db");
+    const module = await import("@jk/db");
+    cachedDbModule = {
+      style: module.style,
+      leather: module.leather
+    };
+    return cachedDbModule;
   } catch (error) {
     console.warn(
       "Baza danych katalogu jest niedostępna — korzystamy z danych referencyjnych",
@@ -24,15 +37,15 @@ function getFallbackLeathers(): CatalogLeather[] {
   return [...catalogLeathers].sort((a, b) => a.id - b.id);
 }
 
-export async function findActiveStyles(): Promise<CatalogStyle[]> {
+export async function findActiveStyles(database?: Database): Promise<CatalogStyle[]> {
   const dbModule = await loadDbModule();
 
-  if (!dbModule) {
+  if (!database || !dbModule) {
     return getFallbackStyles();
   }
 
   try {
-    const rows = await dbModule.db.select().from(dbModule.style);
+    const rows = await database.select().from(dbModule.style);
 
     return rows
       .filter((entry) => entry.active !== false)
@@ -47,15 +60,15 @@ export async function findActiveStyles(): Promise<CatalogStyle[]> {
   }
 }
 
-export async function findActiveLeathers(): Promise<CatalogLeather[]> {
+export async function findActiveLeathers(database?: Database): Promise<CatalogLeather[]> {
   const dbModule = await loadDbModule();
 
-  if (!dbModule) {
+  if (!database || !dbModule) {
     return getFallbackLeathers();
   }
 
   try {
-    const rows = await dbModule.db.select().from(dbModule.leather);
+    const rows = await database.select().from(dbModule.leather);
 
     return rows
       .filter((entry) => entry.active !== false)

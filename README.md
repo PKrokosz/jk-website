@@ -73,6 +73,8 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 - `APP_BASE_URL` – adres aplikacji wykorzystywany do walidacji nagłówków `Origin`/`Referer` w API kontaktowym.
 - `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` – identyfikatory skryptów marketingowych. W `.env.example` znajdziesz placeholdery akceptowane przez walidator (np. `GTM-XXXXXXX`), które można zastąpić realnymi identyfikatorami przy wdrożeniu integracji.
 
+Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który raportuje brakujące wartości ze wszystkich powyższych kategorii i podpowiada, jak je uzupełnić.
+
 > **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d` i korzystać z `devuser/devpass@jkdb`.
 
 ### Uruchomienie Postgresa lokalnie
@@ -97,9 +99,10 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 | `pnpm typecheck` | Weryfikuje typy TypeScript bez emitowania plików. |
 | `pnpm test` | Uruchamia testy jednostkowe Vitest. |
 | `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
+| `pnpm test:ci` | Uruchamia testy Vitest z reporterem `dot` oraz weryfikacją pokrycia (bramka CI). |
 | `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
-| `pnpm exec tsx tools/verify-drizzle-env.ts` | Szybka walidacja obecności `DATABASE_URL` w aktualnym środowisku. |
+| `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). |
 | `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test). |
 | `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright i depcheck). |
 | `pnpm simulate:user-journeys` | Uruchamia symulacje ścieżek użytkowników na podstawie modułu `src/lib/navigation`. |
@@ -117,7 +120,7 @@ Repozytorium udostępnia warstwę CLI (`pnpm run cli`), która orkiestruje kroki
 - `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck; skrót `pnpm qa:ci`).
 - `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
 
-Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts` i sprawdza, czy w środowisku znajduje się `DATABASE_URL`. Dzięki temu brak konfiguracji bazy jest raportowany zanim wystartuje lint czy testy.
+Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts` i sprawdza komplet wymaganych zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). Dzięki temu brak konfiguracji bazy lub mailingu jest raportowany zanim wystartuje lint czy testy.
 
 Testy CLI mockują `process.exit` i logi, dzięki czemu zachowania są weryfikowane bez kończenia procesu Node.js.
 
@@ -159,9 +162,16 @@ pnpm db:migrate    # uruchamia wygenerowane migracje na bazie wskazanej przez DA
 
 - `pnpm test` uruchamia pakiet testów Vitest obejmujący strony App Routera, komponenty kontaktu, prymitywy UI oraz warstwę CLI.
 - `pnpm test:coverage` generuje raport pokrycia (`coverage/`) na bazie `@vitest/coverage-v8`.
+- `pnpm test:ci` wykonuje ten sam zestaw testów w trybie bez interakcji i kończy się błędem, jeśli próg pokrycia nie zostanie spełniony.
 - `pnpm test:e2e` wykonuje scenariusze Playwright (pobranie dokumentów prawnych + smoke test nawigacji i API katalogu; przed pierwszym uruchomieniem zainstaluj przeglądarki: `pnpm exec playwright install --with-deps`).
 - Linting (`pnpm lint`), statyczna analiza typów (`pnpm typecheck`) i kontrola zależności (`pnpm depcheck`) odtwarzają etapy pipeline CI.
 - Dla modułu nawigacji dostępne są dodatkowe symulacje (`pnpm simulate:*`) z testami snapshotowymi agregacji przejść.
+
+### Jak uruchamiać testy & wymagania coverage
+
+- Do szybkiego feedbacku używaj `pnpm test` (watch), a na pipeline CI `pnpm test:ci`, który emituje raport `dot` i kontroluje progi pokrycia.
+- Globalne pokrycie Statements/Lines musi utrzymywać minimum **85%**. Bramka w `pnpm test:ci` dodatkowo wymusza ten próg na kluczowych modułach – spadek poniżej limitu przerywa job.
+- `pnpm test:coverage` generuje raport V8 (`coverage/lcov-report/index.html`), który ułatwia analizę brakujących scenariuszy.
 
 ## Dokumentacja produktu i procesu
 

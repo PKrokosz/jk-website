@@ -9,7 +9,7 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
   3. **Dlaczego dokumentacja nie została zaktualizowana?** Priorytet przeniesiono na implementację katalogu i formularza, odkładając stabilizację środowiska.
   4. **Dlaczego backlog T0 nie został domknięty?** Brak dedykowanego ownera konfiguracji infra.
   5. **Dlaczego brak ownera?** Zadanie nie przypisane w `PLAN_MVP_SPRINTS.md` do konkretnej roli.
-- **Ulepszenie:** Wybrać docelowe poświadczenia (`devuser/devpass@jkdb`), zaktualizować `.env.example`, README, dodać `drizzle.config.ts`, wygenerować migrację inicjalną i skrypt seeda. _(Status: zrealizowane lokalnie; follow-up: zintegrować API Next.js i CI z nowymi migracjami/seeds oraz zaktualizować secrets.)_
+- **Ulepszenie:** Wybrać docelowe poświadczenia (`devuser/devpass@jkdb`), zaktualizować `.env.example`, README, dodać `drizzle.config.ts`, wygenerować migrację inicjalną i skrypt seeda. _(Status: zrealizowane lokalnie; follow-up: zintegrować API Next.js i CI z nowymi migracjami/seeds oraz zaktualizować secrets. 2025-10-27: `/api/products`, `/api/styles` i `/api/leather` korzystają już z `getNextDbClient().db`, testy resetują cache helpera.)_
 
 ## 2. Brak design tokens w kodzie (5xWhy)
 - **Problem:** Kolory i spacing są hard-coded w `globals.css`.
@@ -101,6 +101,12 @@ Zebrane pomysły na niewykorzystane ulepszenia oraz rekomendacje usprawnienia is
 - **Dlaczego:** Aby uniknąć duplikowania logiki cache'owania klienta DB w handlerach i zapewnić deterministyczne testy przy współdzieleniu połączeń.
 - **Jakie przyjęto założenia:** Endpointy Next.js korzystają z jednego procesu, dzięki czemu cache modułu jest bezpieczny, a reset helpera będzie używany tylko w testach jednostkowych.
 - **Co dalej:** Migrować `/api/products`, `/api/styles` oraz `/api/leather` na nowy helper i dopisać testy weryfikujące reset cache'u po mockowaniu środowiska.
+
+## Raport agenta – 2025-10-27
+- **Co zrobiono:** Podłączono `/api/products`, `/api/styles` i `/api/leather` do `getNextDbClient().db`, rozszerzono repozytorium katalogu o wstrzykiwany klient i cache schematów oraz uzupełniono testy o reset `resetNextDbClient`, mock `@jk/db#createDbClient` i scenariusze braku `DATABASE_URL`.
+- **Dlaczego:** Aby unifikować inicjalizację połączeń bazodanowych, zminimalizować ryzyko przekroczenia limitu połączeń w App Routerze i osłonić się przed błędami konfiguracji środowiska.
+- **Jakie przyjęto założenia:** Fallbackowe dane katalogu nadal pełnią rolę referencji, a testy jednostkowe będą izolować cache klienta przez helper; QA obejmuje uruchomienie `pnpm test src/app/api/products/route.test.ts src/app/api/styles/route.test.ts src/app/api/leather/route.test.ts`.
+- **Co dalej:** Zaplanować testy integracyjne z realnym Drizzle (np. dockerized Postgres w CI) i ujednolicić repozytorium katalogu tak, by korzystało z tych samych mapowań w ścieżkach SSR.
 
 ---
 **Priorytety rekomendowane:**

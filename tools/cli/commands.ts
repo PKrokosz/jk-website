@@ -1,4 +1,14 @@
+import { REQUIRED_ENVIRONMENT_VARIABLES } from "../verify-drizzle-env";
 import type { CommandDefinition } from "./types";
+
+const REQUIRED_ENV_SUMMARY = REQUIRED_ENVIRONMENT_VARIABLES.map((requirement) => requirement.name).join(
+  ", "
+);
+
+const VERIFY_ENV_DESCRIPTION =
+  "Sprawdza wymagane zmienne środowiskowe (" +
+  REQUIRED_ENV_SUMMARY +
+  ") przed uruchomieniem kontroli jakości.";
 
 export const COMMANDS: Record<string, CommandDefinition> = {
   quality: {
@@ -10,8 +20,7 @@ export const COMMANDS: Record<string, CommandDefinition> = {
         title: "Verify Drizzle env",
         command: "pnpm",
         args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
-        description:
-          "Ensures DATABASE_URL is available before running quality checks."
+        description: VERIFY_ENV_DESCRIPTION
       },
       {
         id: "lint",
@@ -46,8 +55,7 @@ export const COMMANDS: Record<string, CommandDefinition> = {
         title: "Verify Drizzle env",
         command: "pnpm",
         args: ["exec", "tsx", "tools/verify-drizzle-env.ts"],
-        description:
-          "Ensures DATABASE_URL is available before running quality checks."
+        description: VERIFY_ENV_DESCRIPTION
       },
       {
         id: "lint",

@@ -22,7 +22,20 @@ export default defineConfig({
     exclude: ["node_modules/**", "src/tests/e2e/**"],
     coverage: {
       reporter: ["text", "lcov"],
-      provider: "v8"
+      provider: "v8",
+      exclude: [
+        "next.config.mjs",
+        "vitest.config.ts",
+        "playwright.config.ts",
+        "tsconfig.*",
+        "**/*.d.ts",
+        "src/app/robots.ts",
+        "src/app/sitemap.ts",
+        "packages/db/src/**/types.ts",
+        "packages/db/src/**/schema.ts",
+        "packages/db/src/seed.ts",
+        "packages/db/src/index.ts"
+      ]
     }
   }
 });

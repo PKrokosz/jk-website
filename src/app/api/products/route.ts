@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createMockProducts, getProductBySlug } from "@/lib/catalog/products";
 import { findActiveLeathers, findActiveStyles } from "@/lib/catalog/repository";
+import { DatabaseConfigurationError, getNextDbClient } from "@/lib/db/next-client";
 import {
   catalogProductDetailResponseSchema,
   catalogProductListResponseSchema
@@ -30,8 +31,33 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  let database: import("@jk/db").Database;
+
   try {
-    const [styles, leathers] = await Promise.all([findActiveStyles(), findActiveLeathers()]);
+    database = getNextDbClient().db;
+  } catch (error) {
+    console.error("Failed to initialize database client", error);
+
+    if (error instanceof DatabaseConfigurationError) {
+      return NextResponse.json(
+        {
+          error: "Database connection is not configured. Please try again later."
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Unable to connect to the database. Please try again later." },
+      { status: 500 }
+    );
+  }
+
+  try {
+    const [styles, leathers] = await Promise.all([
+      findActiveStyles(database),
+      findActiveLeathers(database)
+    ]);
 
     if (parsedQuery.data.slug) {
       const product = getProductBySlug(parsedQuery.data.slug, styles, leathers);

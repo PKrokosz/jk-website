@@ -28,6 +28,7 @@ Repozytorium sklepu MTO „JK Handmade Footwear” zbudowanego na Next.js 14 (Ap
 | `src/lib/legal` | Helpery do generowania treści prawnych i raportowania telemetryjnego. | Jednostkowe testy sprawdzają routingi oraz fallback linków. |
 | `packages/db` | Pakiet `@jk/db` z konfiguracją Drizzle, migracjami i seedem danych referencyjnych. | Migracja inicjalna i seed są zsynchronizowane; CI weryfikuje metadane Drizzle (`pnpm db:generate`). |
 | `tools/cli` | CLI (`quality`, `quality:ci`) spinające lint, typecheck, testy, build, Playwright, depcheck i sprzątanie bazy. | Testy mockują logi/`process.exit`, CLI ładuje `.env.local`/`.env`/`.env.example` przed walidacją środowiska. |
+| `.github/workflows` | Pipeline [`ci.yml`](.github/workflows/ci.yml) uruchamiany na Node 20.x/22.x. | Kroki odwzorowują bramkę `pnpm qa`/`pnpm qa:ci`, pilnują diffów `drizzle/` i publikują artefakty — szczegóły w [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md). |
 | `docs/` | Artefakty discovery (audyt repo, roadmapa, tokeny UI, pętla zadań, checklisty QA/SEO). | Indeks `docs/README_DOCS.md` aktualny na 2025-10-29; każda aktualizacja dokumentu wymaga dopisku sekcji meta. |
 
 ## Wymagania wstępne
@@ -129,9 +130,9 @@ docker compose down --volumes jkdb
 | `pnpm test:e2e` | Scenariusze Playwright (najpierw `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analiza nieużywanych zależności. |
 | `pnpm exec tsx tools/verify-drizzle-env.ts` | Walidacja konfiguracji środowiskowej i spójności z Docker Compose. |
-| `pnpm qa` | `pnpm run cli -- quality` – lint + typecheck + test (dodaj `-- --with-integration-db`, aby przygotować bazę integracyjną). |
-| `pnpm qa:ci` | `pnpm run cli -- quality:ci` – pełen pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, przygotowanie bazy `.env.test`, integracja katalogu, sprzątanie DB). |
-| `pnpm exec tsx scripts/prepare-integration-db.ts` | Startuje `jkdb`, czeka na dostępność, wykonuje migracje i seed korzystając z `.env.test`. |
+| `pnpm qa` | `pnpm run cli -- quality` – lint + typecheck + test; pierwszy krok uruchamia [`tools/verify-drizzle-env.ts`](./tools/verify-drizzle-env.ts) i kontrolę diffów `drizzle/` ([`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md)). |
+| `pnpm qa:ci` | `pnpm run cli -- quality:ci` – pełen pipeline (lint, typecheck, build, test, coverage, Playwright, depcheck, przygotowanie bazy `.env.test`, integracja katalogu, sprzątanie DB) opisany w [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md). |
+| `pnpm exec tsx scripts/prepare-integration-db.ts` | Startuje `jkdb`, czeka na dostępność, wykonuje migracje i seed korzystając z `.env.test` (więcej w [`docs/DANE_I_API_MVP.md`](./docs/DANE_I_API_MVP.md)). |
 | `pnpm run cli -- --list` | Lista dostępnych komend CLI i opis kroków. |
 | `pnpm simulate:user-journeys` | Symulacje ścieżek użytkowników (`src/lib/navigation`). |
 | `pnpm simulate:navigation` | Agregacja przejść na grafie nawigacji (obsługa `--config`, `--user-count`, `--summary`). |
@@ -202,6 +203,7 @@ pnpm db:seed       # zasila bazę danymi referencyjnymi
 - `pnpm test:ci` (uruchamiane też w CI) wykorzystuje reporter `dot` i weryfikuje próg pokrycia 85% Statements/Lines.
 - `pnpm test:e2e` odpala Playwright (nawigacja po głównych stronach, health-checki API, dokumenty prawne). Przed pierwszym runem: `pnpm exec playwright install --with-deps`.
 - `pnpm test:integration` (alias `vitest run src/app/api/products/route.integration.test.ts`) korzysta z `.env.test` i helpera `src/tests/integration/db.ts`; przed uruchomieniem użyj `pnpm exec tsx scripts/prepare-integration-db.ts`, aby wystartować `jkdb`, zastosować migracje i seed.
+- `pnpm qa` oraz `pnpm qa:ci` odwzorowują kroki pipeline [`ci.yml`](.github/workflows/ci.yml): pierwszy krok to [`tools/verify-drizzle-env.ts`](./tools/verify-drizzle-env.ts) i `pnpm db:generate`, które blokują diffy w `drizzle/` (opisane w [`docs/JAKOSC_TESTY_CI.md`](./docs/JAKOSC_TESTY_CI.md)).
 - `pnpm qa -- --with-integration-db` odpala krok przygotowania bazy (`scripts/prepare-integration-db.ts`), co pozwala lokalnie uruchomić pełną bramkę jakościową bez przełączania się na `quality:ci`.
 - `pnpm depcheck`, `pnpm lint` i `pnpm typecheck` odtwarzają etapy pipeline CI.
 - Dodatkowe symulacje nawigacji (`pnpm simulate:*`) mają testy snapshotowe weryfikujące konfiguracje wag i brak cykli.

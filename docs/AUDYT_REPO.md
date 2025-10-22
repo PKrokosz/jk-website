@@ -13,7 +13,7 @@
 - Monorepo oparte o pnpm workspaces, z główną aplikacją Next.js 14 w katalogu `src/` i pakietem współdzielonym `@jk/db`.
 - Routing App Routera jest rozbudowany: Home, Catalog (z filtrami), Product (dynamiczne slug), About, Contact (formularz), Order (iframe + fallback) oraz API `/api/styles`, `/api/leather`, `/api/pricing/quote`, `/healthz`.
 - Mockowane dane katalogowe (`src/lib/catalog`) rozszerzono o slug, warianty, funnel stage i referencje do formularza natywnego.
-- Konfiguracja środowiska wymaga ujednolicenia danych dostępowych do Postgresa (różnice między `.env.example` a `docker-compose.yml`) i przygotowania migracji `drizzle-kit`.
+- Konfiguracja środowiska ujednolicono: `.env.example` i `docker-compose.yml` korzystają z tych samych poświadczeń, dostępna jest migracja inicjalna w katalogu `drizzle/` oraz skrypt seeda `pnpm db:seed`.
 
 ## Struktura monorepo
 - **Apps**

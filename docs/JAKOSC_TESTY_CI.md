@@ -127,17 +127,17 @@ jobs:
 - [x] Przedstawiono aktualny workflow GitHub Actions.
 - [x] Określono konwencje commitów/PR.
 - [x] Dodano brakujące testy (product page, contact form, modal, metadata).
-- [ ] Dodano template PR.
+- [x] Dodano template PR (`.github/pull_request_template.md`).
 - [x] Włączono upload coverage w CI.
 
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
   - Pokrycie UI prymitywów nadal brakujące – potencjalne regresje wizualne.
-  - Brak template PR utrudnia spójne raportowanie wyników.
+  - Utrzymanie checklisty PR wymaga dyscypliny zespołu (ryzyko pomijania logów testów).
 - **Decyzje do podjęcia**
   - Czy wymagamy raportu coverage (np. próg %) w CI?
   - Czy rozszerzamy pipeline o `pnpm build` / preview build na gałęziach feature?
 - **Następne kroki**
   - Dodać testy dla UI prymitywów (`button`, `badge`).
-  - Przygotować template PR (sekcje DoD + logi testów).
+  - Przeglądać losowe PR-y pod kątem kompletności checklisty i logów.
   - Rozważyć włączenie Playwright smoke testów po stabilizacji flow zamówień.

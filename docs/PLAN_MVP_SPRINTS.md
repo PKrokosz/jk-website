@@ -100,13 +100,13 @@
 
 ### T6 — Jakość, testy i CI
 - **Branch**: `codex/ci-hardening`
-- **Status**: 🔄 częściowo (workflow CI działa, coverage + depcheck w pipeline; brak template PR i dodatkowych testów komponentów).
+- **Status**: 🔄 częściowo (workflow CI działa, coverage + depcheck w pipeline; brak dodatkowych testów komponentów).
 - **Zakres**: Dodanie workflow GitHub Actions, testów brakujących, template PR, coverage badge (opcjonalnie).
 - **DoD**:
   - [x] `.github/workflows/ci.yml` zgodny z `JAKOSC_TESTY_CI.md` (lint, typecheck, test, coverage, depcheck).
   - [x] Zaktualizowany `README.md` z instrukcjami lint/test.
   - [ ] Minimum testów uzupełnionych (product page, contact form) – TODO.
-  - [ ] Template PR (niezaimplementowany).
+  - [x] Template PR (`.github/pull_request_template.md`).
   - [x] `pnpm lint`, `pnpm test`.
 - **Ryzyka**: dłuższy pipeline; potrzeba utrzymania logów coverage.
 - **Rollback**: wyłączenie workflow, revert commitów.
@@ -134,10 +134,10 @@
 ## Ryzyka, Decyzje do podjęcia, Następne kroki
 - **Ryzyka**
   - Brak zasobów (grafiki, copy) może opóźnić T4/T5 – częściowo zaadresowane placeholderami.
-  - Niewdrożone migracje/PR template mogą utrudnić skalowanie zespołu.
+  - Niewdrożone migracje i brak dodatkowych testów komponentów mogą utrudnić skalowanie zespołu.
 - **Decyzje do podjęcia**
   - Priorytet: dokończyć T0/T1/T6 czy rozszerzać katalog? (wymaga akceptacji właściciela).
   - Czy T5 wymaga integracji z backendem przed startem kampanii marketingowej?
 - **Następne kroki**
-  - Przygotować zadania follow-up dla: integracji API z Drizzle (styles/leather), CSS tokens, testy `ContactForm`/`ProductPage`, template PR.
+  - Przygotować zadania follow-up dla: integracji API z Drizzle (styles/leather), CSS tokens, testy `ContactForm`/`ProductPage`.
   - Uzyskać akceptację planu od właściciela i zaktualizować timeline.

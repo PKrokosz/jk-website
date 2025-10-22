@@ -109,6 +109,22 @@ export const COMMANDS: Record<string, CommandDefinition> = {
         description: "Produces the lcov coverage report used for CI artifacts."
       },
       {
+        id: "prepare-integration-db",
+        title: "Prepare integration database",
+        command: "pnpm",
+        args: ["exec", "tsx", "scripts/prepare-integration-db.ts"],
+        description:
+          "Uruchamia kontener jkdb, czeka na połączenie i wykonuje `pnpm db:migrate` oraz `pnpm db:seed` z konfiguracją .env.test."
+      },
+      {
+        id: "integration-tests",
+        title: "Integration tests",
+        command: "pnpm",
+        args: ["test", "src/app/api/products/route.integration.test.ts"],
+        description:
+          "Uruchamia scenariusze Vitest łączące się z prawdziwą bazą, aby zweryfikować degradację katalogu."
+      },
+      {
         id: "e2e",
         title: "Playwright e2e",
         command: "pnpm",

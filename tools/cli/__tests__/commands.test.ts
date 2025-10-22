@@ -102,4 +102,34 @@ describe("CLI environment verification", () => {
     expect(qualityDrizzleStep?.description).toContain("drizzle/");
     expect(qualityCiDrizzleStep?.description).toContain("drizzle/");
   });
+
+  it("w scenariuszu quality:ci przygotowuje bazę i uruchamia testy integracyjne", () => {
+    const qualityCiSteps = COMMANDS["quality:ci"].steps;
+
+    const prepareStepIndex = qualityCiSteps.findIndex(
+      (step) => step.id === "prepare-integration-db"
+    );
+    const integrationTestStepIndex = qualityCiSteps.findIndex(
+      (step) => step.id === "integration-tests"
+    );
+
+    expect(prepareStepIndex).toBeGreaterThanOrEqual(0);
+    expect(integrationTestStepIndex).toBeGreaterThan(prepareStepIndex);
+
+    expect(qualityCiSteps[prepareStepIndex]).toEqual(
+      expect.objectContaining({
+        command: "pnpm",
+        args: ["exec", "tsx", "scripts/prepare-integration-db.ts"],
+        description: expect.stringContaining("jkdb")
+      })
+    );
+
+    expect(qualityCiSteps[integrationTestStepIndex]).toEqual(
+      expect.objectContaining({
+        command: "pnpm",
+        args: ["test", "src/app/api/products/route.integration.test.ts"],
+        description: expect.stringContaining("Vitest")
+      })
+    );
+  });
 });

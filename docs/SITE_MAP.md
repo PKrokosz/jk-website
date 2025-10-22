@@ -38,15 +38,15 @@
 │   ├── Detale (opis, proces)
 │   └── Warianty personalizacji
 ├── About (/about)
-│   └── Treść o pracowni (placeholder copy)
+│   └── Treść o pracowni (finalne copy + CTA)
 ├── Group Orders (/group-orders)
 │   ├── Hero (CTA mailto + link do kontaktu)
 │   ├── Lista benefitów współpracy
 │   └── Sekcja procesu 3 kroków + CTA konsultacji
 ├── Contact (/contact)
 │   ├── Hero kontaktu (dane, CTA)
-│   ├── Formularz
-│   └── Sekcja warsztatu (adres, godziny, social)
+│   ├── Sekcja warsztatu (adres, godziny, powody wizyty)
+│   └── Formularz
 └── Order (/order)
     ├── Osadzony formularz (iframe)
     └── Order native (/order/native) – lista modeli + CTA do pełnego formularza
@@ -85,7 +85,7 @@
 | --- | --- | --- | --- |
 | Hero kontaktu | H1, lead, dane kontaktowe, social | `mailto`, `tel`, anchor do formularza | Stały |
 | Formularz | Inputy, textarea, checkbox zgody | Submit (walidacja, status), `mailto` fallback | Status `idle/submitting/success/error` |
-| Sekcja warsztatu | Adres, godziny, social | Link do Instagram/Facebook | Placeholder content |
+| Sekcja warsztatu | Adres, godziny, lista benefitów wizyty | Link anchor do formularza | Stały content |
 
 ### 3.5 Order
 | Sekcja | Elementy | CTA | Stany |

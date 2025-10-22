@@ -1,6 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { compareDatabaseUrlWithCompose } from "../verify-drizzle-env";
+import {
+  compareDatabaseUrlWithCompose,
+  loadVerifyEnvEnvironment
+} from "../verify-drizzle-env";
 
 const composeFixture = `services:
   jkdb:
@@ -26,5 +29,35 @@ describe("compareDatabaseUrlWithCompose", () => {
     expect(comparison.composeDatabaseUrl).toBe(
       "postgres://devuser:devpass@localhost:5432/jkdb"
     );
+  });
+});
+
+describe("loadVerifyEnvEnvironment", () => {
+  it("ładuje domyślną sekwencję plików środowiskowych", () => {
+    const loader = vi.fn().mockReturnValue(["/project/.env.example"]);
+
+    const loaded = loadVerifyEnvEnvironment({ loader });
+
+    expect(loader).toHaveBeenCalledWith({
+      cwd: process.cwd(),
+      files: [".env.local", ".env", ".env.example"]
+    });
+    expect(loaded).toEqual(["/project/.env.example"]);
+  });
+
+  it("pozwala określić katalog roboczy i sekwencję plików", () => {
+    const loader = vi.fn().mockReturnValue(["/custom/.env"]);
+
+    const loaded = loadVerifyEnvEnvironment({
+      cwd: "/custom",
+      sequence: [".env"],
+      loader
+    });
+
+    expect(loader).toHaveBeenCalledWith({
+      cwd: "/custom",
+      files: [".env"]
+    });
+    expect(loaded).toEqual(["/custom/.env"]);
   });
 });

@@ -23,26 +23,21 @@ export async function GET(
     );
   }
 
-  let database: import("@jk/db").Database;
+  let database: import("@jk/db").Database | undefined;
 
   try {
     database = getNextDbClient().db;
   } catch (error) {
-    console.error("Failed to initialize database client", error);
-
     if (error instanceof DatabaseConfigurationError) {
-      return NextResponse.json(
-        {
-          error: "Database connection is not configured. Please try again later."
-        },
-        { status: 500 }
+      console.warn(
+        "Database connection is not configured. Falling back to reference catalog data.",
+        error
       );
+    } else {
+      console.error("Failed to initialize database client", error);
     }
 
-    return NextResponse.json(
-      { error: "Unable to connect to the database. Please try again later." },
-      { status: 500 }
-    );
+    database = undefined;
   }
 
   try {

@@ -30,19 +30,19 @@ beforeEach(() => {
       matches: false,
       media: query,
       onchange: null,
-      addEventListener: (_event, listener) => {
+      addEventListener: (_event: string, listener: EventListenerOrEventListenerObject) => {
         matchMediaListeners.push(listener as (event: MediaQueryListEvent) => void);
       },
-      removeEventListener: (_event, listener) => {
+      removeEventListener: (_event: string, listener: EventListenerOrEventListenerObject) => {
         const index = matchMediaListeners.indexOf(listener as (event: MediaQueryListEvent) => void);
         if (index >= 0) {
           matchMediaListeners.splice(index, 1);
         }
       },
-      addListener: (listener) => {
+      addListener: (listener: (event: MediaQueryListEvent) => void) => {
         matchMediaListeners.push(listener as (event: MediaQueryListEvent) => void);
       },
-      removeListener: (listener) => {
+      removeListener: (listener: (event: MediaQueryListEvent) => void) => {
         const index = matchMediaListeners.indexOf(listener as (event: MediaQueryListEvent) => void);
         if (index >= 0) {
           matchMediaListeners.splice(index, 1);

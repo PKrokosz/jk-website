@@ -26,10 +26,14 @@ vi.mock("@jk/db", () => ({
 
 describe("quote-requests-repository", () => {
   const baseRequest: PricingQuoteRequest = {
-    modelId: "model-1",
+    styleId: 1,
+    leatherId: 2,
+    basePriceGrosz: 100_00,
+    baseLabel: "Model testowy",
     options: []
   };
   const baseQuote: PricingQuote = {
+    currency: "PLN",
     totalNetGrosz: 100_00,
     totalVatGrosz: 23_00,
     totalGrossGrosz: 123_00,

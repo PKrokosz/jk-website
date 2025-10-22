@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({
 
 import ProductPage, { generateMetadata, generateStaticParams } from "../[slug]/page";
 import { CatalogApiError } from "@/lib/catalog/api";
+import type { CatalogProductSummary } from "@/lib/catalog/types";
 
 const sampleStyles = [
   { id: 1, slug: "style-1", name: "Szermierz", era: "XIV", description: "Opis", basePriceGrosz: 80_000 }
@@ -47,7 +48,9 @@ const fallbackSlugs = [sampleProduct.slug];
 
 const fetchStylesMock = vi.hoisted(() => vi.fn(async () => sampleStyles));
 const fetchLeathersMock = vi.hoisted(() => vi.fn(async () => sampleLeathers));
-const fetchProductsMock = vi.hoisted(() => vi.fn(async () => []));
+const fetchProductsMock = vi.hoisted(() =>
+  vi.fn(async (): Promise<CatalogProductSummary[]> => [])
+);
 const fetchProductDetailMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/catalog/api", () => ({
@@ -124,21 +127,23 @@ describe("Product page metadata", () => {
 
   it("generuje statyczne parametry dla wszystkich slugów", async () => {
     const slugs = [sampleProduct.slug];
-    fetchProductsMock.mockResolvedValue(slugs.map((slug) => ({
-      id: slug,
-      slug,
-      name: sampleProduct.name,
-      styleId: 1,
-      leatherId: 1,
-      description: sampleProduct.description,
-      highlight: sampleProduct.highlight,
-      priceGrosz: sampleProduct.priceGrosz,
-      category: "footwear" as const,
-      categoryLabel: sampleProduct.categoryLabel,
-      funnelStage: "MOFU" as const,
-      funnelLabel: sampleProduct.funnelLabel,
-      orderReference: undefined
-    })));
+    fetchProductsMock.mockResolvedValue(
+      slugs.map<CatalogProductSummary>((slug) => ({
+        id: slug,
+        slug,
+        name: sampleProduct.name,
+        styleId: 1,
+        leatherId: 1,
+        description: sampleProduct.description,
+        highlight: sampleProduct.highlight,
+        priceGrosz: sampleProduct.priceGrosz,
+        category: "footwear" as const,
+        categoryLabel: sampleProduct.categoryLabel,
+        funnelStage: "MOFU" as const,
+        funnelLabel: sampleProduct.funnelLabel,
+        orderReference: undefined
+      }))
+    );
     const params = await generateStaticParams();
 
     slugs.forEach((slug) => {

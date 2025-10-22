@@ -60,11 +60,11 @@ test.describe("Nawigacja kluczowych stron", () => {
     }
   });
 
-  test("API katalogu zwraca dane referencyjne", async ({ request }) => {
+  test("API katalogu zwraca dane referencyjne", async ({ page }) => {
     const endpoints = ["/api/products", "/api/styles", "/api/leather"];
 
     for (const endpoint of endpoints) {
-      const response = await request.get(endpoint);
+      const response = await page.request.get(endpoint);
       expect(response.status(), `Status dla ${endpoint}`).toBe(200);
 
       const body = await response.json();

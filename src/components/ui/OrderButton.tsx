@@ -31,11 +31,14 @@ const focusableSelectors = [
 
 type OrderButtonMode = "auto" | "modal" | "link";
 
+type DataAttributes = Partial<Record<`data-${string}`, string | number | boolean | undefined>>;
+
 export type OrderButtonProps = {
   children?: ReactNode;
   className?: string;
   mode?: OrderButtonMode;
-  buttonProps?: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "type">;
+  buttonProps?: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "type"> &
+    DataAttributes;
 };
 
 const resolveResponsiveMode = (mode: OrderButtonMode, setMode: (value: OrderButtonMode) => void) => {

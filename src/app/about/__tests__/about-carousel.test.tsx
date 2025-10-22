@@ -70,10 +70,12 @@ describe("AboutCarousel", () => {
   let intersectionObserver: IntersectionObserverMock;
 
   beforeEach(() => {
+    type IntersectionObserverFactory = (callback: IntersectionObserverCallback) => IntersectionObserver;
+
     intersectionObserver = new IntersectionObserverMock(() => undefined);
     scrollIntoViewMock.mockReset();
     (window as unknown as { IntersectionObserver: unknown }).IntersectionObserver = vi
-      .fn<IntersectionObserverConstructor>((callback) => {
+      .fn<IntersectionObserverFactory>((callback) => {
         intersectionObserver = new IntersectionObserverMock(callback);
         return intersectionObserver as unknown as IntersectionObserver;
       });

@@ -103,6 +103,7 @@ describe("navigation weight configuration", () => {
 
   it("ignores comment keys in JSON configuration", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: JSON.stringify({
         _comment: "source -> target -> weight",
         home: {
@@ -166,6 +167,7 @@ describe("navigation weight configuration", () => {
     );
 
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_PATH: configPath,
     } satisfies NodeJS.ProcessEnv;
 
@@ -186,6 +188,7 @@ describe("navigation weight configuration", () => {
 
   it("throws when both JSON and file based overrides are defined", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: JSON.stringify({}),
       NAVIGATION_WEIGHTS_PATH: "config/navigation-weights.example.json",
     } satisfies NodeJS.ProcessEnv;
@@ -195,6 +198,7 @@ describe("navigation weight configuration", () => {
 
   it("throws when weights are not positive numbers", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: JSON.stringify({
         home: {
           contact: 0,
@@ -207,6 +211,7 @@ describe("navigation weight configuration", () => {
 
   it("throws when weights are not numeric", () => {
     const env = {
+      NODE_ENV: "test",
       NAVIGATION_WEIGHTS_JSON: JSON.stringify({
         home: {
           contact: "wysokie" as unknown as number,

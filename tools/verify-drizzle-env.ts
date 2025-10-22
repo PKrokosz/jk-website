@@ -226,7 +226,7 @@ export const compareDatabaseUrlWithCompose = (
     return {
       envDatabaseUrl,
       composeDatabaseUrl,
-      matches: null as const
+      matches: null
     };
   }
 
@@ -267,7 +267,7 @@ export const warnOnDatabaseUrlMismatch = (
     return {
       envDatabaseUrl: null,
       composeDatabaseUrl: null,
-      matches: null as const
+      matches: null
     };
   }
 };

@@ -3,8 +3,8 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ParsedArguments } from "../args";
 import type { CommandDefinition } from "../types";
 
-const mockParseArguments = vi.fn<[], ParsedArguments>();
-const mockListCommandDefinitions = vi.fn<[], CommandDefinition[]>();
+const mockParseArguments = vi.fn<() => ParsedArguments>();
+const mockListCommandDefinitions = vi.fn<() => CommandDefinition[]>();
 const mockGetCommandDefinition = vi.fn<(name: string) => CommandDefinition | undefined>();
 const mockRunCommandDefinition = vi.fn();
 
@@ -94,9 +94,17 @@ describe("CLI entrypoint", () => {
     logSpy.mockReset();
     errorSpy.mockReset();
 
-    exitSpy.mockImplementation((code?: number) => {
-      throw new ExitCalled(code);
-    });
+    exitSpy.mockImplementation(
+      ((code?: Parameters<typeof process.exit>[0]) => {
+        const numericCode =
+          typeof code === "number"
+            ? code
+            : code == null
+            ? undefined
+            : Number(code);
+        throw new ExitCalled(Number.isFinite(numericCode ?? NaN) ? numericCode : undefined);
+      }) as typeof process.exit
+    );
     logSpy.mockImplementation(() => {});
     errorSpy.mockImplementation(() => {});
 

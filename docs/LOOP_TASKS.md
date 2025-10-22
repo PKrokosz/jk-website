@@ -25,6 +25,7 @@
 ### Zadanie bazowe `x₂`: Domknąć brakujące testy jakościowe (T6)
 - `-x₂`: Zidentyfikować i usunąć przestarzałe snapshoty/testy blokujące pokrycie po dopisaniu nowych przypadków.
 - `1/x₂`: Napisać test jednostkowy dla `ContactForm` (render, walidacja, komunikaty statusu). ✅ 2025-10-22 — zrealizowane wraz z pokryciem prefill i CTA katalogu.
+- ✅ 2025-10-23 — Dodano testy prymitywów UI (`OrderButton`, `button`, `badge`) z pokryciem aria i focus state zgodnie z `docs/JAKOSC_TESTY_CI.md`.
 - `x₂²`: Przygotować zestaw testów integracyjnych dla `/catalog/[slug]` i `/account` sprawdzających dostępność kluczowych CTA.
 - `x₂ˣ`: Skonfigurować automatyczny raport pokrycia z wysyłką do Slacka/emailem po każdej gałęzi PR.
 
@@ -40,6 +41,11 @@
 - `x₄²`: Wyprowadzić layout formularzy do komponentów wielokrotnego użytku i udokumentować je w specyfikacji.
 - `x₄ˣ`: Automatycznie generować checklistę z rozdziału 10 i integrować ją z CI (`pnpm qa`).
 
+### Zadanie bazowe `x₅`: Wydzielić i ustandaryzować prymitywy UI jako komponenty
+- `-x₅`: Usunąć duplikacje klas `.button`/`.badge` po migracji do komponentów.
+- `1/x₅`: Zaprojektować komponenty `Button` i `Badge` eksportowane z `src/components/ui/primitives` wraz z mapowaniem wariantów na tokens.
+- `x₅²`: Zintegrować nowe komponenty w kluczowych widokach (`Home`, `Catalog`, `Order`) i zapewnić storybook/preview.
+- `x₅ˣ`: Dodać generator dokumentacji komponentów (MDX) synchronizowany z design tokens.
 ### Zadanie bazowe `x₅`: Uspójnić fallback katalogu z docelową bazą danych
 - `-x₅`: Monitorować logi ostrzeżeń o fallbacku i dodać alert w telemetrii, aby łatwiej wykrywać brak połączenia z DB.
 - `1/x₅`: Napisać test integracyjny dla `/api/styles` i `/api/leather`, który potwierdzi zwracanie danych referencyjnych przy braku DB.

@@ -36,7 +36,7 @@ Checklist dla każdego PR:
 | Katalog (`CatalogExplorer`) | Component | Filtry (style/leather), sortowanie, empty state | Vitest + RTL | ✅ (testy w `src/components/catalog/__tests__`) |
 | Strona produktu | Component/server | Render breadcrumb, galeria, CTA, 404 fallback | Vitest + RTL | ✅ (testy w `src/app/catalog/__tests__`) |
 | SEO/Metadata | Unit | `generateMetadata` zwraca właściwe tytuły/opisy | Vitest | ✅ (pokryte w `product-page.test.tsx`) |
-| UI prymitywy (`button`, `badge`) | Snapshot/accessibility | Style/role, focus ring | Vitest + `@testing-library/react` | 🔄 |
+| UI prymitywy (`button`, `badge`) | Accessibility | Style/role, focus ring, warianty kolorystyczne | Vitest + `@testing-library/react` | ✅ (`src/components/ui/__tests__/button.primitive.test.tsx`, `src/components/ui/__tests__/badge.primitive.test.tsx`) |
 | Formularz kontaktowy | Component | Walidacja required fields, stany success/error, prefill produktu, obsługa limitów | Vitest | ✅ (testy w `src/components/contact/__tests__`) |
 | NativeModelShowcase | Component | Lista modeli, formatowanie cen, CTA do `/order/native` | Vitest + RTL | ✅ (test w `src/components/catalog/__tests__/NativeModelShowcase.test.tsx`) |
 | Pricing calculator | Unit | `calculateQuote`, integracja z UI | Vitest | ✅ (istniejące testy w `src/app/components/__tests__`) |
@@ -131,6 +131,6 @@ jobs:
   - Czy wymagamy raportu coverage (np. próg %) w CI?
   - Czy rozszerzamy pipeline o `pnpm build` / preview build na gałęziach feature?
 - **Następne kroki**
-  - Dodać testy dla UI prymitywów (`button`, `badge`).
+  - Utrzymać testy UI prymitywów w parze z migracją tokens do CSS custom properties.
   - Przeglądać losowe PR-y pod kątem kompletności checklisty i logów.
   - Rozważyć włączenie Playwright smoke testów po stabilizacji flow zamówień.

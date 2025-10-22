@@ -27,7 +27,9 @@
 - `-x₂`: Zidentyfikować i usunąć przestarzałe snapshoty/testy blokujące pokrycie po dopisaniu nowych przypadków.
 - `1/x₂`: Napisać test jednostkowy dla `ContactForm` (render, walidacja, komunikaty statusu). ✅ 2025-10-22 — zrealizowane wraz z pokryciem prefill i CTA katalogu.
 - ✅ 2025-10-23 — Dodano testy prymitywów UI (`OrderButton`, `button`, `badge`) z pokryciem aria i focus state zgodnie z `docs/JAKOSC_TESTY_CI.md`.
+- ✅ 2025-10-24 — Dopisano testy API (`/api/styles`, `/api/leather`), rozszerzono scenariusze CLI i Playwright (nawigacja + API katalogu).
 - `x₂²`: Przygotować zestaw testów integracyjnych dla `/catalog/[slug]` i `/account` sprawdzających dostępność kluczowych CTA.
+- ⏭️ 2025-10-24 — Zaprojektować e2e flow zamówienia (Order modal → `/order/native`) z weryfikacją pól formularza.
 - `x₂ˣ`: Skonfigurować automatyczny raport pokrycia z wysyłką do Slacka/emailem po każdej gałęzi PR.
 
 ### Zadanie bazowe `x₃`: Urealnić obsługę leadów z formularza kontaktowego

@@ -69,7 +69,7 @@ export interface ReferenceProductTemplateSeed {
   priceOverrideGrosz?: number;
 }
 
-export const referenceStyles = [
+export const referenceStyles: ReadonlyArray<ReferenceStyleSeed> = [
   {
     id: 1,
     slug: "courtly-riding-boot",
@@ -120,9 +120,9 @@ export const referenceStyles = [
     basePriceGrosz: 0,
     active: true
   }
-] satisfies readonly ReferenceStyleSeed[];
+];
 
-export const referenceLeathers = [
+export const referenceLeathers: ReadonlyArray<ReferenceLeatherSeed> = [
   {
     id: 1,
     name: "Kasztanowa licowa",
@@ -168,9 +168,9 @@ export const referenceLeathers = [
     description: "Materiał warsztatowy stosowany w akcesoriach, bukłakach i prawidłach uzupełniających zamówienie.",
     active: true
   }
-] satisfies readonly ReferenceLeatherSeed[];
+];
 
-export const referenceSoles = [
+export const referenceSoles: ReadonlyArray<ReferenceSoleSeed> = [
   {
     id: 1,
     type: "leather",
@@ -195,9 +195,9 @@ export const referenceSoles = [
     priceModGrosz: 15_000,
     active: true
   }
-] satisfies readonly ReferenceSoleSeed[];
+];
 
-export const referenceOptions = [
+export const referenceOptions: ReadonlyArray<ReferenceOptionSeed> = [
   {
     id: 1,
     kind: "toe-cap",
@@ -226,10 +226,9 @@ export const referenceOptions = [
     priceModGrosz: 4_000,
     active: true
   }
-] satisfies readonly ReferenceOptionSeed[];
+];
 
-export const referenceProductTemplates =
-  [
+export const referenceProductTemplates: ReadonlyArray<ReferenceProductTemplateSeed> = [
 
     {
       templateId: "model-szpic",

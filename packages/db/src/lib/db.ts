@@ -1,14 +1,20 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-const connectionString = process.env.DATABASE_URL;
+import * as schema from "../schema";
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is not set");
+export type Database = NodePgDatabase<typeof schema>;
+
+export interface DbClient {
+  db: Database;
+  pool: Pool;
 }
 
-const pool = new Pool({ connectionString });
+export function createDbClient(connectionString: string): DbClient {
+  const pool = new Pool({ connectionString });
+  const db = drizzle(pool, { schema });
 
-export const db = drizzle(pool);
-export { pool };
+  return { db, pool };
+}

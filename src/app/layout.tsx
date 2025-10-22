@@ -4,6 +4,7 @@ import React, { type ReactNode } from "react";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { AppProviders } from "./providers";
+import { MarketingScriptsManager } from "../components/MarketingScriptsManager";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -71,6 +72,7 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className="site-body">
+        <MarketingScriptsManager />
         <AppProviders>
           <a className="skip-link" href="#main-content">
             Przejdź do głównej treści

@@ -31,6 +31,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 ## Konwencje
 - TypeScript strict, ESLint bez ostrzeżeń.
 - Testy: Vitest (unit/component) + [opcjonalnie] Playwright e2e.
+- Dodano smoke test kompilacji modułów stron (`src/app/__tests__/pages.compile.test.ts`) korzystający z `import.meta.glob` – przy dodawaniu nowych stron upewnij się, że przechodzą import bez błędów runtime.
 - Commity: Conventional Commits.
 - Strony w App Router pod `app/`: home, catalog, product, order/native, contact, about.
 - Stosuj design tokens z `docs/UI_TOKENS.md`; obecnie wartości zakodowane w `globals.css` – kolejne zadania powinny je przenieść do CSS variables.

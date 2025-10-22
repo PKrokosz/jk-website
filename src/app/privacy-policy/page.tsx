@@ -4,7 +4,6 @@ export const metadata: Metadata = {
   title: "Polityka prywatności",
   description:
     "Polityka prywatności JK Handmade Footwear – informacje o administratorze danych, celach przetwarzania oraz prawach użytkownika."
-  title: "Polityka prywatności"
 };
 
 export default function PrivacyPolicyPage() {
@@ -122,20 +121,7 @@ export default function PrivacyPolicyPage() {
             Polityka może podlegać zmianom. Aktualna wersja jest publikowana na tej stronie wraz z datą obowiązywania.
           </p>
           <p>Data wejścia w życie: 22.10.2025 r.</p>
-          <h1 id="privacy-policy-heading">Polityka prywatności</h1>
-          <p>
-            Niniejsza polityka prywatności opisuje zasady przetwarzania danych osobowych przez JK Handmade
-            Footwear oraz wyjaśnia, w jaki sposób dbamy o poufność i bezpieczeństwo informacji naszych klientów,
-            subskrybentów oraz użytkowników serwisu internetowego.
-          </p>
-          <p>
-            Aktualna wersja polityki została przyjęta dnia 10 lutego 2025 r. i jest dostępna pod adresem{" "}
-            <a className="legal-page__link" href="https://jk-footwear.pl/privacy-policy">
-              https://jk-footwear.pl/privacy-policy
-            </a>
-            .
-          </p>
-        </header>
+        </section>
         <section className="legal-page__section" aria-labelledby="privacy-policy-administrator-heading">
           <h2 id="privacy-policy-administrator-heading">1. Administrator danych</h2>
           <p>

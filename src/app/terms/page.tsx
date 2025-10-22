@@ -4,7 +4,6 @@ export const metadata: Metadata = {
   title: "Regulamin",
   description:
     "Regulamin serwisu JK Handmade Footwear dotyczący zamówień na obuwie wykonywane na zamówienie (MTO)."
-  title: "Regulamin sklepu"
 };
 
 export default function TermsPage() {
@@ -144,22 +143,8 @@ export default function TermsPage() {
           <p>
             Teksty przygotowano zgodnie z polskim prawem konsumenckim i RODO na dzień publikacji. Rekomendujemy krótką konsultację
             prawną przed finalnym wdrożeniem.
-          <h1 id="terms-heading">Regulamin sklepu JK Handmade Footwear</h1>
-          <p>
-            Niniejszy regulamin określa zasady korzystania z serwisu internetowego prowadzonego pod adresem{" "}
-            <a className="legal-page__link" href="https://jk-footwear.pl">
-              https://jk-footwear.pl
-            </a>
-            , w tym składania zamówień na produkty wykonywane na miarę przez JK Handmade Footwear – Pracownię Butów Na Miarę.
           </p>
-          <p>
-            Aktualna wersja regulaminu obowiązuje od dnia 10 lutego 2025 r. Wszelkie pytania prosimy kierować na adres e-mail{" "}
-            <a className="legal-page__link" href="mailto:kontakt@jkhandmade.pl">
-              kontakt@jkhandmade.pl
-            </a>{" "}
-            lub telefonicznie pod numer +48 600 000 000.
-          </p>
-        </header>
+        </section>
 
         <section className="legal-page__section" aria-labelledby="terms-general-heading">
           <h2 id="terms-general-heading">1. Postanowienia ogólne</h2>

@@ -9,7 +9,7 @@ import React, {
   useState
 } from "react";
 
-import type { PricingBreakdownItem } from "@/lib/pricing/calc";
+import type { PricingQuoteBreakdownItem } from "@/lib/pricing/calc";
 
 export interface CartItemContactDetails {
   fullName: string;
@@ -35,7 +35,7 @@ export interface CartItem {
   totalNetGrosz: number;
   totalVatGrosz: number;
   totalGrossGrosz: number;
-  breakdown: PricingBreakdownItem[];
+  breakdown: PricingQuoteBreakdownItem[];
   contact: CartItemContactDetails;
 }
 

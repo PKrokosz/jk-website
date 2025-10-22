@@ -11,6 +11,7 @@
 - **Aktualizacje wykonane**:
   - Dodano sekcję meta audytu i wskazano konieczność decyzji o progu coverage.
   - Zsynchronizowano status dokumentu z audytem (2025-10-29).
+  - Uzupełniono opis pipeline o krok przygotowujący bazę oraz uruchomienie `pnpm test:integration`.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -24,7 +25,7 @@
 ## Podsumowanie
 - DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`.
 - Testy: Vitest + React Testing Library (layout, katalog, kalkulator, formularz kontaktowy, product page, NativeModelShowcase).
-- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck, orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
+- CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck oraz dedykowane przygotowanie bazy + testy integracyjne na Node 20.x; orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
 - Commity: Conventional Commits, PR zawiera opis, listę zmian, wyniki komend, screeny dla UI.
 
 ## Definition of Done
@@ -101,12 +102,36 @@ jobs:
         run: pnpm run approve-builds
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Prepare integration database
+        if: matrix.node-version == '20.x'
+        run: |
+          docker compose up -d jkdb
+          ready=0
+          for attempt in {1..30}; do
+            if docker compose exec -T jkdb pg_isready -U postgres > /dev/null 2>&1; then
+              echo "Database is ready"
+              ready=1
+              break
+            fi
+            echo "Waiting for database... (${attempt}/30)"
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "::error::Database did not become ready in time"
+            docker compose logs jkdb
+            exit 1
+          fi
+          pnpm db:migrate
+          pnpm db:seed
       - name: Quality gate
         if: matrix.node-version == '22.x'
         run: pnpm qa
       - name: Full CI gate
         if: matrix.node-version == '20.x'
         run: pnpm qa:ci
+      - name: Run integration tests
+        if: matrix.node-version == '20.x'
+        run: pnpm test:integration
       - name: Upload coverage report
         if: always() && matrix.node-version == '20.x'
         uses: actions/upload-artifact@v4
@@ -116,9 +141,10 @@ jobs:
   ```
   - `pnpm qa` uruchamia lokalną bramkę jakościową (lint, typecheck, test) – wykorzystywane na macierzy Node 22.x.
   - `pnpm qa:ci` odtwarza pełen pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck) – uruchamiane na Node 20.x.
+  - Kroki `pnpm db:migrate`, `pnpm db:seed` przygotowują kontener Postgresa (`jkdb`) i synchronizują schemat przed testami integracyjnymi.
+  - `pnpm test:integration` korzysta z helpera `ensureIntegrationTestMigrations`, aby upewnić się, że migracje zostały zastosowane i dane referencyjne są dostępne.
   - Raport coverage dołączany jest jako artefakt `coverage-report` dla gałęzi PR/push.
   - Scenariusze Playwright uruchamiane są na Node 20.x, raport HTML dołączany jako artefakt `playwright-report`.
-  - Seedy katalogu uruchamiane są skryptem `pnpm db:seed` (wykorzystuje pakiet `@jk/db`); CI może go wywołać w jobie przygotowującym bazę.
 
 ## Konwencje commitów i PR
 - Commity: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:`).

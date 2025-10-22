@@ -65,12 +65,13 @@ Monorepo sklepu MTO budowanego w Next.js 14 z TypeScriptem, PostgresQL, Stripe o
 
 ### Zmienne środowiskowe
 
-- `DATABASE_URL` – connection string do instancji Postgresa; domyślna wartość w repo korzysta z `devuser/devpass@jkdb` zgodnie z Docker Compose.
-- Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który poinformuje o brakującej zmiennej `DATABASE_URL`.
-- `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`).
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja serwera SMTP używanego do wysyłki wiadomości z formularza kontaktowego.
-- `MAIL_FROM`, `MAIL_TO` – adres nadawcy i odbiorcy wiadomości wysyłanych przez `/api/contact/submit`.
+- `DATABASE_URL` – connection string do instancji Postgresa; domyślna wartość w repo korzysta z `devuser/devpass@jkdb` zgodnie z Docker Compose (np. `postgres://devuser:devpass@localhost:5432/jkdb`).
+- `NEXT_PUBLIC_ORDER_FORM_URL` – adres osadzanego formularza zamówień (wykorzystywany w `/order`), np. `https://forms.gle/twoj-formularz`.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – konfiguracja serwera SMTP używanego do wysyłki wiadomości z formularza kontaktowego (np. `localhost`/`1025`/`devuser`/`devpass` dla MailHoga).
+- `MAIL_FROM`, `MAIL_TO` – adres nadawcy i odbiorcy wiadomości wysyłanych przez `/api/contact/submit` (np. `"JK Handmade Footwear <kontakt@jkhandmade.pl>"` → `kontakt@jkhandmade.pl`).
 - `APP_BASE_URL` – adres aplikacji wykorzystywany do walidacji nagłówków `Origin`/`Referer` w API kontaktowym.
+
+Możesz zweryfikować konfigurację uruchamiając `pnpm exec tsx tools/verify-drizzle-env.ts`, który raportuje brakujące wartości ze wszystkich powyższych kategorii i podpowiada, jak je uzupełnić.
 
 > **Tip:** Skopiowane z `.env.example` poświadczenia są już zgrane z `docker-compose.yml`, więc możesz bez zmian uruchomić `docker compose up -d` i korzystać z `devuser/devpass@jkdb`.
 
@@ -98,7 +99,7 @@ Po uruchomieniu serwera baza danych jest dostępna na `localhost:5432` z danymi 
 | `pnpm test:coverage` | Generuje raport pokrycia testami (`coverage/`). |
 | `pnpm test:e2e` | Uruchamia scenariusze Playwright (wymaga wcześniejszego `pnpm exec playwright install --with-deps`). |
 | `pnpm depcheck` | Analizuje zależności i zgłasza nieużywane pakiety. |
-| `pnpm exec tsx tools/verify-drizzle-env.ts` | Szybka walidacja obecności `DATABASE_URL` w aktualnym środowisku. |
+| `pnpm exec tsx tools/verify-drizzle-env.ts` | Weryfikuje wszystkie wymagane zmienne środowiskowe (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). |
 | `pnpm qa` | Skrót do `pnpm run cli -- quality` (lint + typecheck + test). |
 | `pnpm qa:ci` | Skrót do `pnpm run cli -- quality:ci` (pełne bramki CI z Playwright i depcheck). |
 | `pnpm simulate:user-journeys` | Uruchamia symulacje ścieżek użytkowników na podstawie modułu `src/lib/navigation`. |
@@ -116,7 +117,7 @@ Repozytorium udostępnia warstwę CLI (`pnpm run cli`), która orkiestruje kroki
 - `pnpm run cli -- quality:ci` – pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck; skrót `pnpm qa:ci`).
 - `--dry-run` wypisuje kolejność kroków bez ich uruchamiania, `--skip=build,e2e` pozwala pominąć wskazane kroki.
 
-Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts` i sprawdza, czy w środowisku znajduje się `DATABASE_URL`. Dzięki temu brak konfiguracji bazy jest raportowany zanim wystartuje lint czy testy.
+Obie komendy jakości rozpoczynają się od kroku `Verify Drizzle env`, który uruchamia `tools/verify-drizzle-env.ts` i sprawdza komplet wymaganych zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`). Dzięki temu brak konfiguracji bazy lub mailingu jest raportowany zanim wystartuje lint czy testy.
 
 Testy CLI mockują `process.exit` i logi, dzięki czemu zachowania są weryfikowane bez kończenia procesu Node.js.
 

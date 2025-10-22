@@ -95,7 +95,7 @@ Next.js (App Router) + TypeScript + pnpm workspaces + Drizzle ORM + Postgres (Do
 - Skrypt CLI (`pnpm run cli`) znajduje się w `tools/cli` i udostępnia komendy `quality`, `quality:ci`.
 - Używaj `pnpm qa` do lokalnych kontroli jakości oraz `pnpm qa:ci` do pełnego przebiegu przed PR.
 - Flagi CLI: `--dry-run` (podgląd kroków) oraz `--skip=<id>` (pomijanie konkretnych kroków, np. `--skip=e2e`).
-- Pierwszy krok `quality`/`quality:ci` odpala `tools/verify-drizzle-env.ts`, aby upewnić się, że `DATABASE_URL` jest dostępne – jeśli konfiguracja jest pusta, popraw `.env.local` zanim ruszysz dalej.
+- Pierwszy krok `quality`/`quality:ci` odpala `tools/verify-drizzle-env.ts`, aby upewnić się, że komplet zmiennych (`DATABASE_URL`, `NEXT_PUBLIC_ORDER_FORM_URL`, `SMTP_*`, `MAIL_*`) jest skonfigurowany. Skrypt wypisuje brakujące wpisy i przykładowe wartości – popraw `.env.local` zanim ruszysz dalej.
 - Entry point `tools/cli/index.ts` musi mieć odzwierciedlenie w testach (`tools/cli/__tests__/index.test.ts`) – w testach stubuj `process.exit` i logi (`console.log`, `console.error`), aby weryfikować komunikaty i kody wyjścia bez kończenia procesu.
 
 ## Czego NIE robić

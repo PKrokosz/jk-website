@@ -18,6 +18,13 @@ const {
   ensureDrizzleMigrationsAreClean
 } = await import("../drizzle-generate-check");
 
+type DrizzleMigrationsOutOfSyncErrorInstance = InstanceType<
+  typeof DrizzleMigrationsOutOfSyncError
+>;
+type DrizzleMigrationsPendingGenerationErrorInstance = InstanceType<
+  typeof DrizzleMigrationsPendingGenerationError
+>;
+
 type SpawnFunction = typeof spawn;
 
 const createSpawnMock = () => {
@@ -121,7 +128,9 @@ describe("ensureDrizzleMigrationsAreClean", () => {
     }).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(DrizzleMigrationsOutOfSyncError);
-    expect((error as DrizzleMigrationsOutOfSyncError).statusOutput).toContain("drizzle");
+    expect((error as DrizzleMigrationsOutOfSyncErrorInstance).statusOutput).toContain(
+      "drizzle"
+    );
   });
 
   it("informuje o brakujących migracjach, gdy generacja tworzy nowe pliki", async () => {
@@ -133,6 +142,8 @@ describe("ensureDrizzleMigrationsAreClean", () => {
     const error = await ensureDrizzleMigrationsAreClean({ spawnImpl, execFileImpl }).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(DrizzleMigrationsPendingGenerationError);
-    expect((error as DrizzleMigrationsPendingGenerationError).generatedArtifacts).toEqual(["0001_new.sql"]);
+    expect(
+      (error as DrizzleMigrationsPendingGenerationErrorInstance).generatedArtifacts
+    ).toEqual(["0001_new.sql"]);
   });
 });

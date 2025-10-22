@@ -1,6 +1,12 @@
 "use client";
 
-import React, { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import React, {
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 
 import { sanitizeProductQuery } from "@/lib/contact/sanitizeProduct";
 

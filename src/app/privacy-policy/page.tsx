@@ -86,7 +86,6 @@ export const metadata: Metadata = {
   title: "Polityka prywatności",
   description:
     "Polityka prywatności JK Handmade Footwear – informacje o administratorze danych, celach przetwarzania oraz prawach użytkownika."
-    "Polityka prywatności JK Handmade Footwear – informacje o administratorze danych, celach przetwarzania oraz prawach użytkownika.",
 };
 
 export default function PrivacyPolicyPage() {

@@ -11,8 +11,12 @@ import type {
 
 const NEXT_PHASE_PRODUCTION_BUILD = "phase-production-build";
 
+function isForceCatalogFromDbEnabled(): boolean {
+  return process.env.FORCE_CATALOG_FROM_DB === "true";
+}
+
 function shouldUseBuildMock(): boolean {
-  if (process.env.FORCE_CATALOG_FROM_DB === "true") return false;
+  if (isForceCatalogFromDbEnabled()) return false;
   const isProductionBuild =
     process.env.NEXT_PHASE === NEXT_PHASE_PRODUCTION_BUILD ||
     process.env.IS_BUILD === "true";
@@ -35,10 +39,15 @@ interface ApiResponse<T> {
 }
 
 function shouldMockCatalogFetch(): boolean {
-  return (
-    process.env.MOCK_CATALOG_FETCH === "1" ||
-    shouldUseBuildMock()
-  );
+  if (isForceCatalogFromDbEnabled()) {
+    return false;
+  }
+
+  if (process.env.MOCK_CATALOG_FETCH === "1") {
+    return true;
+  }
+
+  return shouldUseBuildMock();
 }
 
 let hasLoggedMockNotice = false;

@@ -96,4 +96,40 @@ describe("fetchCatalogResource build-time mock", () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("throws CatalogApiError when API responds with an error status", async () => {
+    const fetchSpy = vi.fn(async () =>
+      new Response("internal error", {
+        status: 503,
+        headers: { "Content-Type": "application/json" }
+      })
+    );
+
+    vi.stubGlobal("fetch", fetchSpy as unknown as typeof fetch);
+
+    const catalogApiModule = await import("../api");
+
+    await expect(catalogApiModule.fetchCatalogProducts()).rejects.toMatchObject({
+      status: 503,
+      path: "/api/products"
+    });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("loguje ostrzeżenie tylko raz podczas mockowania katalogu", async () => {
+    process.env.NEXT_PHASE = NEXT_BUILD_PHASE;
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    const fetchSpy = vi.fn(() => {
+      throw new Error("fetch should not be called in mock mode");
+    });
+    vi.stubGlobal("fetch", fetchSpy as unknown as typeof fetch);
+
+    const catalogApiModule = await import("../api");
+
+    await catalogApiModule.fetchCatalogProducts();
+    await catalogApiModule.fetchCatalogProducts();
+
+    expect(infoSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });

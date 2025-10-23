@@ -23,8 +23,8 @@ import { leather, style } from "@jk/db/schema";
 
 import { GET } from "./route";
 
-const TEST_STYLE_ID = 2;
-const TEST_LEATHER_ID = 1;
+const TEST_STYLE_SLUG = "artisan-oxford";
+const TEST_LEATHER_NAME = "Kasztanowa licowa";
 const TEST_PRODUCT_SLUG = "szpic";
 
 async function ensureIntegrationDatabaseAvailability(): Promise<{
@@ -107,11 +107,11 @@ describeIntegration("GET /api/products (integration)", () => {
     const [styleRow] = await db
       .select()
       .from(style)
-      .where(eq(style.id, TEST_STYLE_ID))
+      .where(eq(style.slug, TEST_STYLE_SLUG))
       .limit(1);
 
     if (!styleRow) {
-      throw new Error(`Style with id ${TEST_STYLE_ID} not found in integration database.`);
+      throw new Error(`Style with slug ${TEST_STYLE_SLUG} not found in integration database.`);
     }
 
     originalBasePrice = styleRow.basePriceGrosz;
@@ -120,7 +120,7 @@ describeIntegration("GET /api/products (integration)", () => {
     const [leatherRow] = await db
       .select()
       .from(leather)
-      .where(eq(leather.id, TEST_LEATHER_ID))
+      .where(eq(leather.name, TEST_LEATHER_NAME))
       .limit(1);
 
     leatherPriceMod = leatherRow?.priceModGrosz ?? 0;
@@ -136,7 +136,7 @@ describeIntegration("GET /api/products (integration)", () => {
     await db
       .update(style)
       .set({ basePriceGrosz: originalBasePrice, active: originalActive })
-      .where(eq(style.id, TEST_STYLE_ID));
+      .where(eq(style.slug, TEST_STYLE_SLUG));
 
     await resetCachedNextDbClient();
   });
@@ -153,7 +153,7 @@ describeIntegration("GET /api/products (integration)", () => {
     await db
       .update(style)
       .set({ basePriceGrosz: updatedBasePrice })
-      .where(eq(style.id, TEST_STYLE_ID));
+      .where(eq(style.slug, TEST_STYLE_SLUG));
 
     const request = new NextRequest(
       `https://jkhandmade.pl/api/products?slug=${TEST_PRODUCT_SLUG}`
@@ -181,10 +181,10 @@ describeIntegration("GET /api/products (integration)", () => {
     await db
       .update(style)
       .set({ active: false })
-      .where(eq(style.id, TEST_STYLE_ID));
+      .where(eq(style.slug, TEST_STYLE_SLUG));
 
     const styles = await findActiveStyles(db);
 
-    expect(styles.some((entry) => entry.id === TEST_STYLE_ID)).toBe(false);
+    expect(styles.some((entry) => entry.slug === TEST_STYLE_SLUG)).toBe(false);
   });
 });

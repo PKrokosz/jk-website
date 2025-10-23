@@ -8,13 +8,6 @@ const {
   ensureDrizzleMigrationsAreClean
 } = await import("../drizzle-generate-check");
 
-type DrizzleMigrationsOutOfSyncErrorInstance = InstanceType<
-  typeof DrizzleMigrationsOutOfSyncError
->;
-type DrizzleMigrationsPendingGenerationErrorInstance = InstanceType<
-  typeof DrizzleMigrationsPendingGenerationError
->;
-
 type SpawnFunction = typeof spawn;
 
 const createSpawnMock = () => {
@@ -84,18 +77,11 @@ describe("ensureDrizzleMigrationsAreClean", () => {
       "pnpm",
       ["db:generate"],
       expect.objectContaining({
-        stdio: "inherit"
+        stdio: "inherit",
+        env: expect.not.objectContaining({ DRIZZLE_OUT: expect.any(String) })
       })
     );
-    expect(execFileMock).toHaveBeenNthCalledWith(
-      1,
-      "git",
-      ["status", "--short", "drizzle"],
-      { encoding: "utf8" },
-      expect.any(Function)
-    );
-    expect(execFileMock).toHaveBeenNthCalledWith(
-      2,
+    expect(execFileMock).toHaveBeenCalledWith(
       "git",
       ["status", "--short", "drizzle"],
       { encoding: "utf8" },
@@ -119,23 +105,31 @@ describe("ensureDrizzleMigrationsAreClean", () => {
     }).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(DrizzleMigrationsOutOfSyncError);
-    expect((error as DrizzleMigrationsOutOfSyncErrorInstance).statusOutput).toContain(
-      "drizzle"
-    );
+
+    if (!(error instanceof DrizzleMigrationsOutOfSyncError)) {
+      throw error;
+    }
+
+    expect(error.statusOutput).toContain("drizzle");
   });
 
   it("informuje o brakujących migracjach, gdy generacja tworzy nowe pliki", async () => {
     const { impl: spawnImpl } = createSpawnMock();
-    const { impl: execFileImpl } = createExecFileMock([
-      "",
-      "?? drizzle/0001_new.sql\n M drizzle/meta/_journal.json\n"
-    ]);
+    const { impl: execFileImpl } = createExecFileMock(
+      "?? drizzle/0001_new.sql\n?? drizzle/meta/0001_snapshot.json\n"
+    );
 
     const error = await ensureDrizzleMigrationsAreClean({ spawnImpl, execFileImpl }).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(DrizzleMigrationsPendingGenerationError);
-    expect(
-      (error as DrizzleMigrationsPendingGenerationErrorInstance).generatedArtifacts
-    ).toEqual(["drizzle/0001_new.sql", "drizzle/meta/_journal.json"]);
+
+    if (!(error instanceof DrizzleMigrationsPendingGenerationError)) {
+      throw error;
+    }
+
+    expect(error.generatedArtifacts).toEqual([
+      "drizzle/0001_new.sql",
+      "drizzle/meta/0001_snapshot.json"
+    ]);
   });
 });

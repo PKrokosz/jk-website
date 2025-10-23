@@ -1,5 +1,4 @@
 import { execFile, spawn } from "node:child_process";
-
 export class DrizzleMigrationsOutOfSyncError extends Error {
   constructor(public readonly statusOutput: string) {
     super(
@@ -89,20 +88,30 @@ export const ensureDrizzleMigrationsAreClean = async ({
   spawnImpl = spawn,
   execFileImpl = execFile
 }: RunOptions = {}): Promise<void> => {
-  const { stdout: preRunStatus } = await getDrizzleStatus(execFileImpl);
-
-  if (preRunStatus.trim().length > 0) {
-    throw new DrizzleMigrationsOutOfSyncError(preRunStatus);
-  }
-
   await runCommand("pnpm", ["db:generate"], spawnImpl);
 
-  const { stdout: postRunStatus } = await getDrizzleStatus(execFileImpl);
+  const { stdout } = await getDrizzleStatus(execFileImpl);
+  const trimmedOutput = stdout.trim();
 
-  if (postRunStatus.trim().length > 0) {
-    const artifacts = parseStatusArtifacts(postRunStatus);
-    throw new DrizzleMigrationsPendingGenerationError(artifacts);
+  if (trimmedOutput.length === 0) {
+    return;
   }
+
+  const lines = trimmedOutput
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  const pendingArtifacts = lines
+    .filter((line) => line.startsWith("?? "))
+    .map((line) => line.slice(3).trim())
+    .filter((line) => line.length > 0);
+
+  if (pendingArtifacts.length > 0) {
+    throw new DrizzleMigrationsPendingGenerationError(pendingArtifacts);
+  }
+
+  throw new DrizzleMigrationsOutOfSyncError(stdout);
 };
 
 export const main = async (): Promise<void> => {

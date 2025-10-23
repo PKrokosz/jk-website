@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { sql } from "drizzle-orm";
 
 import { createDbClient, type Database } from "./lib/db";

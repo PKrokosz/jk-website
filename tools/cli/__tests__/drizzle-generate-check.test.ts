@@ -31,7 +31,8 @@ const createSpawnMock = () => {
   };
 };
 
-const createExecFileMock = (stdout: string) => {
+const createExecFileMock = (stdoutSequence: string[]) => {
+  const outputs = [...stdoutSequence];
   const mock = vi.fn(
     (
       command: Parameters<typeof execFile>[0],
@@ -44,7 +45,8 @@ const createExecFileMock = (stdout: string) => {
         | undefined;
 
       if (cb) {
-        cb(null, stdout, "");
+        const next = outputs.shift() ?? "";
+        cb(null, next, "");
       }
 
       return new EventEmitter() as unknown as ReturnType<typeof execFile>;
@@ -63,9 +65,9 @@ describe("ensureDrizzleMigrationsAreClean", () => {
     vi.restoreAllMocks();
   });
 
-  it("uruchamia pnpm db:generate w trybie dry-run i przechodzi, gdy brak zmian", async () => {
+  it("uruchamia pnpm db:generate i przechodzi, gdy brak zmian", async () => {
     const { mock: spawnMock, impl: spawnImpl } = createSpawnMock();
-    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock("");
+    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock(["", ""]);
 
     await expect(
       ensureDrizzleMigrationsAreClean({ spawnImpl, execFileImpl })
@@ -89,15 +91,17 @@ describe("ensureDrizzleMigrationsAreClean", () => {
 
   it("wyrzuca błąd, gdy katalog drizzle/ zawiera zmiany", async () => {
     const { mock: spawnMock, impl: spawnImpl } = createSpawnMock();
-    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock(" M drizzle/0001_pending.sql\n");
+    const { mock: execFileMock, impl: execFileImpl } = createExecFileMock([" M drizzle/0001_pending.sql\n"]);
 
     await expect(
       ensureDrizzleMigrationsAreClean({ spawnImpl, execFileImpl })
     ).rejects.toBeInstanceOf(DrizzleMigrationsOutOfSyncError);
 
+    expect(spawnMock).not.toHaveBeenCalled();
+
     const error = await ensureDrizzleMigrationsAreClean({
       spawnImpl,
-      execFileImpl: createExecFileMock("M drizzle/0001.sql\n").impl
+      execFileImpl: createExecFileMock(["M drizzle/0001.sql\n"]).impl
     }).catch((caught) => caught);
 
     expect(error).toBeInstanceOf(DrizzleMigrationsOutOfSyncError);

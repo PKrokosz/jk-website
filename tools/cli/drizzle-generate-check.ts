@@ -76,6 +76,14 @@ const getDrizzleStatus = (
     );
   });
 
+const parseStatusArtifacts = (statusOutput: string): string[] =>
+  statusOutput
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .filter((line) => line.length > 0)
+    .map((line) => (line.length > 3 ? line.slice(3).trim() : line.trim()))
+    .filter((line) => line.length > 0);
+
 export const ensureDrizzleMigrationsAreClean = async ({
   spawnImpl = spawn,
   execFileImpl = execFile

@@ -15,6 +15,7 @@
   - Ujednolicono workflow CI z CLI – job `quality` korzysta z nowego skryptu i uruchamia docelowy plik testów integracyjnych.
   - Zaktualizowano wymagania dotyczące sprzątania kontenera (`docker compose down --volumes jkdb`) po testach integracyjnych.
   - Dodano flagę `--with-integration-db` do komendy `quality`, aby lokalnie uruchamiać krok `scripts/prepare-integration-db.ts`.
+  - Zmieniono krok kontroli migracji: CLI odpala `pnpm db:generate` bez nadpisywania `DRIZZLE_OUT` i waliduje `git status` przed oraz po komendzie.
 
 ## Spis treści
 - [1. Podsumowanie](#podsumowanie)
@@ -26,7 +27,7 @@
 - [7. Ryzyka, Decyzje do podjęcia, Następne kroki](#ryzyka-decyzje-do-podjecia-nastepne-kroki)
 
 ## Podsumowanie
-- DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`, które dodatkowo pilnują braku zmian w `drizzle/` po `pnpm db:generate -- --dry-run` i – w trybie CI – przygotowują bazę (`scripts/prepare-integration-db.ts`) przed integracjami. Lokalnie rozszerzoną bramkę aktywuje `pnpm qa -- --with-integration-db`.
+- DoD obejmuje `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm test:coverage` (jeśli zmiana dotyka logiki) oraz `pnpm depcheck` na koniec sprintu; wszystkie kroki można uruchomić przez `pnpm qa` / `pnpm qa:ci`, które dodatkowo pilnują braku zmian w `drizzle/` po `pnpm db:generate` (wykonywanym z kontrolą czystości gita) i – w trybie CI – przygotowują bazę (`scripts/prepare-integration-db.ts`) przed integracjami. Lokalnie rozszerzoną bramkę aktywuje `pnpm qa -- --with-integration-db`.
 - Testy: Vitest + React Testing Library (layout, katalog, kalkulator, formularz kontaktowy, product page, NativeModelShowcase).
 - CI: GitHub Actions (job `quality`) z matrycą Node 20.x/22.x, pnpm 10.18.3, kroki lint → typecheck → test → coverage → depcheck oraz dedykowane przygotowanie bazy (`pnpm exec tsx scripts/prepare-integration-db.ts`) + weryfikacja `pnpm db:generate` + testy integracyjne na Node 20.x (uruchamiane zarówno w `pnpm qa:ci`, jak i osobnym kroku); orkiestracją zarządza CLI (`pnpm qa`, `pnpm qa:ci`).
 - Commity: Conventional Commits, PR zawiera opis, listę zmian, wyniki komend, screeny dla UI.
@@ -42,7 +43,7 @@ Checklist dla każdego PR:
 - [x] `pnpm build` – uruchamiane przy zmianach w konfiguracji/routingu.
 - [ ] `pnpm depcheck` – min. raz na sprint (monitoring zależności).
 - [ ] `pnpm db:seed` – opcjonalnie przed testami, aby odświeżyć referencyjne dane w lokalnej bazie (CI korzysta z tej samej komendy).
-- [x] `pnpm db:generate -- --dry-run` – wykonywane automatycznie w `pnpm qa` / `pnpm qa:ci`, aby zatrzymać PR z niezatwierdzonymi migracjami.
+- [x] `pnpm db:generate` – wykonywane automatycznie w `pnpm qa` / `pnpm qa:ci`; skrypt CLI pilnuje czystego stanu `drizzle/` przed i po komendzie, aby zatrzymać PR z niezatwierdzonymi migracjami.
 - [x] Zaktualizowana dokumentacja (jeśli zmiana dotyczy feature'a).
 - [x] Screen/gif dla zmian UI (desktop + mobile, jeśli istotne).
 
@@ -139,7 +140,7 @@ jobs:
   ```
   - `pnpm qa` uruchamia lokalną bramkę jakościową (lint, typecheck, test) – wykorzystywane na macierzy Node 22.x.
   - `pnpm qa:ci` odtwarza pełen pipeline CI (lint, typecheck, build, test, coverage, e2e, depcheck, przygotowanie bazy i test integracyjny) – uruchamiane na Node 20.x.
-  - Obie komendy rozpoczynają się od dry-run `pnpm db:generate`, który kończy job błędem, jeżeli `drizzle/` zawiera niezatwierdzone zmiany.
+  - Obie komendy rozpoczynają się od `pnpm db:generate`; skrypt CLI pilnuje czystego `git status --short drizzle` przed i po komendzie i przerywa job, gdy pojawią się nowe artefakty.
   - Skrypt `pnpm exec tsx scripts/prepare-integration-db.ts` uruchamia `docker compose up -d jkdb`, czeka na dostępność bazy i wywołuje `pnpm db:migrate` + `pnpm db:seed` z `.env.test` przed integracjami.
   - Po przygotowaniu bazy CLI i workflow odpalają `pnpm test src/app/api/products/route.integration.test.ts`, aby upewnić się, że brak połączenia nie pomija scenariuszy degradacji katalogu.
   - `Verify Drizzle schema metadata` wymusza czysty diff po `pnpm db:generate`, dzięki czemu wychwycimy brakujące aktualizacje migracji/metadanych.
